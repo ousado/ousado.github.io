@@ -1,0 +1,14 @@
+#version 100
+precision mediump float;
+varying vec4 fragmentColor;
+uniform sampler2D tex;
+varying vec2 texCoord;
+
+void main()
+{
+	// Label 5
+	gl_FragColor = vec4(vec3(fragmentColor.x, fragmentColor.y, fragmentColor.z).x, vec3(fragmentColor.x, fragmentColor.y, fragmentColor.z).y, vec3(fragmentColor.x, fragmentColor.y, fragmentColor.z).z, (texture2D(tex, texCoord).x * fragmentColor.w));
+	// Branch to 6
+	// Label 6
+	return;
+}

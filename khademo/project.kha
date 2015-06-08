@@ -1,0 +1,59 @@
+{
+	"format": 2,
+	"game": {
+		"name": "Ploing",
+		"width": 640,
+		"height": 480
+	},
+	"assets": [
+		{
+			"type": "blob",
+			"file": "Arial14.kravur",
+			"name": "Arial14.kravur"
+		}
+	],
+	"rooms": [
+		{
+			"name": "level1",
+			"parent": null,
+			"neighbours": [],
+			"assets": [
+				"Arial14.kravur"
+			]
+		}
+	],
+	"shaders": [
+		{
+			"file": "painter-colored.frag.essl",
+			"name": "painter-colored.frag"
+		},
+		{
+			"file": "painter-colored.vert.essl",
+			"name": "painter-colored.vert"
+		},
+		{
+			"file": "painter-image.frag.essl",
+			"name": "painter-image.frag"
+		},
+		{
+			"file": "painter-image.vert.essl",
+			"name": "painter-image.vert"
+		},
+		{
+			"file": "painter-text.frag.essl",
+			"name": "painter-text.frag"
+		},
+		{
+			"file": "painter-text.vert.essl",
+			"name": "painter-text.vert"
+		},
+		{
+			"file": "painter-video.frag.essl",
+			"name": "painter-video.frag"
+		},
+		{
+			"file": "painter-video.vert.essl",
+			"name": "painter-video.vert"
+		}
+	]
+}
