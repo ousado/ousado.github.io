@@ -356,31 +356,34 @@ Ploing.prototype = $extend(kha_Game.prototype,{
 	,cbezp: function(t,p0,p1,p2,p3) {
 		return (1 - t) * ((1 - t) * ((1 - t) * p0 + t * p1) + t * ((1 - t) * p1 + t * p2)) + t * ((1 - t) * ((1 - t) * p1 + t * p2) + t * ((1 - t) * p2 + t * p3));
 	}
-	,bez: function(g) {
-		var T = 100;
-		var p0_x = this.pad1_x;
-		var p0_y = this.pad1_y + Ploing.PAD_HEIGHT / 2;
-		var p1_x = 300;
-		var p1_y = 200;
-		var p2_x = 500;
-		var p2_y = 400;
-		var p3_x = this.ball_x;
-		var p3_y = this.ball_y;
-		var ppx = this.cbezp(0,p0_x,p1_x,p2_x,p3_x);
-		var ppy = this.cbezp(0,p0_y,p1_y,p2_y,p3_y);
+	,bez: function(g,T,p0,p1,p2,p3) {
+		var ppx = this.cbezp(0,p0.x,p1.x,p2.x,p3.x);
+		var ppy = this.cbezp(0,p0.y,p1.y,p2.y,p3.y);
 		var _g = 1;
 		while(_g < T) {
 			var it = _g++;
 			var t = it / T;
-			var px1 = this.cbezp(t,p0_x,p1_x,p2_x,p3_x);
-			var py1 = this.cbezp(t,p0_y,p1_y,p2_y,p3_y);
+			var px1 = this.cbezp(t,p0.x,p1.x,p2.x,p3.x);
+			var py1 = this.cbezp(t,p0.y,p1.y,p2.y,p3.y);
 			g.drawLine(ppx,ppy,px1,py1,1);
 			ppx = px1;
 			ppy = py1;
 		}
-		var px = this.cbezp(1,p0_x,p1_x,p2_x,p3_x);
-		var py = this.cbezp(1,p0_y,p1_y,p2_y,p3_y);
+		var px = this.cbezp(1,p0.x,p1.x,p2.x,p3.x);
+		var py = this.cbezp(1,p0.y,p1.y,p2.y,p3.y);
 		g.drawLine(ppx,ppy,px,py,1);
+	}
+	,curves: function(g) {
+		var p0 = { x : this.pad1_x, y : this.pad1_y + Ploing.PAD_HEIGHT / 2};
+		var p1 = { x : 300., y : 200.};
+		var p2 = { x : 500., y : 400.};
+		var p3 = { x : this.ball_x, y : this.ball_y};
+		this.bez(g,30,p0,p1,p2,p3);
+		var p01 = { x : this.pad2_x, y : this.pad2_y + Ploing.PAD_HEIGHT / 2};
+		var p11 = { x : 300., y : 200.};
+		var p21 = { x : 500., y : 400.};
+		var p31 = { x : this.ball_x, y : this.ball_y};
+		this.bez(g,30,p01,p11,p21,p31);
 	}
 	,render: function(frame) {
 		if(this.first) {
@@ -412,7 +415,7 @@ Ploing.prototype = $extend(kha_Game.prototype,{
 		g.clear();
 		g.set_color(kha__$Color_Color_$Impl_$.White);
 		g.drawImage(this.gridbuffer,0,0);
-		this.bez(g);
+		this.curves(g);
 		g.fillRect(this.pad1_x,this.pad1_y,Ploing.PAD_WIDTH,Ploing.PAD_HEIGHT);
 		g.fillRect(this.pad2_x,this.pad2_y,Ploing.PAD_WIDTH,Ploing.PAD_HEIGHT);
 		g.fillRect(this.ball_x,this.ball_y,Ploing.BALL_WIDTH,Ploing.BALL_HEIGHT);
