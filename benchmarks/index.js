@@ -230,7 +230,7 @@ ddbmviz_web_Index.mkchart = function(label,tests,alt_colors) {
 	anch.appendChild(div);
 	anch.name = label;
 	ddbmviz_web_Index.charts.push(anch);
-	ddbmviz_web_Viz.draw2(div,data,options);
+	ddbmviz_web_Viz.draw(div,data,options);
 };
 ddbmviz_web_Index.mkchart2 = function(label,tests,cols) {
 	var options = { title : label, width : 800, height : 400, isStacked : false, axes : { x : {
