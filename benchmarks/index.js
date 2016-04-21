@@ -180,9 +180,6 @@ ddbmviz_web_Viz.__name__ = true;
 ddbmviz_web_Viz.draw = function(n,data,options) {
 	new google.charts.Bar(n).draw(data,google.charts.Bar.convertOptions(options));
 };
-ddbmviz_web_Viz.draw2 = function(n,data,options) {
-	new google.visualization.ColumnChart(n).draw(data,options);
-};
 var ddbmviz_web_Index = function() { };
 ddbmviz_web_Index.__name__ = true;
 ddbmviz_web_Index.mkchart = function(label,tests,alt_colors) {
@@ -222,8 +219,15 @@ ddbmviz_web_Index.mkchart = function(label,tests,alt_colors) {
 	}
 	var rows = _g;
 	data.addRows(rows);
-	dd_web_Core.doc.body.appendChild(div);
-	ddbmviz_web_Viz.draw2(div,data,options);
+	var anch = dd_web_Core.doc.createElement("a");
+	var lnk = dd_web_Core.doc.createElement("a");
+	lnk.href = "#" + label;
+	lnk.innerHTML = label;
+	ddbmviz_web_Index.links.push(lnk);
+	anch.appendChild(div);
+	anch.name = label;
+	ddbmviz_web_Index.charts.push(anch);
+	ddbmviz_web_Viz.draw(div,data,options);
 };
 ddbmviz_web_Index.mkchart2 = function(label,tests,cols) {
 	var options = { title : label, width : 800, height : 400, isStacked : false, axes : { x : {
@@ -257,7 +261,14 @@ ddbmviz_web_Index.mkchart2 = function(label,tests,cols) {
 		r.splice(0,0,tt.label);
 		data.addRow(r);
 	}
-	dd_web_Core.doc.body.appendChild(div);
+	var anch = dd_web_Core.doc.createElement("a");
+	var lnk = dd_web_Core.doc.createElement("a");
+	lnk.href = "#" + label;
+	lnk.innerHTML = label;
+	ddbmviz_web_Index.links.push(lnk);
+	anch.appendChild(div);
+	anch.name = label;
+	ddbmviz_web_Index.charts.push(anch);
 	ddbmviz_web_Viz.draw(div,data,options);
 };
 ddbmviz_web_Index.onload = function() {
@@ -329,11 +340,33 @@ ddbmviz_web_Index.onload = function() {
 		}
 		ddbmviz_web_Index.mkchart2(p.join(" vs "),tests,p);
 	}
+	var anch = dd_web_Core.doc.createElement("a");
+	anch.name = "top";
+	dd_web_Core.doc.body.appendChild(anch);
 	var _g24 = 0;
-	var _g33 = ddbmviz_web_Index.results;
+	var _g33 = ddbmviz_web_Index.links;
 	while(_g24 < _g33.length) {
-		var target1 = _g33[_g24];
+		var lnk = _g33[_g24];
 		++_g24;
+		dd_web_Core.doc.body.appendChild(lnk);
+		dd_web_Core.doc.body.appendChild(dd_web_Core.doc.createElement("br"));
+	}
+	var _g25 = 0;
+	var _g34 = ddbmviz_web_Index.charts;
+	while(_g25 < _g34.length) {
+		var lnk1 = _g34[_g25];
+		++_g25;
+		var a = dd_web_Core.doc.createElement("a");
+		a.href = "#top";
+		a.innerHTML = "top";
+		dd_web_Core.doc.body.appendChild(lnk1);
+		dd_web_Core.doc.body.appendChild(a);
+	}
+	var _g26 = 0;
+	var _g35 = ddbmviz_web_Index.results;
+	while(_g26 < _g35.length) {
+		var target1 = _g35[_g26];
+		++_g26;
 		var options = { title : target1.target, width : 1800, height : 400, isStacked : true, bar : { groupWidth : "75%"}};
 		var div = dd_web_Core.doc.createElement("div");
 		var data = new google.visualization.DataTable();
@@ -852,6 +885,8 @@ if(ArrayBuffer.prototype.slice == null) {
 }
 var Uint8Array = $global.Uint8Array || js_html_compat_Uint8Array._new;
 dd_web_Core.doc = document;
+ddbmviz_web_Index.links = [];
+ddbmviz_web_Index.charts = [];
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = { }.toString;
