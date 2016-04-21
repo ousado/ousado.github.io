@@ -340,6 +340,9 @@ ddbmviz_web_Index.onload = function() {
 		}
 		ddbmviz_web_Index.mkchart2(p.join(" vs "),tests,p);
 	}
+	var desc = dd_web_Core.doc.createElement("pre");
+	desc.innerHTML = "\n        This is a comparison of 3 different list implementations\n        - alist is uses an anonymous type for the cells \n        - clist uses a class \n        - list uses an enum\n        otherwise they are identical.\n        the follwing charts give an overview over target behaviors and differences.\n        the code used for the benchmarks is available here: \n        https://github.com/ousado/tce_benchmarks/tree/master/src/ddlist\n        ";
+	dd_web_Core.doc.body.appendChild(desc);
 	var anch = dd_web_Core.doc.createElement("a");
 	anch.name = "top";
 	dd_web_Core.doc.body.appendChild(anch);
@@ -362,9 +365,6 @@ ddbmviz_web_Index.onload = function() {
 		dd_web_Core.doc.body.appendChild(lnk1);
 		dd_web_Core.doc.body.appendChild(a);
 	}
-	var desc = dd_web_Core.doc.createElement("pre");
-	desc.innerHTML = "\n        This is a comparison of 3 different list implementations\n        - alist is uses an anonymous type for the cells \n        - clist uses a class \n        - list uses an enum\n        otherwise they are identical.\n        the follwing charts give an overview over target behaviors and differences.\n        the code used for the benchmarks is available here: \n        https://github.com/ousado/tce_benchmarks/tree/master/src/ddlist\n        ";
-	dd_web_Core.doc.body.appendChild(desc);
 	var _g26 = 0;
 	var _g35 = ddbmviz_web_Index.results;
 	while(_g26 < _g35.length) {
