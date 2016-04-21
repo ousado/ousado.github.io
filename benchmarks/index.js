@@ -180,6 +180,9 @@ ddbmviz_web_Viz.__name__ = true;
 ddbmviz_web_Viz.draw = function(n,data,options) {
 	new google.charts.Bar(n).draw(data,google.charts.Bar.convertOptions(options));
 };
+ddbmviz_web_Viz.draw2 = function(n,data,options) {
+	new google.visualization.ColumnChart(n).draw(data,options);
+};
 var ddbmviz_web_Index = function() { };
 ddbmviz_web_Index.__name__ = true;
 ddbmviz_web_Index.mkchart = function(label,tests,alt_colors) {
@@ -227,7 +230,7 @@ ddbmviz_web_Index.mkchart = function(label,tests,alt_colors) {
 	anch.appendChild(div);
 	anch.name = label;
 	ddbmviz_web_Index.charts.push(anch);
-	ddbmviz_web_Viz.draw(div,data,options);
+	ddbmviz_web_Viz.draw2(div,data,options);
 };
 ddbmviz_web_Index.mkchart2 = function(label,tests,cols) {
 	var options = { title : label, width : 800, height : 400, isStacked : false, axes : { x : {
@@ -269,7 +272,7 @@ ddbmviz_web_Index.mkchart2 = function(label,tests,cols) {
 	anch.appendChild(div);
 	anch.name = label;
 	ddbmviz_web_Index.charts.push(anch);
-	ddbmviz_web_Viz.draw(div,data,options);
+	ddbmviz_web_Viz.draw2(div,data,options);
 };
 ddbmviz_web_Index.onload = function() {
 	ddbmviz_web_Index.results = JSON.parse(haxe_Resource.getString("results"));
