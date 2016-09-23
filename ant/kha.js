@@ -10,55 +10,6 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var EReg = function(r,opt) {
-	this.r = new RegExp(r,opt.split("u").join(""));
-};
-$hxClasses["EReg"] = EReg;
-EReg.__name__ = true;
-EReg.prototype = {
-	match: function(s) {
-		if(this.r.global) {
-			this.r.lastIndex = 0;
-		}
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,matched: function(n) {
-		if(this.r.m != null && n >= 0 && n < this.r.m.length) {
-			return this.r.m[n];
-		} else {
-			throw new js__$Boot_HaxeError("EReg::matched");
-		}
-	}
-	,__class__: EReg
-};
-var G1 = function() {
-};
-$hxClasses["G1"] = G1;
-G1.__name__ = true;
-G1.prototype = {
-	init: function(canvas) {
-		this.canvas = canvas;
-	}
-	,begin: function(clear) {
-		this.clear = clear;
-		if(this.texture == null) {
-			this.texture = kha_Image.create(this.canvas.get_width(),this.canvas.get_height(),kha_graphics4_TextureFormat.RGBA32,kha_graphics4_Usage.ReadableUsage);
-		}
-		this.pixels = this.texture.lock();
-	}
-	,end: function() {
-		this.texture.unlock();
-		this.canvas.get_g2().begin(this.clear);
-		this.canvas.get_g2().drawImage(this.texture,0,0);
-		this.canvas.get_g2().end();
-	}
-	,setPixel: function(x,y,color) {
-		this.pixels.setInt32(y * this.texture.get_realWidth() * 4 + x * 4,color);
-	}
-	,__class__: G1
-};
 var HxOverrides = function() { };
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = true;
@@ -119,15 +70,6 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
-var Lambda = function() { };
-$hxClasses["Lambda"] = Lambda;
-Lambda.__name__ = true;
-Lambda.array = function(it) {
-	var a = [];
-	var tmp = $iterator(it)();
-	while(tmp.hasNext()) a.push(tmp.next());
-	return a;
-};
 var List = function() {
 	this.length = 0;
 };
@@ -143,27 +85,6 @@ List.prototype = {
 		}
 		this.q = x;
 		this.length++;
-	}
-	,remove: function(v) {
-		var prev = null;
-		var l = this.h;
-		while(l != null) {
-			if(l.item == v) {
-				if(prev == null) {
-					this.h = l.next;
-				} else {
-					prev.next = l.next;
-				}
-				if(this.q == l) {
-					this.q = prev;
-				}
-				this.length--;
-				return true;
-			}
-			prev = l;
-			l = l.next;
-		}
-		return false;
 	}
 	,iterator: function() {
 		return new _$List_ListIterator(this.h);
@@ -204,27 +125,7 @@ Main.main = function() {
 	});
 };
 Math.__name__ = true;
-var _$Project_BoolColor_$Impl_$ = {};
-$hxClasses["_Project.BoolColor_Impl_"] = _$Project_BoolColor_$Impl_$;
-_$Project_BoolColor_$Impl_$.__name__ = true;
-_$Project_BoolColor_$Impl_$.toColor = function(this1) {
-	if(this1 == 0) {
-		return kha__$Color_Color_$Impl_$.White;
-	} else {
-		return kha__$Color_Color_$Impl_$.Black;
-	}
-};
-_$Project_BoolColor_$Impl_$.toBool = function(this1) {
-	if(this1 == 0) {
-		return false;
-	} else {
-		return true;
-	}
-};
-var _$Project_Space_$Impl_$ = {};
-$hxClasses["_Project.Space_Impl_"] = _$Project_Space_$Impl_$;
-_$Project_Space_$Impl_$.__name__ = true;
-_$Project_Space_$Impl_$._new = function() {
+var Space = function() {
 	var _g = [];
 	var _g1 = 0;
 	while(_g1 < 32) {
@@ -235,46 +136,12 @@ _$Project_Space_$Impl_$._new = function() {
 			_g.push(0);
 		}
 	}
-	return _g;
+	this.data = _g;
 };
-_$Project_Space_$Impl_$.set = function(this1,x,y) {
-	this1[(x >> 5 << 5) + (y >> 5)] |= 1 << (y & 31);
-};
-_$Project_Space_$Impl_$.get = function(this1,x,y) {
-	return this1[(x >> 5 << 5) + (y >> 5)] & 1 << (y & 31);
-};
-_$Project_Space_$Impl_$.flip = function(this1,x,y) {
-	var int32_idx = (y << 5) + (x >> 5);
-	var bit = 1 << (x & 31);
-	var res = this1[int32_idx] & bit;
-	this1[int32_idx] ^= bit;
-	return res;
-};
-_$Project_Space_$Impl_$.wipe = function(this1,x,y,g2) {
-	var row = Std.random(24);
-	var col = Std.random(32);
-	var y1 = row << 5;
-	var x1 = col << 5;
-	var _g = 0;
-	while(_g < 32) this1[(row + _g++ << 5) + col] = 0;
-	g2.set_color(kha__$Color_Color_$Impl_$.Black);
-	g2.fillRect(x1,y1,32,32);
-	return this1[(x1 >> 5 << 5) + (y1 >> 5)] & 1 << (y1 & 31);
-};
-_$Project_Space_$Impl_$.paint = function(this1,g1) {
-	var _g = 0;
-	while(_g < 768) {
-		var y = _g++;
-		var _g1 = 0;
-		while(_g1 < 32) {
-			var idx = _g1++;
-			var _g2 = 0;
-			while(_g2 < 32) {
-				var bit_idx = _g2++;
-				g1.setPixel((idx << 5) + bit_idx,y,(this1[(y << 5) + (idx << 5)] & 1 << bit_idx) == 0?kha__$Color_Color_$Impl_$.Black:kha__$Color_Color_$Impl_$.White);
-			}
-		}
-	}
+$hxClasses["Space"] = Space;
+Space.__name__ = true;
+Space.prototype = {
+	__class__: Space
 };
 var Ant = function(space) {
 	this.space = space;
@@ -285,286 +152,19 @@ var Ant = function(space) {
 $hxClasses["Ant"] = Ant;
 Ant.__name__ = true;
 Ant.prototype = {
-	turn: function(bc) {
-		var tmp;
-		if(bc == 0?false:true) {
-			switch(this.d) {
-			case 0:
-				tmp = 1;
-				break;
-			case 1:
-				tmp = 2;
-				break;
-			case 2:
-				tmp = 3;
-				break;
-			case 3:
-				tmp = 0;
-				break;
-			}
-		} else {
-			switch(this.d) {
-			case 0:
-				tmp = 3;
-				break;
-			case 1:
-				tmp = 0;
-				break;
-			case 2:
-				tmp = 1;
-				break;
-			case 3:
-				tmp = 2;
-				break;
-			}
-		}
-		this.d = tmp;
-	}
-	,step: function() {
-		switch(this.d) {
-		case 0:
-			this.y -= 1;
-			break;
-		case 1:
-			this.x += 1;
-			break;
-		case 2:
-			this.y += 1;
-			break;
-		case 3:
-			this.x -= 1;
-			break;
-		}
-		if(this.x < 0) {
-			this.x = 3;
-		}
-		if(this.y < 0) {
-			this.y = 3;
-		}
-		if(this.x > 1023) {
-			this.x = 1020;
-		}
-		if(this.y > 767) {
-			this.y = 764;
-		}
-	}
-	,move: function() {
-		var this1 = this.space;
-		var x = this.x;
-		var int32_idx = (this.y << 5) + (x >> 5);
-		var bit = 1 << (x & 31);
-		var res = this1[int32_idx] & bit;
-		this1[int32_idx] ^= bit;
-		var bc = res;
-		var tmp;
-		if(bc == 0?false:true) {
-			switch(this.d) {
-			case 0:
-				tmp = 1;
-				break;
-			case 1:
-				tmp = 2;
-				break;
-			case 2:
-				tmp = 3;
-				break;
-			case 3:
-				tmp = 0;
-				break;
-			}
-		} else {
-			switch(this.d) {
-			case 0:
-				tmp = 3;
-				break;
-			case 1:
-				tmp = 0;
-				break;
-			case 2:
-				tmp = 1;
-				break;
-			case 3:
-				tmp = 2;
-				break;
-			}
-		}
-		this.d = tmp;
-		switch(this.d) {
-		case 0:
-			this.y -= 1;
-			break;
-		case 1:
-			this.x += 1;
-			break;
-		case 2:
-			this.y += 1;
-			break;
-		case 3:
-			this.x -= 1;
-			break;
-		}
-		if(this.x < 0) {
-			this.x = 3;
-		}
-		if(this.y < 0) {
-			this.y = 3;
-		}
-		if(this.x > 1023) {
-			this.x = 1020;
-		}
-		if(this.y > 767) {
-			this.y = 764;
-		}
-		return bc;
-	}
-	,__class__: Ant
+	__class__: Ant
 };
 var CleanerAnt = function(space) {
-	this.which = false;
 	this.space = space;
 	this.d = 0;
 	this.x = 100;
 	this.y = 100;
+	this.bb = kha_Image.createRenderTarget(32,32);
 };
 $hxClasses["CleanerAnt"] = CleanerAnt;
 CleanerAnt.__name__ = true;
 CleanerAnt.prototype = {
-	turn: function(bc) {
-		var tmp;
-		if(bc == 0?false:true) {
-			switch(this.d) {
-			case 0:
-				tmp = 1;
-				break;
-			case 1:
-				tmp = 2;
-				break;
-			case 2:
-				tmp = 3;
-				break;
-			case 3:
-				tmp = 0;
-				break;
-			}
-		} else {
-			switch(this.d) {
-			case 0:
-				tmp = 3;
-				break;
-			case 1:
-				tmp = 0;
-				break;
-			case 2:
-				tmp = 1;
-				break;
-			case 3:
-				tmp = 2;
-				break;
-			}
-		}
-		this.d = tmp;
-	}
-	,step: function() {
-		switch(this.d) {
-		case 0:
-			this.y -= 1;
-			break;
-		case 1:
-			this.x += 1;
-			break;
-		case 2:
-			this.y += 1;
-			break;
-		case 3:
-			this.x -= 1;
-			break;
-		}
-		if(this.x < 0) {
-			this.x = 3;
-		}
-		if(this.y < 0) {
-			this.y = 3;
-		}
-		if(this.x > 1023) {
-			this.x = 1020;
-		}
-		if(this.y > 767) {
-			this.y = 764;
-		}
-	}
-	,move: function(fb) {
-		var this1 = this.space;
-		var row = Std.random(24);
-		var col = Std.random(32);
-		var y = row << 5;
-		var x = col << 5;
-		var _g = 0;
-		while(_g < 32) this1[(row + _g++ << 5) + col] = 0;
-		fb.set_color(kha__$Color_Color_$Impl_$.Black);
-		fb.fillRect(x,y,32,32);
-		var bc = this1[(x >> 5 << 5) + (y >> 5)] & 1 << (y & 31);
-		var tmp;
-		if(bc == 0?false:true) {
-			switch(this.d) {
-			case 0:
-				tmp = 1;
-				break;
-			case 1:
-				tmp = 2;
-				break;
-			case 2:
-				tmp = 3;
-				break;
-			case 3:
-				tmp = 0;
-				break;
-			}
-		} else {
-			switch(this.d) {
-			case 0:
-				tmp = 3;
-				break;
-			case 1:
-				tmp = 0;
-				break;
-			case 2:
-				tmp = 1;
-				break;
-			case 3:
-				tmp = 2;
-				break;
-			}
-		}
-		this.d = tmp;
-		switch(this.d) {
-		case 0:
-			this.y -= 1;
-			break;
-		case 1:
-			this.x += 1;
-			break;
-		case 2:
-			this.y += 1;
-			break;
-		case 3:
-			this.x -= 1;
-			break;
-		}
-		if(this.x < 0) {
-			this.x = 3;
-		}
-		if(this.y < 0) {
-			this.y = 3;
-		}
-		if(this.x > 1023) {
-			this.x = 1020;
-		}
-		if(this.y > 767) {
-			this.y = 764;
-		}
-		return bc;
-	}
-	,__class__: CleanerAnt
+	__class__: CleanerAnt
 };
 var Project = function() {
 	this.clean_speed = 0;
@@ -572,23 +172,12 @@ var Project = function() {
 	this.m = kha_input_Mouse.get();
 	this.s = kha_input_Surface.get();
 	this.bb = kha_Image.createRenderTarget(1024,768);
-	this.g = new G1();
-	var _g = [];
-	var _g1 = 0;
-	while(_g1 < 32) {
-		++_g1;
-		var _g2 = 0;
-		while(_g2 < 768) {
-			++_g2;
-			_g.push(0);
-		}
-	}
-	this.space = _g;
+	this.space = new Space();
 	this.ant = new Ant(this.space);
 	this.cleaner = new CleanerAnt(this.space);
 	kha_System.notifyOnRender($bind(this,this.render));
 	kha_Scheduler.addTimeTask($bind(this,this.update),0,0.0166666666666666664);
-	haxe_Log.trace("foo",{ fileName : "Project.hx", lineNumber : 212, className : "Project", methodName : "new"});
+	haxe_Log.trace("foo",{ fileName : "Project.hx", lineNumber : 248, className : "Project", methodName : "new"});
 	this.s.notify($bind(this,this.tstart),$bind(this,this.tend),$bind(this,this.tmove));
 	this.m.notify($bind(this,this.tstart),$bind(this,this.tend),$bind(this,this.mmove),function(_) {
 	});
@@ -597,24 +186,24 @@ $hxClasses["Project"] = Project;
 Project.__name__ = true;
 Project.prototype = {
 	mmove: function(x,y,x1,y1) {
-		haxe_Log.trace("" + x + " " + y + " " + x1 + " " + y1,{ fileName : "Project.hx", lineNumber : 218, className : "Project", methodName : "mmove"});
+		haxe_Log.trace("" + x + " " + y + " " + x1 + " " + y1,{ fileName : "Project.hx", lineNumber : 254, className : "Project", methodName : "mmove"});
 		this.set_speeds(x,y);
 	}
 	,tstart: function(v,x,y) {
-		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 223, className : "Project", methodName : "tstart"});
+		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 259, className : "Project", methodName : "tstart"});
 		this.set_speeds(x,y);
 	}
 	,tend: function(v,x,y) {
-		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 227, className : "Project", methodName : "tend"});
+		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 263, className : "Project", methodName : "tend"});
 		this.set_speeds(x,y);
 	}
 	,tmove: function(v,x,y) {
-		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 231, className : "Project", methodName : "tmove"});
+		haxe_Log.trace("" + x + " " + y + " " + v,{ fileName : "Project.hx", lineNumber : 267, className : "Project", methodName : "tmove"});
 		this.set_speeds(x,y);
 	}
 	,set_speeds: function(x,y) {
 		this.speed = x;
-		this.clean_speed = y / 12 | 0;
+		this.clean_speed = (y > 200?y - 200:0) | 0;
 	}
 	,update: function() {
 	}
@@ -628,12 +217,12 @@ Project.prototype = {
 			var x = this.ant.x;
 			var y = this.ant.y;
 			var _this = this.ant;
-			var this1 = _this.space;
+			var _this1 = _this.space;
 			var x1 = _this.x;
 			var int32_idx = (_this.y << 5) + (x1 >> 5);
 			var bit = 1 << (x1 & 31);
-			var res = this1[int32_idx] & bit;
-			this1[int32_idx] ^= bit;
+			var res = _this1.data[int32_idx] & bit;
+			_this1.data[int32_idx] ^= bit;
 			var bc = res;
 			var tmp;
 			if(bc == 0?false:true) {
@@ -701,75 +290,37 @@ Project.prototype = {
 		var _g2 = this.clean_speed;
 		while(_g11 < _g2) {
 			++_g11;
-			var _this1 = this.cleaner;
-			var this2 = _this1.space;
-			var row = Std.random(24);
-			var col = Std.random(32);
-			var y1 = row << 5;
-			var x2 = col << 5;
-			var _g3 = 0;
-			while(_g3 < 32) this2[(row + _g3++ << 5) + col] = 0;
-			bg2.set_color(kha__$Color_Color_$Impl_$.Black);
-			bg2.fillRect(x2,y1,32,32);
-			var bc1 = this2[(x2 >> 5 << 5) + (y1 >> 5)] & 1 << (y1 & 31);
-			var tmp1;
-			if(bc1 == 0?false:true) {
-				switch(_this1.d) {
-				case 0:
-					tmp1 = 1;
-					break;
-				case 1:
-					tmp1 = 2;
-					break;
-				case 2:
-					tmp1 = 3;
-					break;
-				case 3:
-					tmp1 = 0;
-					break;
+			var _this2 = this.space;
+			var start_int_idx = Std.random(24576);
+			var pos = { x : 0, y : 0};
+			pos.y = start_int_idx >> 5;
+			pos.x = (start_int_idx & 31) << 5;
+			var x2 = pos.x;
+			var y1 = pos.y;
+			var start = Std.random(29);
+			var _g12 = start;
+			var _g3 = start + 3;
+			while(_g12 < _g3) {
+				var ridx = _g12++;
+				var int_idx = start_int_idx + (ridx << 5);
+				var block = _this2.data[int_idx];
+				if(block == 0) {
+					continue;
+				} else {
+					var res1 = block & Std.random(1073741823);
+					_this2.data[int_idx] = res1;
+					if(res1 == 0) {
+						bg2.set_color(kha__$Color_Color_$Impl_$.Black);
+						bg2.fillRect(x2,y1 + ridx,32,1);
+					} else {
+						var _g21 = 0;
+						while(_g21 < 32) {
+							var bit1 = _g21++;
+							bg2.set_color((res1 & 1 << bit1) != 0?kha__$Color_Color_$Impl_$.White:kha__$Color_Color_$Impl_$.Black);
+							bg2.fillRect(x2 + bit1,y1 + ridx,1,1);
+						}
+					}
 				}
-			} else {
-				switch(_this1.d) {
-				case 0:
-					tmp1 = 3;
-					break;
-				case 1:
-					tmp1 = 0;
-					break;
-				case 2:
-					tmp1 = 1;
-					break;
-				case 3:
-					tmp1 = 2;
-					break;
-				}
-			}
-			_this1.d = tmp1;
-			switch(_this1.d) {
-			case 0:
-				_this1.y -= 1;
-				break;
-			case 1:
-				_this1.x += 1;
-				break;
-			case 2:
-				_this1.y += 1;
-				break;
-			case 3:
-				_this1.x -= 1;
-				break;
-			}
-			if(_this1.x < 0) {
-				_this1.x = 3;
-			}
-			if(_this1.y < 0) {
-				_this1.y = 3;
-			}
-			if(_this1.x > 1023) {
-				_this1.x = 1020;
-			}
-			if(_this1.y > 767) {
-				_this1.y = 764;
 			}
 		}
 		bg2.end();
@@ -820,18 +371,6 @@ Std.random = function(x) {
 		return Math.floor(Math.random() * x);
 	}
 };
-var StringTools = function() { };
-$hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = true;
-StringTools.endsWith = function(s,end) {
-	var elen = end.length;
-	var slen = s.length;
-	if(slen >= elen) {
-		return HxOverrides.substr(s,slen - elen,elen) == end;
-	} else {
-		return false;
-	}
-};
 var Type = function() { };
 $hxClasses["Type"] = Type;
 Type.__name__ = true;
@@ -869,13 +408,6 @@ Type.createEnum = function(e,constr,params) {
 	}
 	return f;
 };
-Type.createEnumIndex = function(e,index,params) {
-	var c = e.__constructs__[index];
-	if(c == null) {
-		throw new js__$Boot_HaxeError(index + " is not a valid enum constructor index");
-	}
-	return Type.createEnum(e,c,params);
-};
 var _$UInt_UInt_$Impl_$ = {};
 $hxClasses["_UInt.UInt_Impl_"] = _$UInt_UInt_$Impl_$;
 _$UInt_UInt_$Impl_$.__name__ = true;
@@ -905,9 +437,6 @@ _$UInt_UInt_$Impl_$.toFloat = function(this1) {
 var haxe_IMap = function() { };
 $hxClasses["haxe.IMap"] = haxe_IMap;
 haxe_IMap.__name__ = true;
-haxe_IMap.prototype = {
-	__class__: haxe_IMap
-};
 var haxe__$Int64__$_$_$Int64 = function(high,low) {
 	this.high = high;
 	this.low = low;
@@ -1274,31 +803,7 @@ $hxClasses["haxe.ds.IntMap"] = haxe_ds_IntMap;
 haxe_ds_IntMap.__name__ = true;
 haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
 haxe_ds_IntMap.prototype = {
-	set: function(key,value) {
-		this.h[key] = value;
-	}
-	,get: function(key) {
-		return this.h[key];
-	}
-	,exists: function(key) {
-		return this.h.hasOwnProperty(key);
-	}
-	,keys: function() {
-		var a = [];
-		for( var key in this.h ) if(this.h.hasOwnProperty(key)) {
-			a.push(key | 0);
-		}
-		return HxOverrides.iter(a);
-	}
-	,iterator: function() {
-		return { ref : this.h, it : this.keys(), hasNext : function() {
-			return this.it.hasNext();
-		}, next : function() {
-			var i = this.it.next();
-			return this.ref[i];
-		}};
-	}
-	,__class__: haxe_ds_IntMap
+	__class__: haxe_ds_IntMap
 };
 var haxe_ds_ObjectMap = function() {
 	this.h = { __keys__ : { }};
@@ -1312,12 +817,6 @@ haxe_ds_ObjectMap.prototype = {
 		this.h[id] = value;
 		this.h.__keys__[id] = key;
 	}
-	,get: function(key) {
-		return this.h[key.__id__];
-	}
-	,exists: function(key) {
-		return this.h.__keys__[key.__id__] != null;
-	}
 	,__class__: haxe_ds_ObjectMap
 };
 var haxe_ds_StringMap = function() {
@@ -1327,26 +826,7 @@ $hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
 haxe_ds_StringMap.__name__ = true;
 haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
 haxe_ds_StringMap.prototype = {
-	set: function(key,value) {
-		if(__map_reserved[key] != null) {
-			this.setReserved(key,value);
-		} else {
-			this.h[key] = value;
-		}
-	}
-	,get: function(key) {
-		if(__map_reserved[key] != null) {
-			return this.getReserved(key);
-		}
-		return this.h[key];
-	}
-	,exists: function(key) {
-		if(__map_reserved[key] != null) {
-			return this.existsReserved(key);
-		}
-		return this.h.hasOwnProperty(key);
-	}
-	,setReserved: function(key,value) {
+	setReserved: function(key,value) {
 		if(this.rh == null) {
 			this.rh = { };
 		}
@@ -1376,13 +856,6 @@ var haxe_io_Bytes = function(data) {
 };
 $hxClasses["haxe.io.Bytes"] = haxe_io_Bytes;
 haxe_io_Bytes.__name__ = true;
-haxe_io_Bytes.ofData = function(b) {
-	var hb = b.hxBytes;
-	if(hb != null) {
-		return hb;
-	}
-	return new haxe_io_Bytes(b);
-};
 haxe_io_Bytes.prototype = {
 	blit: function(pos,src,srcpos,len) {
 		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
@@ -1393,48 +866,6 @@ haxe_io_Bytes.prototype = {
 		} else {
 			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
 		}
-	}
-	,sub: function(pos,len) {
-		if(pos < 0 || len < 0 || pos + len > this.length) {
-			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
-		}
-		return new haxe_io_Bytes(this.b.buffer.slice(pos + this.b.byteOffset,pos + this.b.byteOffset + len));
-	}
-	,getDouble: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getFloat64(pos,true);
-	}
-	,getFloat: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getFloat32(pos,true);
-	}
-	,setDouble: function(pos,v) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		this.data.setFloat64(pos,v,true);
-	}
-	,setFloat: function(pos,v) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		this.data.setFloat32(pos,v,true);
-	}
-	,getUInt16: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getUint16(pos,true);
-	}
-	,getInt32: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getInt32(pos,true);
 	}
 	,setInt32: function(pos,v) {
 		if(this.data == null) {
@@ -2326,26 +1757,10 @@ kha_Canvas.prototype = {
 var kha_Resource = function() { };
 $hxClasses["kha.Resource"] = kha_Resource;
 kha_Resource.__name__ = true;
-kha_Resource.prototype = {
-	__class__: kha_Resource
-};
 var kha_Image = function() { };
 $hxClasses["kha.Image"] = kha_Image;
 kha_Image.__name__ = true;
 kha_Image.__interfaces__ = [kha_Resource,kha_Canvas];
-kha_Image.create = function(width,height,format,usage) {
-	if(format == null) {
-		format = kha_graphics4_TextureFormat.RGBA32;
-	}
-	if(usage == null) {
-		usage = kha_graphics4_Usage.StaticUsage;
-	}
-	if(kha_SystemImpl.gl == null) {
-		return new kha_CanvasImage(width,height,format,false);
-	} else {
-		return new kha_WebGLImage(width,height,format,false,0);
-	}
-};
 kha_Image.createRenderTarget = function(width,height,format,depthStencil,antiAliasingSamples,contextId) {
 	if(contextId == null) {
 		contextId = 0;
@@ -2365,81 +1780,11 @@ kha_Image.createRenderTarget = function(width,height,format,depthStencil,antiAli
 		return new kha_WebGLImage(width,height,format,true,depthStencil);
 	}
 };
-kha_Image.fromImage = function(image,readable) {
-	if(kha_SystemImpl.gl == null) {
-		var img = new kha_CanvasImage(image.width,image.height,kha_graphics4_TextureFormat.RGBA32,false);
-		img.image = image;
-		img.createTexture();
-		return img;
-	} else {
-		var img1 = new kha_WebGLImage(image.width,image.height,kha_graphics4_TextureFormat.RGBA32,false,0);
-		img1.image = image;
-		img1.createTexture();
-		return img1;
-	}
-};
-kha_Image.fromBytes = function(bytes,width,height,format,usage) {
-	if(format == null) {
-		format = kha_graphics4_TextureFormat.RGBA32;
-	}
-	if(usage == null) {
-		usage = kha_graphics4_Usage.StaticUsage;
-	}
-	if(kha_SystemImpl.gl != null) {
-		var img = new kha_WebGLImage(width,height,format,false,0);
-		img.image = img.bytesToArray(bytes);
-		img.createTexture();
-		return img;
-	}
-	return null;
-};
-kha_Image.fromVideo = function(video) {
-	if(kha_SystemImpl.gl == null) {
-		var img = new kha_CanvasImage(video.element.videoWidth,video.element.videoHeight,kha_graphics4_TextureFormat.RGBA32,false);
-		img.video = video.element;
-		img.createTexture();
-		return img;
-	} else {
-		var img1 = new kha_WebGLImage(video.element.videoWidth,video.element.videoHeight,kha_graphics4_TextureFormat.RGBA32,false,0);
-		img1.video = video.element;
-		img1.createTexture();
-		return img1;
-	}
-};
-kha_Image.get_maxSize = function() {
-	if(kha_SystemImpl.gl == null) {
-		return 8192;
-	} else {
-		return kha_SystemImpl.gl.getParameter(3379);
-	}
-};
 kha_Image.get_nonPow2Supported = function() {
 	return kha_SystemImpl.gl != null;
 };
 kha_Image.prototype = {
-	isOpaque: function(x,y) {
-		return false;
-	}
-	,at: function(x,y) {
-		return kha__$Color_Color_$Impl_$.Black;
-	}
-	,unload: function() {
-	}
-	,lock: function(level) {
-		if(level == null) {
-			level = 0;
-		}
-		return null;
-	}
-	,unlock: function() {
-	}
-	,generateMipmaps: function(levels) {
-	}
-	,setMipmaps: function(mipmaps) {
-	}
-	,setDepthStencilFrom: function(image) {
-	}
-	,get_width: function() {
+	get_width: function() {
 		return 0;
 	}
 	,get_height: function() {
@@ -2450,9 +1795,6 @@ kha_Image.prototype = {
 	}
 	,get_realHeight: function() {
 		return 0;
-	}
-	,get_g1: function() {
-		return null;
 	}
 	,get_g2: function() {
 		return null;
@@ -2485,24 +1827,9 @@ kha_CanvasImage.init = function() {
 		kha_CanvasImage.context.globalCompositeOperation = "copy";
 	}
 };
-kha_CanvasImage.upperPowerOfTwo = function(v) {
-	--v;
-	v |= v >>> 1;
-	v |= v >>> 2;
-	v |= v >>> 4;
-	v |= v >>> 8;
-	v |= v >>> 16;
-	return ++v;
-};
 kha_CanvasImage.__super__ = kha_Image;
 kha_CanvasImage.prototype = $extend(kha_Image.prototype,{
-	get_g1: function() {
-		if(this.graphics1 == null) {
-			this.graphics1 = new kha_graphics2_Graphics1(this);
-		}
-		return this.graphics1;
-	}
-	,get_g2: function() {
+	get_g2: function() {
 		if(this.g2canvas == null) {
 			var canvas = window.document.createElement("canvas");
 			this.image = canvas;
@@ -2528,33 +1855,6 @@ kha_CanvasImage.prototype = $extend(kha_Image.prototype,{
 	,get_realHeight: function() {
 		return this.myHeight;
 	}
-	,isOpaque: function(x,y) {
-		if(this.data == null) {
-			if(kha_CanvasImage.context == null) {
-				return true;
-			} else {
-				this.createImageData();
-			}
-		}
-		return this.data.data[y * (this.image.width | 0) * 4 + x * 4 + 3] != 0;
-	}
-	,at: function(x,y) {
-		if(this.data == null) {
-			if(kha_CanvasImage.context == null) {
-				return kha__$Color_Color_$Impl_$.Black;
-			} else {
-				this.createImageData();
-			}
-		}
-		return kha__$Color_Color_$Impl_$._new(this.data.data[y * (this.image.width | 0) * 4 + x * 4]);
-	}
-	,createImageData: function() {
-		kha_CanvasImage.context.strokeStyle = "rgba(0,0,0,0)";
-		kha_CanvasImage.context.fillStyle = "rgba(0,0,0,0)";
-		kha_CanvasImage.context.fillRect(0,0,this.image.width,this.image.height);
-		kha_CanvasImage.context.drawImage(this.image,0,0,this.image.width,this.image.height,0,0,this.image.width,this.image.height);
-		this.data = kha_CanvasImage.context.getImageData(0,0,this.image.width,this.image.height);
-	}
 	,createTexture: function() {
 		if(kha_SystemImpl.gl == null) {
 			return;
@@ -2578,187 +1878,31 @@ kha_CanvasImage.prototype = $extend(kha_Image.prototype,{
 		}
 		kha_SystemImpl.gl.bindTexture(3553,null);
 	}
-	,set: function(stage) {
-		kha_SystemImpl.gl.activeTexture(33984 + stage);
-		kha_SystemImpl.gl.bindTexture(3553,this.texture);
-		if(this.video != null) {
-			kha_SystemImpl.gl.texImage2D(3553,0,6408,6408,5121,this.video);
-		}
-	}
-	,lock: function(level) {
-		if(level == null) {
-			level = 0;
-		}
-		this.bytes = new haxe_io_Bytes(new ArrayBuffer(this.format == kha_graphics4_TextureFormat.RGBA32?4 * this.get_width() * this.get_height():this.get_width() * this.get_height()));
-		return this.bytes;
-	}
-	,unlock: function() {
-		if(kha_SystemImpl.gl != null) {
-			this.texture = kha_SystemImpl.gl.createTexture();
-			kha_SystemImpl.gl.bindTexture(3553,this.texture);
-			kha_SystemImpl.gl.texParameteri(3553,10240,9729);
-			kha_SystemImpl.gl.texParameteri(3553,10241,9729);
-			kha_SystemImpl.gl.texParameteri(3553,10242,33071);
-			kha_SystemImpl.gl.texParameteri(3553,10243,33071);
-			kha_SystemImpl.gl.texImage2D(3553,0,6409,this.get_width(),this.get_height(),0,6409,5121,new Uint8Array(this.bytes.b.bufferValue));
-			if(kha_SystemImpl.gl.getError() == 1282) {
-				var rgbaBytes = new haxe_io_Bytes(new ArrayBuffer(this.get_width() * this.get_height() * 4));
-				var _g1 = 0;
-				var _g = this.get_height();
-				while(_g1 < _g) {
-					var y = _g1++;
-					var _g3 = 0;
-					var _g2 = this.get_width();
-					while(_g3 < _g2) {
-						var x = _g3++;
-						var value = this.bytes.b[y * this.get_width() + x];
-						rgbaBytes.b[y * this.get_width() * 4 + x * 4] = value & 255;
-						rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 1] = value & 255;
-						rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 2] = value & 255;
-						rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 3] = 255;
-					}
-				}
-				kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,5121,new Uint8Array(rgbaBytes.b.bufferValue));
-			}
-			kha_SystemImpl.gl.bindTexture(3553,null);
-			this.bytes = null;
-		}
-	}
-	,unload: function() {
-	}
 	,__class__: kha_CanvasImage
 });
 var kha__$Color_Color_$Impl_$ = $hx_exports["kha"]["_Color"]["Color_Impl_"] = {};
 $hxClasses["kha._Color.Color_Impl_"] = kha__$Color_Color_$Impl_$;
 kha__$Color_Color_$Impl_$.__name__ = true;
-kha__$Color_Color_$Impl_$.fromValue = function(value) {
-	return kha__$Color_Color_$Impl_$._new(value);
-};
 kha__$Color_Color_$Impl_$.fromBytes = function(r,g,b,a) {
 	if(a == null) {
 		a = 255;
 	}
 	return kha__$Color_Color_$Impl_$._new(a << 24 | r << 16 | g << 8 | b);
 };
-kha__$Color_Color_$Impl_$.fromFloats = function(r,g,b,a) {
-	if(a == null) {
-		a = 1;
-	}
-	return kha__$Color_Color_$Impl_$._new((a * 255 | 0) << 24 | (r * 255 | 0) << 16 | (g * 255 | 0) << 8 | (b * 255 | 0));
-};
-kha__$Color_Color_$Impl_$.fromString = function(value) {
-	if((value.length == 7 || value.length == 9) && value.charCodeAt(0) == 35) {
-		var colorValue = Std.parseInt("0x" + HxOverrides.substr(value,1,null));
-		if(value.length == 7) {
-			colorValue += -16777216;
-		}
-		return kha__$Color_Color_$Impl_$._new(colorValue);
-	} else {
-		throw new js__$Boot_HaxeError("Invalid Color string: '" + value + "'");
-	}
-};
 kha__$Color_Color_$Impl_$._new = function(value) {
 	return value;
-};
-kha__$Color_Color_$Impl_$.get_value = function(this1) {
-	return this1;
-};
-kha__$Color_Color_$Impl_$.set_value = function(this1,value) {
-	this1 = value;
-	return value;
-};
-kha__$Color_Color_$Impl_$.get_Rb = function(this1) {
-	return (this1 & 16711680) >>> 16;
-};
-kha__$Color_Color_$Impl_$.get_Gb = function(this1) {
-	return (this1 & 65280) >>> 8;
-};
-kha__$Color_Color_$Impl_$.get_Bb = function(this1) {
-	return this1 & 255;
-};
-kha__$Color_Color_$Impl_$.get_Ab = function(this1) {
-	return this1 >>> 24;
-};
-kha__$Color_Color_$Impl_$.set_Rb = function(this1,i) {
-	this1 = this1 >>> 24 << 24 | i << 16 | (this1 & 65280) >>> 8 << 8 | this1 & 255;
-	return i;
-};
-kha__$Color_Color_$Impl_$.set_Gb = function(this1,i) {
-	this1 = this1 >>> 24 << 24 | (this1 & 16711680) >>> 16 << 16 | i << 8 | this1 & 255;
-	return i;
-};
-kha__$Color_Color_$Impl_$.set_Bb = function(this1,i) {
-	this1 = this1 >>> 24 << 24 | (this1 & 16711680) >>> 16 << 16 | (this1 & 65280) >>> 8 << 8 | i;
-	return i;
-};
-kha__$Color_Color_$Impl_$.set_Ab = function(this1,i) {
-	this1 = i << 24 | (this1 & 16711680) >>> 16 << 16 | (this1 & 65280) >>> 8 << 8 | this1 & 255;
-	return i;
-};
-kha__$Color_Color_$Impl_$.get_R = function(this1) {
-	return ((this1 & 16711680) >>> 16) * 0.00392156862745098;
-};
-kha__$Color_Color_$Impl_$.get_G = function(this1) {
-	return ((this1 & 65280) >>> 8) * 0.00392156862745098;
-};
-kha__$Color_Color_$Impl_$.get_B = function(this1) {
-	return (this1 & 255) * 0.00392156862745098;
-};
-kha__$Color_Color_$Impl_$.get_A = function(this1) {
-	return (this1 >>> 24) * 0.00392156862745098;
-};
-kha__$Color_Color_$Impl_$.set_R = function(this1,f) {
-	this1 = ((this1 >>> 24) * 0.00392156862745098 * 255 | 0) << 24 | (f * 255 | 0) << 16 | (((this1 & 65280) >>> 8) * 0.00392156862745098 * 255 | 0) << 8 | ((this1 & 255) * 0.00392156862745098 * 255 | 0);
-	return f;
-};
-kha__$Color_Color_$Impl_$.set_G = function(this1,f) {
-	this1 = ((this1 >>> 24) * 0.00392156862745098 * 255 | 0) << 24 | (((this1 & 16711680) >>> 16) * 0.00392156862745098 * 255 | 0) << 16 | (f * 255 | 0) << 8 | ((this1 & 255) * 0.00392156862745098 * 255 | 0);
-	return f;
-};
-kha__$Color_Color_$Impl_$.set_B = function(this1,f) {
-	this1 = ((this1 >>> 24) * 0.00392156862745098 * 255 | 0) << 24 | (((this1 & 16711680) >>> 16) * 0.00392156862745098 * 255 | 0) << 16 | (((this1 & 65280) >>> 8) * 0.00392156862745098 * 255 | 0) << 8 | (f * 255 | 0);
-	return f;
-};
-kha__$Color_Color_$Impl_$.set_A = function(this1,f) {
-	this1 = (f * 255 | 0) << 24 | (((this1 & 16711680) >>> 16) * 0.00392156862745098 * 255 | 0) << 16 | (((this1 & 65280) >>> 8) * 0.00392156862745098 * 255 | 0) << 8 | ((this1 & 255) * 0.00392156862745098 * 255 | 0);
-	return f;
 };
 var kha_EnvironmentVariables = function() {
 };
 $hxClasses["kha.EnvironmentVariables"] = kha_EnvironmentVariables;
 kha_EnvironmentVariables.__name__ = true;
 kha_EnvironmentVariables.prototype = {
-	getVariable: function(name) {
-		return "";
-	}
-	,__class__: kha_EnvironmentVariables
+	__class__: kha_EnvironmentVariables
 };
 var kha_Font = function() { };
 $hxClasses["kha.Font"] = kha_Font;
 kha_Font.__name__ = true;
 kha_Font.__interfaces__ = [kha_Resource];
-kha_Font.prototype = {
-	__class__: kha_Font
-};
-var kha_FontStyle = function(bold,italic,underlined) {
-	this.bold = bold;
-	this.italic = italic;
-	this.underlined = underlined;
-};
-$hxClasses["kha.FontStyle"] = kha_FontStyle;
-kha_FontStyle.__name__ = true;
-kha_FontStyle.prototype = {
-	getBold: function() {
-		return this.bold;
-	}
-	,getItalic: function() {
-		return this.italic;
-	}
-	,getUnderlined: function() {
-		return this.underlined;
-	}
-	,__class__: kha_FontStyle
-};
 var kha_Framebuffer = function(windowId,g1,g2,g4) {
 	this.windowId = windowId;
 	this.graphics1 = g1;
@@ -2773,9 +1917,6 @@ kha_Framebuffer.prototype = {
 		this.graphics1 = g1;
 		this.graphics2 = g2;
 		this.graphics4 = g4;
-	}
-	,get_g1: function() {
-		return this.graphics1;
 	}
 	,get_g2: function() {
 		return this.graphics2;
@@ -2834,162 +1975,6 @@ kha_Key.RIGHT.__enum__ = kha_Key;
 kha_Key.BACK = ["BACK",13];
 kha_Key.BACK.toString = $estr;
 kha_Key.BACK.__enum__ = kha_Key;
-var kha_AlignedQuad = function() {
-};
-$hxClasses["kha.AlignedQuad"] = kha_AlignedQuad;
-kha_AlignedQuad.__name__ = true;
-kha_AlignedQuad.prototype = {
-	__class__: kha_AlignedQuad
-};
-var kha_KravurImage = function(size,ascent,descent,lineGap,width,height,chars,pixels) {
-	this.mySize = size;
-	this.width = width;
-	this.height = height;
-	this.chars = chars;
-	this.baseline = ascent;
-	var _g = 0;
-	while(_g < chars.length) {
-		var $char = chars[_g];
-		++_g;
-		$char.yoff += this.baseline;
-	}
-	this.texture = kha_Image.create(width,height,kha_graphics4_TextureFormat.L8);
-	var bytes = this.texture.lock();
-	var pos = 0;
-	var _g1 = 0;
-	while(_g1 < height) {
-		++_g1;
-		var _g3 = 0;
-		while(_g3 < width) {
-			++_g3;
-			bytes.b[pos] = pixels.readU8(pos) & 255;
-			++pos;
-		}
-	}
-	this.texture.unlock();
-};
-$hxClasses["kha.KravurImage"] = kha_KravurImage;
-kha_KravurImage.__name__ = true;
-kha_KravurImage.prototype = {
-	getTexture: function() {
-		return this.texture;
-	}
-	,getBakedQuad: function(char_index,xpos,ypos) {
-		if(char_index >= this.chars.length) {
-			return null;
-		}
-		var ipw = 1.0 / this.width;
-		var iph = 1.0 / this.height;
-		var b = this.chars[char_index];
-		if(b == null) {
-			return null;
-		}
-		var round_x = Math.round(xpos + b.xoff);
-		var round_y = Math.round(ypos + b.yoff);
-		var q = new kha_AlignedQuad();
-		q.x0 = round_x;
-		q.y0 = round_y;
-		q.x1 = round_x + b.x1 - b.x0;
-		q.y1 = round_y + b.y1 - b.y0;
-		q.s0 = b.x0 * ipw;
-		q.t0 = b.y0 * iph;
-		q.s1 = b.x1 * ipw;
-		q.t1 = b.y1 * iph;
-		q.xadvance = b.xadvance;
-		return q;
-	}
-	,getCharWidth: function(charIndex) {
-		if(charIndex < 32) {
-			return 0;
-		}
-		if(charIndex - 32 >= this.chars.length) {
-			return 0;
-		}
-		return this.chars[charIndex - 32].xadvance;
-	}
-	,getHeight: function() {
-		return this.mySize;
-	}
-	,stringWidth: function(string) {
-		var str = new String(string);
-		var width = 0;
-		var _g1 = 0;
-		var _g = str.length;
-		while(_g1 < _g) width += this.getCharWidth(HxOverrides.cca(str,_g1++));
-		return width;
-	}
-	,getBaselinePosition: function() {
-		return this.baseline;
-	}
-	,__class__: kha_KravurImage
-};
-var kha_Kravur = function(blob) {
-	this.images = new haxe_ds_IntMap();
-	this.blob = blob;
-};
-$hxClasses["kha.Kravur"] = kha_Kravur;
-kha_Kravur.__name__ = true;
-kha_Kravur.__interfaces__ = [kha_Font];
-kha_Kravur.prototype = {
-	_get: function(fontSize,glyphs) {
-		if(!this.images.h.hasOwnProperty(fontSize)) {
-			if(glyphs == null) {
-				glyphs = [];
-				var _g = 32;
-				while(_g < 256) glyphs.push(_g++);
-			}
-			var width = 64;
-			var height = 32;
-			var length = glyphs.length;
-			var baked = new Array(length);
-			var _g1 = 0;
-			var _g2 = baked.length;
-			while(_g1 < _g2) baked[_g1++] = new kha_graphics2_truetype_Stbtt_$bakedchar();
-			var pixels = null;
-			var status = -1;
-			while(status < 0) {
-				if(height < width) {
-					height *= 2;
-				} else {
-					width *= 2;
-				}
-				pixels = kha_internal_BytesBlob.alloc(width * height);
-				status = kha_graphics2_truetype_StbTruetype.stbtt_BakeFontBitmap(this.blob,0,fontSize,pixels,width,height,glyphs,baked);
-			}
-			var info = new kha_graphics2_truetype_Stbtt_$fontinfo();
-			kha_graphics2_truetype_StbTruetype.stbtt_InitFont(info,this.blob,0);
-			var metrics = kha_graphics2_truetype_StbTruetype.stbtt_GetFontVMetrics(info);
-			var scale = kha_graphics2_truetype_StbTruetype.stbtt_ScaleForPixelHeight(info,fontSize);
-			var image = new kha_KravurImage(fontSize | 0,Math.round(metrics.ascent * scale),Math.round(metrics.descent * scale),Math.round(metrics.lineGap * scale),width,height,baked,pixels);
-			this.images.h[fontSize] = image;
-			return image;
-		}
-		return this.images.h[fontSize];
-	}
-	,height: function(fontSize) {
-		return this._get(fontSize).getHeight();
-	}
-	,width: function(fontSize,str) {
-		return this._get(fontSize).stringWidth(str);
-	}
-	,baseline: function(fontSize) {
-		return this._get(fontSize).getBaselinePosition();
-	}
-	,unload: function() {
-		this.blob = null;
-		this.images = null;
-	}
-	,__class__: kha_Kravur
-};
-var kha_Rotation = function(center,angle) {
-	this.center = center;
-	this.angle = angle;
-};
-$hxClasses["kha.Rotation"] = kha_Rotation;
-kha_Rotation.__name__ = true;
-kha_Rotation.prototype = {
-	__class__: kha_Rotation
-};
 var kha_TimeTask = function() {
 };
 $hxClasses["kha.TimeTask"] = kha_TimeTask;
@@ -2997,13 +1982,7 @@ kha_TimeTask.__name__ = true;
 kha_TimeTask.prototype = {
 	__class__: kha_TimeTask
 };
-var kha_FrameTask = function(task,priority,id) {
-	this.task = task;
-	this.priority = priority;
-	this.id = id;
-	this.active = true;
-	this.paused = false;
-};
+var kha_FrameTask = function() { };
 $hxClasses["kha.FrameTask"] = kha_FrameTask;
 kha_FrameTask.__name__ = true;
 kha_FrameTask.prototype = {
@@ -3063,75 +2042,6 @@ kha_Scheduler.start = function(restartTimers) {
 			frameTask.paused = false;
 		}
 	}
-};
-kha_Scheduler.stop = function() {
-	kha_Scheduler.stopped = true;
-};
-kha_Scheduler.isStopped = function() {
-	return kha_Scheduler.stopped;
-};
-kha_Scheduler.warpTimeTasks = function(time,tasks) {
-	var _g = 0;
-	while(_g < tasks.length) {
-		var timeTask = tasks[_g];
-		++_g;
-		if(timeTask.start >= time) {
-			timeTask.next = timeTask.start;
-		} else if(timeTask.period > 0) {
-			var times = Math.ceil((time - timeTask.start) / timeTask.period);
-			timeTask.next = timeTask.start + times * timeTask.period;
-		}
-	}
-};
-kha_Scheduler.back = function(time) {
-	if(time >= kha_Scheduler.lastTime) {
-		return;
-	}
-	kha_Scheduler.current = time;
-	kha_Scheduler.lastTime = time;
-	kha_Scheduler.warpTimeTasks(time,kha_Scheduler.outdatedTimeTasks);
-	kha_Scheduler.warpTimeTasks(time,kha_Scheduler.timeTasks);
-	var _g = 0;
-	var _g1 = kha_Scheduler.outdatedTimeTasks;
-	while(_g < _g1.length) {
-		var task = _g1[_g];
-		++_g;
-		if(task.next >= time) {
-			kha_Scheduler.timeTasksScratchpad.push(task);
-		}
-	}
-	var _g2 = 0;
-	var _g11 = kha_Scheduler.timeTasksScratchpad;
-	while(_g2 < _g11.length) {
-		var task1 = _g11[_g2];
-		++_g2;
-		HxOverrides.remove(kha_Scheduler.outdatedTimeTasks,task1);
-	}
-	var _g3 = 0;
-	var _g12 = kha_Scheduler.timeTasksScratchpad;
-	while(_g3 < _g12.length) {
-		var task2 = _g12[_g3];
-		++_g3;
-		kha_Scheduler.insertSorted(kha_Scheduler.timeTasks,task2);
-	}
-	while(kha_Scheduler.timeTasksScratchpad.length > 0) HxOverrides.remove(kha_Scheduler.timeTasksScratchpad,kha_Scheduler.timeTasksScratchpad[0]);
-	var _g4 = 0;
-	var _g13 = kha_Scheduler.outdatedTimeTasks;
-	while(_g4 < _g13.length) {
-		var task3 = _g13[_g4];
-		++_g4;
-		if(task3.next < time - 1.0) {
-			kha_Scheduler.timeTasksScratchpad.push(task3);
-		}
-	}
-	var _g5 = 0;
-	var _g14 = kha_Scheduler.timeTasksScratchpad;
-	while(_g5 < _g14.length) {
-		var task4 = _g14[_g5];
-		++_g5;
-		HxOverrides.remove(kha_Scheduler.outdatedTimeTasks,task4);
-	}
-	while(kha_Scheduler.timeTasksScratchpad.length > 0) HxOverrides.remove(kha_Scheduler.timeTasksScratchpad,kha_Scheduler.timeTasksScratchpad[0]);
 };
 kha_Scheduler.executeFrame = function() {
 	var delta = kha_Scheduler.realTime() - kha_Scheduler.lastTime;
@@ -3238,9 +2148,6 @@ kha_Scheduler.executeFrame = function() {
 };
 kha_Scheduler.archiveTimeTask = function(timeTask,frameEnd) {
 };
-kha_Scheduler.time = function() {
-	return kha_Scheduler.current;
-};
 kha_Scheduler.realTime = function() {
 	return kha_System.get_time() - kha_Scheduler.startTime;
 };
@@ -3261,44 +2168,6 @@ kha_Scheduler.resetTime = function() {
 	while(_g11 < _g2) kha_Scheduler.deltas[_g11++] = 0;
 	kha_Scheduler.current = 0;
 	kha_Scheduler.lastTime = 0;
-};
-kha_Scheduler.addBreakableFrameTask = function(task,priority) {
-	kha_Scheduler.frameTasks.push(new kha_FrameTask(task,priority,++kha_Scheduler.currentFrameTaskId));
-	kha_Scheduler.frame_tasks_sorted = false;
-	return kha_Scheduler.currentFrameTaskId;
-};
-kha_Scheduler.addFrameTask = function(task,priority) {
-	return kha_Scheduler.addBreakableFrameTask(function() {
-		task();
-		return true;
-	},priority);
-};
-kha_Scheduler.pauseFrameTask = function(id,paused) {
-	var _g = 0;
-	var _g1 = kha_Scheduler.frameTasks;
-	while(_g < _g1.length) {
-		var frameTask = _g1[_g];
-		++_g;
-		if(frameTask.id == id) {
-			frameTask.paused = paused;
-			break;
-		}
-	}
-};
-kha_Scheduler.removeFrameTask = function(id) {
-	var _g = 0;
-	var _g1 = kha_Scheduler.frameTasks;
-	while(_g < _g1.length) {
-		var frameTask = _g1[_g];
-		++_g;
-		if(frameTask.id == id) {
-			frameTask.active = false;
-			break;
-		}
-	}
-};
-kha_Scheduler.generateGroupId = function() {
-	return ++kha_Scheduler.currentGroupId;
 };
 kha_Scheduler.addBreakableTimeTaskToGroup = function(groupId,task,start,period,duration) {
 	if(duration == null) {
@@ -3337,15 +2206,6 @@ kha_Scheduler.addTimeTaskToGroup = function(groupId,task,start,period,duration) 
 		return true;
 	},start,period,duration);
 };
-kha_Scheduler.addBreakableTimeTask = function(task,start,period,duration) {
-	if(duration == null) {
-		duration = 0;
-	}
-	if(period == null) {
-		period = 0;
-	}
-	return kha_Scheduler.addBreakableTimeTaskToGroup(0,task,start,period,duration);
-};
 kha_Scheduler.addTimeTask = function(task,start,period,duration) {
 	if(duration == null) {
 		duration = 0;
@@ -3354,96 +2214,6 @@ kha_Scheduler.addTimeTask = function(task,start,period,duration) {
 		period = 0;
 	}
 	return kha_Scheduler.addTimeTaskToGroup(0,task,start,period,duration);
-};
-kha_Scheduler.getTimeTask = function(id) {
-	if(kha_Scheduler.activeTimeTask != null && kha_Scheduler.activeTimeTask.id == id) {
-		return kha_Scheduler.activeTimeTask;
-	}
-	var _g = 0;
-	var _g1 = kha_Scheduler.timeTasks;
-	while(_g < _g1.length) {
-		var timeTask = _g1[_g];
-		++_g;
-		if(timeTask.id == id) {
-			return timeTask;
-		}
-	}
-	var _g2 = 0;
-	var _g11 = kha_Scheduler.pausedTimeTasks;
-	while(_g2 < _g11.length) {
-		var timeTask1 = _g11[_g2];
-		++_g2;
-		if(timeTask1.id == id) {
-			return timeTask1;
-		}
-	}
-	return null;
-};
-kha_Scheduler.pauseTimeTask = function(id,paused) {
-	var timeTask = kha_Scheduler.getTimeTask(id);
-	if(timeTask != null) {
-		kha_Scheduler.pauseRunningTimeTask(timeTask,paused);
-	}
-	if(kha_Scheduler.activeTimeTask != null && kha_Scheduler.activeTimeTask.id == id) {
-		kha_Scheduler.activeTimeTask.paused = paused;
-	}
-};
-kha_Scheduler.pauseRunningTimeTask = function(timeTask,paused) {
-	timeTask.paused = paused;
-	if(paused) {
-		HxOverrides.remove(kha_Scheduler.timeTasks,timeTask);
-		kha_Scheduler.pausedTimeTasks.push(timeTask);
-	} else {
-		kha_Scheduler.insertSorted(kha_Scheduler.timeTasks,timeTask);
-		HxOverrides.remove(kha_Scheduler.pausedTimeTasks,timeTask);
-	}
-};
-kha_Scheduler.pauseTimeTasks = function(groupId,paused) {
-	var _g = 0;
-	var _g1 = kha_Scheduler.timeTasks;
-	while(_g < _g1.length) {
-		var timeTask = _g1[_g];
-		++_g;
-		if(timeTask.groupId == groupId) {
-			kha_Scheduler.pauseRunningTimeTask(timeTask,paused);
-		}
-	}
-	if(kha_Scheduler.activeTimeTask != null && kha_Scheduler.activeTimeTask.groupId == groupId) {
-		kha_Scheduler.activeTimeTask.paused = paused;
-	}
-};
-kha_Scheduler.removeTimeTask = function(id) {
-	var timeTask = kha_Scheduler.getTimeTask(id);
-	if(timeTask != null) {
-		timeTask.active = false;
-		HxOverrides.remove(kha_Scheduler.timeTasks,timeTask);
-	}
-};
-kha_Scheduler.removeTimeTasks = function(groupId) {
-	var _g = 0;
-	var _g1 = kha_Scheduler.timeTasks;
-	while(_g < _g1.length) {
-		var timeTask = _g1[_g];
-		++_g;
-		if(timeTask.groupId == groupId) {
-			timeTask.active = false;
-			kha_Scheduler.timeTasksScratchpad.push(timeTask);
-		}
-	}
-	var _g2 = 0;
-	var _g11 = kha_Scheduler.timeTasksScratchpad;
-	while(_g2 < _g11.length) {
-		var timeTask1 = _g11[_g2];
-		++_g2;
-		HxOverrides.remove(kha_Scheduler.timeTasks,timeTask1);
-	}
-	while(kha_Scheduler.timeTasksScratchpad.length > 0) HxOverrides.remove(kha_Scheduler.timeTasksScratchpad,kha_Scheduler.timeTasksScratchpad[0]);
-	if(kha_Scheduler.activeTimeTask != null && kha_Scheduler.activeTimeTask.groupId == groupId) {
-		kha_Scheduler.activeTimeTask.active = false;
-	}
-};
-kha_Scheduler.numTasksInSchedule = function() {
-	return kha_Scheduler.timeTasks.length + kha_Scheduler.frameTasks.length;
 };
 kha_Scheduler.insertSorted = function(list,task) {
 	var _g1 = 0;
@@ -3472,19 +2242,6 @@ kha_Scheduler.sortFrameTasks = function() {
 	});
 	kha_Scheduler.frame_tasks_sorted = true;
 };
-var kha_ScreenRotation = $hxClasses["kha.ScreenRotation"] = { __ename__ : true, __constructs__ : ["RotationNone","Rotation90","Rotation180","Rotation270"] };
-kha_ScreenRotation.RotationNone = ["RotationNone",0];
-kha_ScreenRotation.RotationNone.toString = $estr;
-kha_ScreenRotation.RotationNone.__enum__ = kha_ScreenRotation;
-kha_ScreenRotation.Rotation90 = ["Rotation90",1];
-kha_ScreenRotation.Rotation90.toString = $estr;
-kha_ScreenRotation.Rotation90.__enum__ = kha_ScreenRotation;
-kha_ScreenRotation.Rotation180 = ["Rotation180",2];
-kha_ScreenRotation.Rotation180.toString = $estr;
-kha_ScreenRotation.Rotation180.__enum__ = kha_ScreenRotation;
-kha_ScreenRotation.Rotation270 = ["Rotation270",3];
-kha_ScreenRotation.Rotation270.toString = $estr;
-kha_ScreenRotation.Rotation270.__enum__ = kha_ScreenRotation;
 var kha_Shaders = function() { };
 $hxClasses["kha.Shaders"] = kha_Shaders;
 kha_Shaders.__name__ = true;
@@ -3514,44 +2271,6 @@ kha_Shaders.init = function() {
 	var bytes7 = haxe_Unserializer.run(data7);
 	kha_Shaders.painter_video_vert = new kha_graphics4_VertexShader(kha_internal_BytesBlob.fromBytes(bytes7),"painter_video_vert");
 };
-var kha_Sound = function() {
-};
-$hxClasses["kha.Sound"] = kha_Sound;
-kha_Sound.__name__ = true;
-kha_Sound.__interfaces__ = [kha_Resource];
-kha_Sound.prototype = {
-	uncompress: function(done) {
-		var output = new haxe_io_BytesOutput();
-		var header = kha_audio2_ogg_vorbis_Reader.readAll(this.compressedData,output,true);
-		var soundBytes = output.getBytes();
-		var count = soundBytes.length / 4 | 0;
-		if(header.channel == 1) {
-			this.uncompressedData = new Array(count * 2);
-			var _g1 = 0;
-			var _g = count;
-			while(_g1 < _g) {
-				var i = _g1++;
-				this.uncompressedData[i * 2] = soundBytes.getFloat(i * 4);
-				this.uncompressedData[i * 2 + 1] = soundBytes.getFloat(i * 4);
-			}
-		} else {
-			this.uncompressedData = new Array(count);
-			var _g11 = 0;
-			var _g2 = count;
-			while(_g11 < _g2) {
-				var i1 = _g11++;
-				this.uncompressedData[i1] = soundBytes.getFloat(i1 * 4);
-			}
-		}
-		this.compressedData = null;
-		done();
-	}
-	,unload: function() {
-		this.compressedData = null;
-		this.uncompressedData = null;
-	}
-	,__class__: kha_Sound
-};
 var kha_System = function() { };
 $hxClasses["kha.System"] = kha_System;
 kha_System.__name__ = true;
@@ -3570,32 +2289,12 @@ kha_System.init = function(options,callback) {
 	}
 	kha_SystemImpl.init(options,callback);
 };
-kha_System.initEx = function(title,options,windowCallback,callback) {
-	kha_SystemImpl.initEx(title,options,windowCallback,callback);
-};
 kha_System.notifyOnRender = function(listener,id) {
 	if(id == null) {
 		id = 0;
 	}
 	while(id >= kha_System.renderListeners.length) kha_System.renderListeners.push([]);
 	kha_System.renderListeners[id].push(listener);
-};
-kha_System.notifyOnApplicationState = function(foregroundListener,resumeListener,pauseListener,backgroundListener,shutdownListener) {
-	if(foregroundListener != null) {
-		kha_System.foregroundListeners.push(foregroundListener);
-	}
-	if(resumeListener != null) {
-		kha_System.resumeListeners.push(resumeListener);
-	}
-	if(pauseListener != null) {
-		kha_System.pauseListeners.push(pauseListener);
-	}
-	if(backgroundListener != null) {
-		kha_System.backgroundListeners.push(backgroundListener);
-	}
-	if(shutdownListener != null) {
-		kha_System.shutdownListeners.push(shutdownListener);
-	}
 };
 kha_System.render = function(id,framebuffer) {
 	if(kha_System.renderListeners.length == 0) {
@@ -3618,36 +2317,9 @@ kha_System.foreground = function() {
 		listener();
 	}
 };
-kha_System.resume = function() {
-	var _g = 0;
-	var _g1 = kha_System.resumeListeners;
-	while(_g < _g1.length) {
-		var listener = _g1[_g];
-		++_g;
-		listener();
-	}
-};
-kha_System.pause = function() {
-	var _g = 0;
-	var _g1 = kha_System.pauseListeners;
-	while(_g < _g1.length) {
-		var listener = _g1[_g];
-		++_g;
-		listener();
-	}
-};
 kha_System.background = function() {
 	var _g = 0;
 	var _g1 = kha_System.backgroundListeners;
-	while(_g < _g1.length) {
-		var listener = _g1[_g];
-		++_g;
-		listener();
-	}
-};
-kha_System.shutdown = function() {
-	var _g = 0;
-	var _g1 = kha_System.shutdownListeners;
 	while(_g < _g1.length) {
 		var listener = _g1[_g];
 		++_g;
@@ -3669,28 +2341,11 @@ kha_System.windowHeight = function(windowId) {
 	}
 	return kha_SystemImpl.windowHeight(windowId);
 };
-kha_System.screenDpi = function() {
-	return kha_SystemImpl.screenDpi();
-};
-kha_System.get_screenRotation = function() {
-	return kha_SystemImpl.getScreenRotation();
-};
 kha_System.get_vsync = function() {
 	return kha_SystemImpl.getVsync();
 };
 kha_System.get_refreshRate = function() {
 	return kha_SystemImpl.getRefreshRate();
-};
-kha_System.get_systemId = function() {
-	return kha_SystemImpl.getSystemId();
-};
-kha_System.requestShutdown = function() {
-	kha_SystemImpl.requestShutdown();
-};
-kha_System.changeResolution = function(width,height) {
-	kha_SystemImpl.changeResolution(width,height);
-};
-kha_System.loadUrl = function(url) {
 };
 var kha_GamepadStates = function() {
 	this.axes = [];
@@ -3711,22 +2366,11 @@ kha_SystemImpl.initPerformanceTimer = function() {
 		kha_SystemImpl.performance = window.Date;
 	}
 };
-kha_SystemImpl.errorHandler = function(message,source,lineno,colno,error) {
-	window.console.error(error.stack);
-	return true;
-};
 kha_SystemImpl.init = function(options,callback) {
 	kha_SystemImpl.options = options;
 	kha_SystemImpl.mobile = kha_SystemImpl.isMobile();
 	kha_SystemImpl.init2();
 	callback();
-};
-kha_SystemImpl.initEx = function(title,options,windowCallback,callback) {
-	haxe_Log.trace("initEx is not supported on the html5 target, running init() with first window options",{ fileName : "SystemImpl.hx", lineNumber : 80, className : "kha.SystemImpl", methodName : "initEx"});
-	kha_SystemImpl.init({ title : title, width : options[0].width, height : options[0].height},callback);
-	if(windowCallback != null) {
-		windowCallback(0);
-	}
 };
 kha_SystemImpl.isMobile = function() {
 	var agent = window.navigator.userAgent;
@@ -3748,23 +2392,8 @@ kha_SystemImpl.windowHeight = function(windowId) {
 	}
 	return kha_SystemImpl.khanvas.height;
 };
-kha_SystemImpl.screenDpi = function() {
-	var dpiElement = window.document.createElement("div");
-	dpiElement.style.position = "absolute";
-	dpiElement.style.width = "1in";
-	dpiElement.style.height = "1in";
-	dpiElement.style.left = "-100%";
-	dpiElement.style.top = "-100%";
-	window.document.body.appendChild(dpiElement);
-	var dpi = dpiElement.offsetHeight;
-	dpiElement.remove();
-	return dpi;
-};
 kha_SystemImpl.setCanvas = function(canvas) {
 	kha_SystemImpl.khanvas = canvas;
-};
-kha_SystemImpl.getScreenRotation = function() {
-	return kha_ScreenRotation.RotationNone;
 };
 kha_SystemImpl.getTime = function() {
 	return kha_SystemImpl.performance.now() / 1000;
@@ -3774,12 +2403,6 @@ kha_SystemImpl.getVsync = function() {
 };
 kha_SystemImpl.getRefreshRate = function() {
 	return 60;
-};
-kha_SystemImpl.getSystemId = function() {
-	return "HTML5";
-};
-kha_SystemImpl.requestShutdown = function() {
-	window.close();
 };
 kha_SystemImpl.init2 = function(backbufferFormat) {
 	haxe_Log.trace = js_Boot.__trace;
@@ -3823,12 +2446,6 @@ kha_SystemImpl.getMouse = function(num) {
 		return null;
 	}
 	return kha_SystemImpl.mouse;
-};
-kha_SystemImpl.getKeyboard = function(num) {
-	if(num != 0) {
-		return null;
-	}
-	return kha_SystemImpl.keyboard;
 };
 kha_SystemImpl.checkGamepadButton = function(pad,num) {
 	if(kha_SystemImpl.buttonspressed[num]) {
@@ -3999,50 +2616,6 @@ kha_SystemImpl.loadFinished = function() {
 	canvas.addEventListener("touchend",kha_SystemImpl.touchUp,false);
 	canvas.addEventListener("touchmove",kha_SystemImpl.touchMove,false);
 	window.addEventListener("unload",kha_SystemImpl.unload);
-};
-kha_SystemImpl.lockMouse = function() {
-	if(($_=kha_SystemImpl.khanvas,$bind($_,$_.requestPointerLock))) {
-		kha_SystemImpl.khanvas.requestPointerLock();
-	} else if(kha_SystemImpl.khanvas.mozRequestPointerLock) {
-		kha_SystemImpl.khanvas.mozRequestPointerLock();
-	} else if(kha_SystemImpl.khanvas.webkitRequestPointerLock) {
-		kha_SystemImpl.khanvas.webkitRequestPointerLock();
-	}
-};
-kha_SystemImpl.unlockMouse = function() {
-	if(document.exitPointerLock) {
-		document.exitPointerLock();
-	} else if(document.mozExitPointerLock) {
-		document.mozExitPointerLock();
-	} else if(document.webkitExitPointerLock) {
-		document.webkitExitPointerLock();
-	}
-};
-kha_SystemImpl.canLockMouse = function() {
-	return 'pointerLockElement' in document ||
-		'mozPointerLockElement' in document ||
-		'webkitPointerLockElement' in document;
-};
-kha_SystemImpl.isMouseLocked = function() {
-	return document.pointerLockElement === kha_Sys.khanvas ||
-			document.mozPointerLockElement === kha_Sys.khanvas ||
-			document.webkitPointerLockElement === kha_Sys.khanvas;
-};
-kha_SystemImpl.notifyOfMouseLockChange = function(func,error) {
-	window.document.addEventListener("pointerlockchange",func,false);
-	window.document.addEventListener("mozpointerlockchange",func,false);
-	window.document.addEventListener("webkitpointerlockchange",func,false);
-	window.document.addEventListener("pointerlockerror",error,false);
-	window.document.addEventListener("mozpointerlockerror",error,false);
-	window.document.addEventListener("webkitpointerlockerror",error,false);
-};
-kha_SystemImpl.removeFromMouseLockChange = function(func,error) {
-	window.document.removeEventListener("pointerlockchange",func,false);
-	window.document.removeEventListener("mozpointerlockchange",func,false);
-	window.document.removeEventListener("webkitpointerlockchange",func,false);
-	window.document.removeEventListener("pointerlockerror",error,false);
-	window.document.removeEventListener("mozpointerlockerror",error,false);
-	window.document.removeEventListener("webkitpointerlockerror",error,false);
 };
 kha_SystemImpl.unload = function(_) {
 };
@@ -4498,107 +3071,6 @@ kha_SystemImpl.keyUp = function(event) {
 		}
 	}
 };
-kha_SystemImpl.canSwitchFullscreen = function() {
-	return 'fullscreenElement ' in document ||
-		'mozFullScreenElement' in document ||
-		'webkitFullscreenElement' in document ||
-		'msFullscreenElement' in document
-		;
-};
-kha_SystemImpl.isFullscreen = function() {
-	return document.fullscreenElement === this.khanvas ||
-			document.mozFullScreenElement === this.khanvas ||
-			document.webkitFullscreenElement === this.khanvas ||
-			document.msFullscreenElement === this.khanvas ;
-};
-kha_SystemImpl.requestFullscreen = function() {
-	if(($_=kha_SystemImpl.khanvas,$bind($_,$_.requestFullscreen))) {
-		kha_SystemImpl.khanvas.requestFullscreen();
-	} else if(kha_SystemImpl.khanvas.msRequestFullscreen) {
-		kha_SystemImpl.khanvas.msRequestFullscreen();
-	} else if(kha_SystemImpl.khanvas.mozRequestFullScreen) {
-		kha_SystemImpl.khanvas.mozRequestFullScreen();
-	} else if(kha_SystemImpl.khanvas.webkitRequestFullscreen) {
-		kha_SystemImpl.khanvas.webkitRequestFullscreen();
-	}
-};
-kha_SystemImpl.exitFullscreen = function() {
-	if(document.exitFullscreen) {
-		document.exitFullscreen();
-	} else if(document.msExitFullscreen) {
-		document.msExitFullscreen();
-	} else if(document.mozCancelFullScreen) {
-		document.mozCancelFullScreen();
-	} else if(document.webkitExitFullscreen) {
-		document.webkitExitFullscreen();
-	}
-};
-kha_SystemImpl.changeResolution = function(width,height) {
-};
-kha_SystemImpl.setKeepScreenOn = function(on) {
-};
-kha_SystemImpl.prototype = {
-	notifyOfFullscreenChange: function(func,error) {
-		window.document.addEventListener("fullscreenchange",func,false);
-		window.document.addEventListener("mozfullscreenchange",func,false);
-		window.document.addEventListener("webkitfullscreenchange",func,false);
-		window.document.addEventListener("MSFullscreenChange",func,false);
-		window.document.addEventListener("fullscreenerror",error,false);
-		window.document.addEventListener("mozfullscreenerror",error,false);
-		window.document.addEventListener("webkitfullscreenerror",error,false);
-		window.document.addEventListener("MSFullscreenError",error,false);
-	}
-	,removeFromFullscreenChange: function(func,error) {
-		window.document.removeEventListener("fullscreenchange",func,false);
-		window.document.removeEventListener("mozfullscreenchange",func,false);
-		window.document.removeEventListener("webkitfullscreenchange",func,false);
-		window.document.removeEventListener("MSFullscreenChange",func,false);
-		window.document.removeEventListener("fullscreenerror",error,false);
-		window.document.removeEventListener("mozfullscreenerror",error,false);
-		window.document.removeEventListener("webkitfullscreenerror",error,false);
-		window.document.removeEventListener("MSFullscreenError",error,false);
-	}
-	,__class__: kha_SystemImpl
-};
-var kha_Video = function() {
-};
-$hxClasses["kha.Video"] = kha_Video;
-kha_Video.__name__ = true;
-kha_Video.__interfaces__ = [kha_Resource];
-kha_Video.prototype = {
-	width: function() {
-		return 100;
-	}
-	,height: function() {
-		return 100;
-	}
-	,play: function(loop) {
-		if(loop == null) {
-			loop = false;
-		}
-	}
-	,pause: function() {
-	}
-	,stop: function() {
-	}
-	,getLength: function() {
-		return 0;
-	}
-	,getCurrentPos: function() {
-		return 0;
-	}
-	,getVolume: function() {
-		return 1;
-	}
-	,setVolume: function(volume) {
-	}
-	,isFinished: function() {
-		return this.getCurrentPos() >= this.getLength();
-	}
-	,unload: function() {
-	}
-	,__class__: kha_Video
-};
 var kha_WebGLImage = function(width,height,format,renderTarget,depthStencilFormat) {
 	this.myWidth = width;
 	this.myHeight = height;
@@ -4613,51 +3085,9 @@ var kha_WebGLImage = function(width,height,format,renderTarget,depthStencilForma
 };
 $hxClasses["kha.WebGLImage"] = kha_WebGLImage;
 kha_WebGLImage.__name__ = true;
-kha_WebGLImage.init = function() {
-	var canvas = window.document.createElement("canvas");
-	if(canvas != null) {
-		kha_WebGLImage.context = canvas.getContext("2d");
-		canvas.width = 2048;
-		canvas.height = 2048;
-		kha_WebGLImage.context.globalCompositeOperation = "copy";
-	}
-};
-kha_WebGLImage.upperPowerOfTwo = function(v) {
-	--v;
-	v |= v >>> 1;
-	v |= v >>> 2;
-	v |= v >>> 4;
-	v |= v >>> 8;
-	v |= v >>> 16;
-	return ++v;
-};
-kha_WebGLImage.formatByteSize = function(format) {
-	switch(format[1]) {
-	case 0:
-		return 4;
-	case 1:
-		return 1;
-	case 2:
-		return 16;
-	case 3:
-		return 2;
-	case 4:
-		return 8;
-	case 5:
-		return 4;
-	case 6:
-		return 2;
-	}
-};
 kha_WebGLImage.__super__ = kha_Image;
 kha_WebGLImage.prototype = $extend(kha_Image.prototype,{
-	get_g1: function() {
-		if(this.graphics1 == null) {
-			this.graphics1 = new kha_graphics2_Graphics1(this);
-		}
-		return this.graphics1;
-	}
-	,get_g2: function() {
+	get_g2: function() {
 		if(this.graphics2 == null) {
 			this.graphics2 = new kha_js_graphics4_Graphics2(this);
 		}
@@ -4680,33 +3110,6 @@ kha_WebGLImage.prototype = $extend(kha_Image.prototype,{
 	}
 	,get_realHeight: function() {
 		return this.myHeight;
-	}
-	,isOpaque: function(x,y) {
-		if(this.data == null) {
-			if(kha_WebGLImage.context == null) {
-				return true;
-			} else {
-				this.createImageData();
-			}
-		}
-		return this.data.data[y * (this.image.width | 0) * 4 + x * 4 + 3] != 0;
-	}
-	,at: function(x,y) {
-		if(this.data == null) {
-			if(kha_WebGLImage.context == null) {
-				return kha__$Color_Color_$Impl_$.Black;
-			} else {
-				this.createImageData();
-			}
-		}
-		return kha__$Color_Color_$Impl_$._new(this.data.data[y * (this.image.width | 0) * 4 + x * 4]);
-	}
-	,createImageData: function() {
-		kha_WebGLImage.context.strokeStyle = "rgba(0,0,0,0)";
-		kha_WebGLImage.context.fillStyle = "rgba(0,0,0,0)";
-		kha_WebGLImage.context.fillRect(0,0,this.image.width,this.image.height);
-		kha_WebGLImage.context.drawImage(this.image,0,0,this.image.width,this.image.height,0,0,this.image.width,this.image.height);
-		this.data = kha_WebGLImage.context.getImageData(0,0,this.image.width,this.image.height);
 	}
 	,createTexture: function() {
 		if(kha_SystemImpl.gl == null) {
@@ -4834,184 +3237,8 @@ kha_WebGLImage.prototype = $extend(kha_Image.prototype,{
 			kha_SystemImpl.gl.texImage2D(3553,0,6408,6408,5121,this.video);
 		}
 	}
-	,setDepth: function(stage) {
-		kha_SystemImpl.gl.activeTexture(33984 + stage);
-		kha_SystemImpl.gl.bindTexture(3553,this.depthTexture);
-	}
-	,setDepthStencilFrom: function(image) {
-		kha_SystemImpl.gl.bindFramebuffer(36160,this.frameBuffer);
-		kha_SystemImpl.gl.framebufferTexture2D(36160,36096,3553,(js_Boot.__cast(image , kha_WebGLImage)).depthTexture,0);
-	}
-	,bytesToArray: function(bytes) {
-		switch(this.format[1]) {
-		case 0:case 1:
-			return new Uint8Array(bytes.b.bufferValue);
-		case 2:case 4:case 5:case 6:
-			return new Float32Array(bytes.b.bufferValue);
-		default:
-			return new Uint8Array(bytes.b.bufferValue);
-		}
-	}
-	,lock: function(level) {
-		if(level == null) {
-			level = 0;
-		}
-		this.bytes = new haxe_io_Bytes(new ArrayBuffer(kha_WebGLImage.formatByteSize(this.format) * this.get_width() * this.get_height()));
-		return this.bytes;
-	}
-	,unlock: function() {
-		if(kha_SystemImpl.gl != null) {
-			this.texture = kha_SystemImpl.gl.createTexture();
-			kha_SystemImpl.gl.bindTexture(3553,this.texture);
-			kha_SystemImpl.gl.texParameteri(3553,10240,9729);
-			kha_SystemImpl.gl.texParameteri(3553,10241,9729);
-			kha_SystemImpl.gl.texParameteri(3553,10242,33071);
-			kha_SystemImpl.gl.texParameteri(3553,10243,33071);
-			switch(this.format[1]) {
-			case 0:
-				kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,5121,this.bytesToArray(this.bytes));
-				break;
-			case 1:
-				kha_SystemImpl.gl.texImage2D(3553,0,6409,this.get_width(),this.get_height(),0,6409,5121,this.bytesToArray(this.bytes));
-				if(kha_SystemImpl.gl.getError() == 1282) {
-					var rgbaBytes = new haxe_io_Bytes(new ArrayBuffer(this.get_width() * this.get_height() * 4));
-					var _g1 = 0;
-					var _g = this.get_height();
-					while(_g1 < _g) {
-						var y = _g1++;
-						var _g3 = 0;
-						var _g2 = this.get_width();
-						while(_g3 < _g2) {
-							var x = _g3++;
-							var value = this.bytes.b[y * this.get_width() + x];
-							rgbaBytes.b[y * this.get_width() * 4 + x * 4] = value & 255;
-							rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 1] = value & 255;
-							rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 2] = value & 255;
-							rgbaBytes.b[y * this.get_width() * 4 + x * 4 + 3] = 255;
-						}
-					}
-					kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,5121,this.bytesToArray(rgbaBytes));
-				}
-				break;
-			case 2:
-				kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,5126,this.bytesToArray(this.bytes));
-				break;
-			case 4:
-				kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,kha_SystemImpl.halfFloat.HALF_FLOAT_OES,this.bytesToArray(this.bytes));
-				break;
-			case 5:
-				kha_SystemImpl.gl.texImage2D(3553,0,6406,this.get_width(),this.get_height(),0,6406,5126,this.bytesToArray(this.bytes));
-				break;
-			case 6:
-				kha_SystemImpl.gl.texImage2D(3553,0,6406,this.get_width(),this.get_height(),0,6406,kha_SystemImpl.halfFloat.HALF_FLOAT_OES,this.bytesToArray(this.bytes));
-				break;
-			default:
-				kha_SystemImpl.gl.texImage2D(3553,0,6408,this.get_width(),this.get_height(),0,6408,5121,this.bytesToArray(this.bytes));
-			}
-			kha_SystemImpl.gl.bindTexture(3553,null);
-			this.bytes = null;
-		}
-	}
-	,unload: function() {
-	}
-	,generateMipmaps: function(levels) {
-		kha_SystemImpl.gl.bindTexture(3553,this.texture);
-		kha_SystemImpl.gl.generateMipmap(3553);
-	}
-	,setMipmaps: function(mipmaps) {
-		kha_SystemImpl.gl.bindTexture(3553,this.texture);
-		if(this.format != kha_graphics4_TextureFormat.RGBA32) {
-			var _g1 = 0;
-			var _g = mipmaps.length;
-			while(_g1 < _g) {
-				var i = _g1++;
-				kha_SystemImpl.gl.texImage2D(3553,i + 1,6408,mipmaps[i].get_width(),mipmaps[i].get_height(),0,6408,this.format == kha_graphics4_TextureFormat.RGBA128?5126:kha_SystemImpl.halfFloat.HALF_FLOAT_OES,(js_Boot.__cast(mipmaps[i] , kha_WebGLImage)).image);
-			}
-		} else {
-			var _g11 = 0;
-			var _g2 = mipmaps.length;
-			while(_g11 < _g2) {
-				var i1 = _g11++;
-				kha_SystemImpl.gl.texImage2D(3553,i1 + 1,6408,6408,5121,(js_Boot.__cast(mipmaps[i1] , kha_WebGLImage)).image);
-			}
-		}
-	}
 	,__class__: kha_WebGLImage
 });
-var kha_Mode = $hxClasses["kha.Mode"] = { __ename__ : true, __constructs__ : ["Window","BorderlessWindow","Fullscreen"] };
-kha_Mode.Window = ["Window",0];
-kha_Mode.Window.toString = $estr;
-kha_Mode.Window.__enum__ = kha_Mode;
-kha_Mode.BorderlessWindow = ["BorderlessWindow",1];
-kha_Mode.BorderlessWindow.toString = $estr;
-kha_Mode.BorderlessWindow.__enum__ = kha_Mode;
-kha_Mode.Fullscreen = ["Fullscreen",2];
-kha_Mode.Fullscreen.toString = $estr;
-kha_Mode.Fullscreen.__enum__ = kha_Mode;
-var kha_Position = $hxClasses["kha.Position"] = { __ename__ : true, __constructs__ : ["Center","Fixed"] };
-kha_Position.Center = ["Center",0];
-kha_Position.Center.toString = $estr;
-kha_Position.Center.__enum__ = kha_Position;
-kha_Position.Fixed = function(v) { var $x = ["Fixed",1,v]; $x.__enum__ = kha_Position; $x.toString = $estr; return $x; };
-var kha_TargetDisplay = $hxClasses["kha.TargetDisplay"] = { __ename__ : true, __constructs__ : ["Primary","ById"] };
-kha_TargetDisplay.Primary = ["Primary",0];
-kha_TargetDisplay.Primary.toString = $estr;
-kha_TargetDisplay.Primary.__enum__ = kha_TargetDisplay;
-kha_TargetDisplay.ById = function(id) { var $x = ["ById",1,id]; $x.__enum__ = kha_TargetDisplay; $x.toString = $estr; return $x; };
-var kha_RendererOptions = function(textureFormat,depthStencilFormat,samplesPerPixel) {
-	this.textureFormat = textureFormat;
-	this.depthStencilFormat = depthStencilFormat;
-	this.samplesPerPixel = samplesPerPixel;
-};
-$hxClasses["kha.RendererOptions"] = kha_RendererOptions;
-kha_RendererOptions.__name__ = true;
-kha_RendererOptions.prototype = {
-	__class__: kha_RendererOptions
-};
-var kha_WindowedModeOptions = function(minimizable,maximizable,resizable) {
-	this.minimizable = minimizable;
-	this.maximizable = maximizable;
-	this.resizable = resizable;
-};
-$hxClasses["kha.WindowedModeOptions"] = kha_WindowedModeOptions;
-kha_WindowedModeOptions.__name__ = true;
-kha_WindowedModeOptions.prototype = {
-	__class__: kha_WindowedModeOptions
-};
-var kha_WindowOptions = function(width,height,mode,title,x,y,targetDisplay,rendererOptions,windowedModeOptions) {
-	this.width = width;
-	this.height = height;
-	this.mode = mode;
-	this.title = title;
-	this.x = x;
-	this.y = y;
-	this.targetDisplay = targetDisplay;
-	this.rendererOptions = rendererOptions;
-	this.windowedModeOptions = windowedModeOptions;
-};
-$hxClasses["kha.WindowOptions"] = kha_WindowOptions;
-kha_WindowOptions.__name__ = true;
-kha_WindowOptions.prototype = {
-	__class__: kha_WindowOptions
-};
-var kha_arrays__$Float32Array_Float32Array_$Impl_$ = {};
-$hxClasses["kha.arrays._Float32Array.Float32Array_Impl_"] = kha_arrays__$Float32Array_Float32Array_$Impl_$;
-kha_arrays__$Float32Array_Float32Array_$Impl_$.__name__ = true;
-kha_arrays__$Float32Array_Float32Array_$Impl_$._new = function(elements) {
-	return new Float32Array(elements);
-};
-kha_arrays__$Float32Array_Float32Array_$Impl_$.get_length = function(this1) {
-	return this1.length;
-};
-kha_arrays__$Float32Array_Float32Array_$Impl_$.set = function(this1,index,value) {
-	return this1[index] = value;
-};
-kha_arrays__$Float32Array_Float32Array_$Impl_$.get = function(this1,index) {
-	return this1[index];
-};
-kha_arrays__$Float32Array_Float32Array_$Impl_$.data = function(this1) {
-	return this1;
-};
 var kha_audio1_AudioChannel = function() { };
 $hxClasses["kha.audio1.AudioChannel"] = kha_audio1_AudioChannel;
 kha_audio1_AudioChannel.__name__ = true;
@@ -5070,17 +3297,6 @@ kha_audio2_Audio._init = function() {
 	kha_audio2_Audio.processingNode.connect(kha_audio2_Audio._context.destination);
 	return true;
 };
-kha_audio2_Audio.stream = function(sound,loop) {
-	if(loop == null) {
-		loop = false;
-	}
-	var element = window.document.createElement("audio");
-	element.src = URL.createObjectURL(new Blob([sound.compressedData.b.bufferValue],{ type : "audio/mp4"}));
-	element.loop = loop;
-	var channel = new kha_js_AEAudioChannel(element);
-	channel.play();
-	return channel;
-};
 var kha_audio2_Audio1 = function() { };
 $hxClasses["kha.audio2.Audio1"] = kha_audio2_Audio1;
 kha_audio2_Audio1.__name__ = true;
@@ -5092,20 +3308,6 @@ kha_audio2_Audio1._init = function() {
 	kha_audio2_Audio1.sampleCache1 = new Array(512);
 	kha_audio2_Audio1.sampleCache2 = new Array(512);
 	kha_audio2_Audio.audioCallback = kha_audio2_Audio1._mix;
-};
-kha_audio2_Audio1.max = function(a,b) {
-	if(a > b) {
-		return a;
-	} else {
-		return b;
-	}
-};
-kha_audio2_Audio1.min = function(a,b) {
-	if(a < b) {
-		return a;
-	} else {
-		return b;
-	}
 };
 kha_audio2_Audio1._mix = function(samples,buffer) {
 	if(kha_audio2_Audio1.sampleCache1.length < samples) {
@@ -5174,48 +3376,8 @@ kha_audio2_Audio1._mix = function(samples,buffer) {
 		}
 	}
 };
-kha_audio2_Audio1.play = function(sound,loop) {
-	if(loop == null) {
-		loop = false;
-	}
-	var channel = null;
-	var _g = 0;
-	while(_g < 16) {
-		var i = _g++;
-		if(kha_audio2_Audio1.soundChannels[i] == null || kha_audio2_Audio1.soundChannels[i].get_finished()) {
-			channel = new kha_audio2_AudioChannel(loop);
-			channel.data = sound.uncompressedData;
-			kha_audio2_Audio1.soundChannels[i] = channel;
-			break;
-		}
-	}
-	return channel;
-};
-kha_audio2_Audio1.stream = function(sound,loop) {
-	if(loop == null) {
-		loop = false;
-	}
-	var hardwareChannel = kha_audio2_Audio.stream(sound,loop);
-	if(hardwareChannel != null) {
-		return hardwareChannel;
-	}
-	var channel = null;
-	var _g = 0;
-	while(_g < 16) {
-		var i = _g++;
-		if(kha_audio2_Audio1.streamChannels[i] == null || kha_audio2_Audio1.streamChannels[i].get_finished()) {
-			channel = new kha_audio2_StreamChannel(sound.compressedData,loop);
-			kha_audio2_Audio1.streamChannels[i] = channel;
-			break;
-		}
-	}
-	return channel;
-};
-var kha_audio2_AudioChannel = function(looping) {
+var kha_audio2_AudioChannel = function() {
 	this.paused = false;
-	this.looping = looping;
-	this.myVolume = 1;
-	this.myPosition = 0;
 };
 $hxClasses["kha.audio2.AudioChannel"] = kha_audio2_AudioChannel;
 kha_audio2_AudioChannel.__name__ = true;
@@ -5237,26 +3399,8 @@ kha_audio2_AudioChannel.prototype = {
 			++this.myPosition;
 		}
 	}
-	,play: function() {
-		this.paused = false;
-	}
-	,pause: function() {
-		this.paused = true;
-	}
-	,stop: function() {
-		this.myPosition = this.data.length;
-	}
-	,get_length: function() {
-		return this.data.length / 44100 / 2;
-	}
-	,get_position: function() {
-		return this.myPosition / 44100 / 2;
-	}
 	,get_volume: function() {
 		return this.myVolume;
-	}
-	,set_volume: function(value) {
-		return this.myVolume = value;
 	}
 	,get_finished: function() {
 		return this.myPosition >= this.data.length;
@@ -5276,12 +3420,9 @@ kha_audio2_Buffer.__name__ = true;
 kha_audio2_Buffer.prototype = {
 	__class__: kha_audio2_Buffer
 };
-var kha_audio2_StreamChannel = function(data,loop) {
+var kha_audio2_StreamChannel = function() {
 	this.paused = false;
 	this.atend = false;
-	this.myVolume = 1;
-	this.loop = loop;
-	this.reader = kha_audio2_ogg_vorbis_Reader.openFromBytes(data);
 };
 $hxClasses["kha.audio2.StreamChannel"] = kha_audio2_StreamChannel;
 kha_audio2_StreamChannel.__name__ = true;
@@ -5304,26 +3445,8 @@ kha_audio2_StreamChannel.prototype = {
 			while(_g11 < length) samples[_g11++] = 0;
 		}
 	}
-	,play: function() {
-		this.paused = false;
-	}
-	,pause: function() {
-		this.paused = true;
-	}
-	,stop: function() {
-		this.atend = true;
-	}
-	,get_length: function() {
-		return this.reader.get_totalMillisecond() / 1000.0;
-	}
-	,get_position: function() {
-		return this.reader.get_currentMillisecond() / 1000.0;
-	}
 	,get_volume: function() {
 		return this.myVolume;
-	}
-	,set_volume: function(value) {
-		return this.myVolume = value;
 	}
 	,get_finished: function() {
 		return this.atend;
@@ -5348,897 +3471,6 @@ kha_audio2_ogg_tools_Crc32.init = function() {
 			s = s << 1 ^ (_$UInt_UInt_$Impl_$.gte(s,1 << 31)?79764919:0);
 		}
 		kha_audio2_ogg_tools_Crc32.table[i] = s;
-	}
-};
-kha_audio2_ogg_tools_Crc32.update = function(crc,$byte) {
-	return crc << 8 ^ kha_audio2_ogg_tools_Crc32.table[$byte ^ crc >>> 24];
-};
-var kha_audio2_ogg_tools_MathTools = function() { };
-$hxClasses["kha.audio2.ogg.tools.MathTools"] = kha_audio2_ogg_tools_MathTools;
-kha_audio2_ogg_tools_MathTools.__name__ = true;
-kha_audio2_ogg_tools_MathTools.ilog = function(n) {
-	var log2_4 = [0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4];
-	if(n < 16384) {
-		if(n < 16) {
-			return log2_4[n];
-		} else if(n < 512) {
-			return 5 + log2_4[n >> 5];
-		} else {
-			return 10 + log2_4[n >> 10];
-		}
-	} else if(n < 16777216) {
-		if(n < 524288) {
-			return 15 + log2_4[n >> 15];
-		} else {
-			return 20 + log2_4[n >> 20];
-		}
-	} else if(n < 536870912) {
-		return 25 + log2_4[n >> 25];
-	} else if(n < -2147483648) {
-		return 30 + log2_4[n >> 30];
-	} else {
-		return 0;
-	}
-};
-var kha_audio2_ogg_tools_Mdct = function() { };
-$hxClasses["kha.audio2.ogg.tools.Mdct"] = kha_audio2_ogg_tools_Mdct;
-kha_audio2_ogg_tools_Mdct.__name__ = true;
-kha_audio2_ogg_tools_Mdct.inverseTransform = function(buffer,n,a,b,c,bitReverse) {
-	var n2 = n >> 1;
-	var n4 = n >> 2;
-	var n8 = n >> 3;
-	var buf2 = new Array(n2);
-	var dOffset = n2 - 2;
-	var aaOffset = 0;
-	var eOffset = 0;
-	var eStopOffset = n2;
-	while(eOffset != eStopOffset) {
-		buf2[dOffset + 1] = buffer[eOffset] * a[aaOffset] - buffer[eOffset + 2] * a[aaOffset + 1];
-		buf2[dOffset] = buffer[eOffset] * a[aaOffset + 1] + buffer[eOffset + 2] * a[aaOffset];
-		dOffset -= 2;
-		aaOffset += 2;
-		eOffset += 4;
-	}
-	eOffset = n2 - 3;
-	while(dOffset >= 0) {
-		buf2[dOffset + 1] = -buffer[eOffset + 2] * a[aaOffset] - -buffer[eOffset] * a[aaOffset + 1];
-		buf2[dOffset] = -buffer[eOffset + 2] * a[aaOffset + 1] + -buffer[eOffset] * a[aaOffset];
-		dOffset -= 2;
-		aaOffset += 2;
-		eOffset -= 4;
-	}
-	var u = buffer;
-	var v = buf2;
-	var aaOffset1 = n2 - 8;
-	var eOffset0 = n4;
-	var eOffset1 = 0;
-	var dOffset0 = n4;
-	var dOffset1 = 0;
-	while(aaOffset1 >= 0) {
-		var v41_21 = v[eOffset0 + 1] - v[eOffset1 + 1];
-		var v40_20 = v[eOffset0] - v[eOffset1];
-		u[dOffset0 + 1] = v[eOffset0 + 1] + v[eOffset1 + 1];
-		u[dOffset0] = v[eOffset0] + v[eOffset1];
-		u[dOffset1 + 1] = v41_21 * a[aaOffset1 + 4] - v40_20 * a[aaOffset1 + 5];
-		u[dOffset1] = v40_20 * a[aaOffset1 + 4] + v41_21 * a[aaOffset1 + 5];
-		v41_21 = v[eOffset0 + 3] - v[eOffset1 + 3];
-		v40_20 = v[eOffset0 + 2] - v[eOffset1 + 2];
-		u[dOffset0 + 3] = v[eOffset0 + 3] + v[eOffset1 + 3];
-		u[dOffset0 + 2] = v[eOffset0 + 2] + v[eOffset1 + 2];
-		u[dOffset1 + 3] = v41_21 * a[aaOffset1] - v40_20 * a[aaOffset1 + 1];
-		u[dOffset1 + 2] = v40_20 * a[aaOffset1] + v41_21 * a[aaOffset1 + 1];
-		aaOffset1 -= 8;
-		dOffset0 += 4;
-		dOffset1 += 4;
-		eOffset0 += 4;
-		eOffset1 += 4;
-	}
-	var log2_4 = [0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4];
-	var ld = (n < 16384?n < 16?log2_4[n]:n < 512?5 + log2_4[n >> 5]:10 + log2_4[n >> 10]:n < 16777216?n < 524288?15 + log2_4[n >> 15]:20 + log2_4[n >> 20]:n < 536870912?25 + log2_4[n >> 25]:n < -2147483648?30 + log2_4[n >> 30]:0) - 1;
-	var i_off = n2 - 1 - n4 * 0;
-	var eeOffset0 = i_off;
-	var eeOffset2 = i_off + -(n >> 3);
-	var aOffset = 0;
-	var i = (n >> 4 >> 2) + 1;
-	while(--i > 0) {
-		var k00_20 = u[eeOffset0] - u[eeOffset2];
-		var k01_21 = u[eeOffset0 + -1] - u[eeOffset2 + -1];
-		var _g = eeOffset0;
-		u[_g] = u[_g] + u[eeOffset2];
-		var _g1 = eeOffset0 + -1;
-		u[_g1] = u[_g1] + u[eeOffset2 + -1];
-		u[eeOffset2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		u[eeOffset2 + -1] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = u[eeOffset0 + -2] - u[eeOffset2 + -2];
-		k01_21 = u[eeOffset0 + -3] - u[eeOffset2 + -3];
-		var _g2 = eeOffset0 + -2;
-		u[_g2] = u[_g2] + u[eeOffset2 + -2];
-		var _g3 = eeOffset0 + -3;
-		u[_g3] = u[_g3] + u[eeOffset2 + -3];
-		u[eeOffset2 + -2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		u[eeOffset2 + -3] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = u[eeOffset0 + -4] - u[eeOffset2 + -4];
-		k01_21 = u[eeOffset0 + -5] - u[eeOffset2 + -5];
-		var _g4 = eeOffset0 + -4;
-		u[_g4] = u[_g4] + u[eeOffset2 + -4];
-		var _g5 = eeOffset0 + -5;
-		u[_g5] = u[_g5] + u[eeOffset2 + -5];
-		u[eeOffset2 + -4] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		u[eeOffset2 + -5] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = u[eeOffset0 + -6] - u[eeOffset2 + -6];
-		k01_21 = u[eeOffset0 + -7] - u[eeOffset2 + -7];
-		var _g6 = eeOffset0 + -6;
-		u[_g6] = u[_g6] + u[eeOffset2 + -6];
-		var _g7 = eeOffset0 + -7;
-		u[_g7] = u[_g7] + u[eeOffset2 + -7];
-		u[eeOffset2 + -6] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		u[eeOffset2 + -7] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		eeOffset0 -= 8;
-		eeOffset2 -= 8;
-	}
-	var i_off1 = n2 - 1 - n4;
-	var eeOffset01 = i_off1;
-	var eeOffset21 = i_off1 + -(n >> 3);
-	var aOffset1 = 0;
-	var i1 = (n >> 4 >> 2) + 1;
-	while(--i1 > 0) {
-		var k00_201 = u[eeOffset01] - u[eeOffset21];
-		var k01_211 = u[eeOffset01 + -1] - u[eeOffset21 + -1];
-		var _g8 = eeOffset01;
-		u[_g8] = u[_g8] + u[eeOffset21];
-		var _g9 = eeOffset01 + -1;
-		u[_g9] = u[_g9] + u[eeOffset21 + -1];
-		u[eeOffset21] = k00_201 * a[aOffset1] - k01_211 * a[aOffset1 + 1];
-		u[eeOffset21 + -1] = k01_211 * a[aOffset1] + k00_201 * a[aOffset1 + 1];
-		aOffset1 += 8;
-		k00_201 = u[eeOffset01 + -2] - u[eeOffset21 + -2];
-		k01_211 = u[eeOffset01 + -3] - u[eeOffset21 + -3];
-		var _g10 = eeOffset01 + -2;
-		u[_g10] = u[_g10] + u[eeOffset21 + -2];
-		var _g11 = eeOffset01 + -3;
-		u[_g11] = u[_g11] + u[eeOffset21 + -3];
-		u[eeOffset21 + -2] = k00_201 * a[aOffset1] - k01_211 * a[aOffset1 + 1];
-		u[eeOffset21 + -3] = k01_211 * a[aOffset1] + k00_201 * a[aOffset1 + 1];
-		aOffset1 += 8;
-		k00_201 = u[eeOffset01 + -4] - u[eeOffset21 + -4];
-		k01_211 = u[eeOffset01 + -5] - u[eeOffset21 + -5];
-		var _g12 = eeOffset01 + -4;
-		u[_g12] = u[_g12] + u[eeOffset21 + -4];
-		var _g13 = eeOffset01 + -5;
-		u[_g13] = u[_g13] + u[eeOffset21 + -5];
-		u[eeOffset21 + -4] = k00_201 * a[aOffset1] - k01_211 * a[aOffset1 + 1];
-		u[eeOffset21 + -5] = k01_211 * a[aOffset1] + k00_201 * a[aOffset1 + 1];
-		aOffset1 += 8;
-		k00_201 = u[eeOffset01 + -6] - u[eeOffset21 + -6];
-		k01_211 = u[eeOffset01 + -7] - u[eeOffset21 + -7];
-		var _g14 = eeOffset01 + -6;
-		u[_g14] = u[_g14] + u[eeOffset21 + -6];
-		var _g15 = eeOffset01 + -7;
-		u[_g15] = u[_g15] + u[eeOffset21 + -7];
-		u[eeOffset21 + -6] = k00_201 * a[aOffset1] - k01_211 * a[aOffset1 + 1];
-		u[eeOffset21 + -7] = k01_211 * a[aOffset1] + k00_201 * a[aOffset1 + 1];
-		aOffset1 += 8;
-		eeOffset01 -= 8;
-		eeOffset21 -= 8;
-	}
-	var d0 = n2 - 1 - n8 * 0;
-	var aOffset2 = 0;
-	var eOffset01 = d0;
-	var eOffset2 = d0 + -(n >> 4);
-	var i2 = (n >> 5 >> 2) + 1;
-	while(--i2 > 0) {
-		var k00_202 = u[eOffset01] - u[eOffset2];
-		var k01_212 = u[eOffset01 + -1] - u[eOffset2 + -1];
-		var _g16 = eOffset01;
-		u[_g16] = u[_g16] + u[eOffset2];
-		var _g17 = eOffset01 + -1;
-		u[_g17] = u[_g17] + u[eOffset2 + -1];
-		u[eOffset2] = k00_202 * a[aOffset2] - k01_212 * a[aOffset2 + 1];
-		u[eOffset2 + -1] = k01_212 * a[aOffset2] + k00_202 * a[aOffset2 + 1];
-		aOffset2 += 16;
-		k00_202 = u[eOffset01 + -2] - u[eOffset2 + -2];
-		k01_212 = u[eOffset01 + -3] - u[eOffset2 + -3];
-		var _g18 = eOffset01 + -2;
-		u[_g18] = u[_g18] + u[eOffset2 + -2];
-		var _g19 = eOffset01 + -3;
-		u[_g19] = u[_g19] + u[eOffset2 + -3];
-		u[eOffset2 + -2] = k00_202 * a[aOffset2] - k01_212 * a[aOffset2 + 1];
-		u[eOffset2 + -3] = k01_212 * a[aOffset2] + k00_202 * a[aOffset2 + 1];
-		aOffset2 += 16;
-		k00_202 = u[eOffset01 + -4] - u[eOffset2 + -4];
-		k01_212 = u[eOffset01 + -5] - u[eOffset2 + -5];
-		var _g20 = eOffset01 + -4;
-		u[_g20] = u[_g20] + u[eOffset2 + -4];
-		var _g21 = eOffset01 + -5;
-		u[_g21] = u[_g21] + u[eOffset2 + -5];
-		u[eOffset2 + -4] = k00_202 * a[aOffset2] - k01_212 * a[aOffset2 + 1];
-		u[eOffset2 + -5] = k01_212 * a[aOffset2] + k00_202 * a[aOffset2 + 1];
-		aOffset2 += 16;
-		k00_202 = u[eOffset01 + -6] - u[eOffset2 + -6];
-		k01_212 = u[eOffset01 + -7] - u[eOffset2 + -7];
-		var _g22 = eOffset01 + -6;
-		u[_g22] = u[_g22] + u[eOffset2 + -6];
-		var _g23 = eOffset01 + -7;
-		u[_g23] = u[_g23] + u[eOffset2 + -7];
-		u[eOffset2 + -6] = k00_202 * a[aOffset2] - k01_212 * a[aOffset2 + 1];
-		u[eOffset2 + -7] = k01_212 * a[aOffset2] + k00_202 * a[aOffset2 + 1];
-		eOffset01 -= 8;
-		eOffset2 -= 8;
-		aOffset2 += 16;
-	}
-	var d01 = n2 - 1 - n8;
-	var aOffset3 = 0;
-	var eOffset02 = d01;
-	var eOffset21 = d01 + -(n >> 4);
-	var i3 = (n >> 5 >> 2) + 1;
-	while(--i3 > 0) {
-		var k00_203 = u[eOffset02] - u[eOffset21];
-		var k01_213 = u[eOffset02 + -1] - u[eOffset21 + -1];
-		var _g24 = eOffset02;
-		u[_g24] = u[_g24] + u[eOffset21];
-		var _g25 = eOffset02 + -1;
-		u[_g25] = u[_g25] + u[eOffset21 + -1];
-		u[eOffset21] = k00_203 * a[aOffset3] - k01_213 * a[aOffset3 + 1];
-		u[eOffset21 + -1] = k01_213 * a[aOffset3] + k00_203 * a[aOffset3 + 1];
-		aOffset3 += 16;
-		k00_203 = u[eOffset02 + -2] - u[eOffset21 + -2];
-		k01_213 = u[eOffset02 + -3] - u[eOffset21 + -3];
-		var _g26 = eOffset02 + -2;
-		u[_g26] = u[_g26] + u[eOffset21 + -2];
-		var _g27 = eOffset02 + -3;
-		u[_g27] = u[_g27] + u[eOffset21 + -3];
-		u[eOffset21 + -2] = k00_203 * a[aOffset3] - k01_213 * a[aOffset3 + 1];
-		u[eOffset21 + -3] = k01_213 * a[aOffset3] + k00_203 * a[aOffset3 + 1];
-		aOffset3 += 16;
-		k00_203 = u[eOffset02 + -4] - u[eOffset21 + -4];
-		k01_213 = u[eOffset02 + -5] - u[eOffset21 + -5];
-		var _g28 = eOffset02 + -4;
-		u[_g28] = u[_g28] + u[eOffset21 + -4];
-		var _g29 = eOffset02 + -5;
-		u[_g29] = u[_g29] + u[eOffset21 + -5];
-		u[eOffset21 + -4] = k00_203 * a[aOffset3] - k01_213 * a[aOffset3 + 1];
-		u[eOffset21 + -5] = k01_213 * a[aOffset3] + k00_203 * a[aOffset3 + 1];
-		aOffset3 += 16;
-		k00_203 = u[eOffset02 + -6] - u[eOffset21 + -6];
-		k01_213 = u[eOffset02 + -7] - u[eOffset21 + -7];
-		var _g30 = eOffset02 + -6;
-		u[_g30] = u[_g30] + u[eOffset21 + -6];
-		var _g31 = eOffset02 + -7;
-		u[_g31] = u[_g31] + u[eOffset21 + -7];
-		u[eOffset21 + -6] = k00_203 * a[aOffset3] - k01_213 * a[aOffset3 + 1];
-		u[eOffset21 + -7] = k01_213 * a[aOffset3] + k00_203 * a[aOffset3 + 1];
-		eOffset02 -= 8;
-		eOffset21 -= 8;
-		aOffset3 += 16;
-	}
-	var d02 = n2 - 1 - n8 * 2;
-	var aOffset4 = 0;
-	var eOffset03 = d02;
-	var eOffset22 = d02 + -(n >> 4);
-	var i4 = (n >> 5 >> 2) + 1;
-	while(--i4 > 0) {
-		var k00_204 = u[eOffset03] - u[eOffset22];
-		var k01_214 = u[eOffset03 + -1] - u[eOffset22 + -1];
-		var _g32 = eOffset03;
-		u[_g32] = u[_g32] + u[eOffset22];
-		var _g33 = eOffset03 + -1;
-		u[_g33] = u[_g33] + u[eOffset22 + -1];
-		u[eOffset22] = k00_204 * a[aOffset4] - k01_214 * a[aOffset4 + 1];
-		u[eOffset22 + -1] = k01_214 * a[aOffset4] + k00_204 * a[aOffset4 + 1];
-		aOffset4 += 16;
-		k00_204 = u[eOffset03 + -2] - u[eOffset22 + -2];
-		k01_214 = u[eOffset03 + -3] - u[eOffset22 + -3];
-		var _g34 = eOffset03 + -2;
-		u[_g34] = u[_g34] + u[eOffset22 + -2];
-		var _g35 = eOffset03 + -3;
-		u[_g35] = u[_g35] + u[eOffset22 + -3];
-		u[eOffset22 + -2] = k00_204 * a[aOffset4] - k01_214 * a[aOffset4 + 1];
-		u[eOffset22 + -3] = k01_214 * a[aOffset4] + k00_204 * a[aOffset4 + 1];
-		aOffset4 += 16;
-		k00_204 = u[eOffset03 + -4] - u[eOffset22 + -4];
-		k01_214 = u[eOffset03 + -5] - u[eOffset22 + -5];
-		var _g36 = eOffset03 + -4;
-		u[_g36] = u[_g36] + u[eOffset22 + -4];
-		var _g37 = eOffset03 + -5;
-		u[_g37] = u[_g37] + u[eOffset22 + -5];
-		u[eOffset22 + -4] = k00_204 * a[aOffset4] - k01_214 * a[aOffset4 + 1];
-		u[eOffset22 + -5] = k01_214 * a[aOffset4] + k00_204 * a[aOffset4 + 1];
-		aOffset4 += 16;
-		k00_204 = u[eOffset03 + -6] - u[eOffset22 + -6];
-		k01_214 = u[eOffset03 + -7] - u[eOffset22 + -7];
-		var _g38 = eOffset03 + -6;
-		u[_g38] = u[_g38] + u[eOffset22 + -6];
-		var _g39 = eOffset03 + -7;
-		u[_g39] = u[_g39] + u[eOffset22 + -7];
-		u[eOffset22 + -6] = k00_204 * a[aOffset4] - k01_214 * a[aOffset4 + 1];
-		u[eOffset22 + -7] = k01_214 * a[aOffset4] + k00_204 * a[aOffset4 + 1];
-		eOffset03 -= 8;
-		eOffset22 -= 8;
-		aOffset4 += 16;
-	}
-	var d03 = n2 - 1 - n8 * 3;
-	var aOffset5 = 0;
-	var eOffset04 = d03;
-	var eOffset23 = d03 + -(n >> 4);
-	var i5 = (n >> 5 >> 2) + 1;
-	while(--i5 > 0) {
-		var k00_205 = u[eOffset04] - u[eOffset23];
-		var k01_215 = u[eOffset04 + -1] - u[eOffset23 + -1];
-		var _g40 = eOffset04;
-		u[_g40] = u[_g40] + u[eOffset23];
-		var _g41 = eOffset04 + -1;
-		u[_g41] = u[_g41] + u[eOffset23 + -1];
-		u[eOffset23] = k00_205 * a[aOffset5] - k01_215 * a[aOffset5 + 1];
-		u[eOffset23 + -1] = k01_215 * a[aOffset5] + k00_205 * a[aOffset5 + 1];
-		aOffset5 += 16;
-		k00_205 = u[eOffset04 + -2] - u[eOffset23 + -2];
-		k01_215 = u[eOffset04 + -3] - u[eOffset23 + -3];
-		var _g42 = eOffset04 + -2;
-		u[_g42] = u[_g42] + u[eOffset23 + -2];
-		var _g43 = eOffset04 + -3;
-		u[_g43] = u[_g43] + u[eOffset23 + -3];
-		u[eOffset23 + -2] = k00_205 * a[aOffset5] - k01_215 * a[aOffset5 + 1];
-		u[eOffset23 + -3] = k01_215 * a[aOffset5] + k00_205 * a[aOffset5 + 1];
-		aOffset5 += 16;
-		k00_205 = u[eOffset04 + -4] - u[eOffset23 + -4];
-		k01_215 = u[eOffset04 + -5] - u[eOffset23 + -5];
-		var _g44 = eOffset04 + -4;
-		u[_g44] = u[_g44] + u[eOffset23 + -4];
-		var _g45 = eOffset04 + -5;
-		u[_g45] = u[_g45] + u[eOffset23 + -5];
-		u[eOffset23 + -4] = k00_205 * a[aOffset5] - k01_215 * a[aOffset5 + 1];
-		u[eOffset23 + -5] = k01_215 * a[aOffset5] + k00_205 * a[aOffset5 + 1];
-		aOffset5 += 16;
-		k00_205 = u[eOffset04 + -6] - u[eOffset23 + -6];
-		k01_215 = u[eOffset04 + -7] - u[eOffset23 + -7];
-		var _g46 = eOffset04 + -6;
-		u[_g46] = u[_g46] + u[eOffset23 + -6];
-		var _g47 = eOffset04 + -7;
-		u[_g47] = u[_g47] + u[eOffset23 + -7];
-		u[eOffset23 + -6] = k00_205 * a[aOffset5] - k01_215 * a[aOffset5 + 1];
-		u[eOffset23 + -7] = k01_215 * a[aOffset5] + k00_205 * a[aOffset5 + 1];
-		eOffset04 -= 8;
-		eOffset23 -= 8;
-		aOffset5 += 16;
-	}
-	var _g110 = 2;
-	var _g48 = ld - 3 >> 1;
-	while(_g110 < _g48) {
-		var l = _g110++;
-		var k0 = n >> l + 2;
-		var k0_2 = k0 >> 1;
-		var _g310 = 0;
-		var _g210 = 1 << l + 1;
-		while(_g310 < _g210) {
-			var d04 = n2 - 1 - k0 * _g310++;
-			var k1 = 1 << l + 3;
-			var aOffset6 = 0;
-			var eOffset05 = d04;
-			var eOffset24 = d04 + -k0_2;
-			var i6 = (n >> l + 4 >> 2) + 1;
-			while(--i6 > 0) {
-				var k00_206 = u[eOffset05] - u[eOffset24];
-				var k01_216 = u[eOffset05 + -1] - u[eOffset24 + -1];
-				var _g49 = eOffset05;
-				u[_g49] = u[_g49] + u[eOffset24];
-				var _g50 = eOffset05 + -1;
-				u[_g50] = u[_g50] + u[eOffset24 + -1];
-				u[eOffset24] = k00_206 * a[aOffset6] - k01_216 * a[aOffset6 + 1];
-				u[eOffset24 + -1] = k01_216 * a[aOffset6] + k00_206 * a[aOffset6 + 1];
-				aOffset6 += k1;
-				k00_206 = u[eOffset05 + -2] - u[eOffset24 + -2];
-				k01_216 = u[eOffset05 + -3] - u[eOffset24 + -3];
-				var _g51 = eOffset05 + -2;
-				u[_g51] = u[_g51] + u[eOffset24 + -2];
-				var _g52 = eOffset05 + -3;
-				u[_g52] = u[_g52] + u[eOffset24 + -3];
-				u[eOffset24 + -2] = k00_206 * a[aOffset6] - k01_216 * a[aOffset6 + 1];
-				u[eOffset24 + -3] = k01_216 * a[aOffset6] + k00_206 * a[aOffset6 + 1];
-				aOffset6 += k1;
-				k00_206 = u[eOffset05 + -4] - u[eOffset24 + -4];
-				k01_216 = u[eOffset05 + -5] - u[eOffset24 + -5];
-				var _g53 = eOffset05 + -4;
-				u[_g53] = u[_g53] + u[eOffset24 + -4];
-				var _g54 = eOffset05 + -5;
-				u[_g54] = u[_g54] + u[eOffset24 + -5];
-				u[eOffset24 + -4] = k00_206 * a[aOffset6] - k01_216 * a[aOffset6 + 1];
-				u[eOffset24 + -5] = k01_216 * a[aOffset6] + k00_206 * a[aOffset6 + 1];
-				aOffset6 += k1;
-				k00_206 = u[eOffset05 + -6] - u[eOffset24 + -6];
-				k01_216 = u[eOffset05 + -7] - u[eOffset24 + -7];
-				var _g55 = eOffset05 + -6;
-				u[_g55] = u[_g55] + u[eOffset24 + -6];
-				var _g56 = eOffset05 + -7;
-				u[_g56] = u[_g56] + u[eOffset24 + -7];
-				u[eOffset24 + -6] = k00_206 * a[aOffset6] - k01_216 * a[aOffset6 + 1];
-				u[eOffset24 + -7] = k01_216 * a[aOffset6] + k00_206 * a[aOffset6 + 1];
-				eOffset05 -= 8;
-				eOffset24 -= 8;
-				aOffset6 += k1;
-			}
-		}
-	}
-	var _g111 = ld - 3 >> 1;
-	var _g57 = ld - 6;
-	while(_g111 < _g57) {
-		var l1 = _g111++;
-		var k01 = n >> l1 + 2;
-		var k11 = 1 << l1 + 3;
-		var k0_21 = k01 >> 1;
-		var rlim = n >> l1 + 6;
-		var lim = 1 << l1 + 1;
-		var aOffset7 = 0;
-		var i_off2 = n2 - 1;
-		var r = rlim + 1;
-		while(--r > 0) {
-			var A0 = a[aOffset7];
-			var A1 = a[aOffset7 + 1];
-			var A2 = a[aOffset7 + k11];
-			var A3 = a[aOffset7 + k11 + 1];
-			var A4 = a[aOffset7 + k11 * 2];
-			var A5 = a[aOffset7 + k11 * 2 + 1];
-			var A6 = a[aOffset7 + k11 * 3];
-			var A7 = a[aOffset7 + k11 * 3 + 1];
-			var eeOffset02 = i_off2;
-			var eeOffset22 = i_off2 + -k0_21;
-			var i7 = lim + 1;
-			while(--i7 > 0) {
-				var k00 = u[eeOffset02] - u[eeOffset22];
-				var k111 = u[eeOffset02 + -1] - u[eeOffset22 + -1];
-				u[eeOffset02] = u[eeOffset02] + u[eeOffset22];
-				u[eeOffset02 + -1] = u[eeOffset02 + -1] + u[eeOffset22 + -1];
-				u[eeOffset22] = k00 * A0 - k111 * A1;
-				u[eeOffset22 + -1] = k111 * A0 + k00 * A1;
-				k00 = u[eeOffset02 + -2] - u[eeOffset22 + -2];
-				k111 = u[eeOffset02 + -3] - u[eeOffset22 + -3];
-				u[eeOffset02 + -2] = u[eeOffset02 + -2] + u[eeOffset22 + -2];
-				u[eeOffset02 + -3] = u[eeOffset02 + -3] + u[eeOffset22 + -3];
-				u[eeOffset22 + -2] = k00 * A2 - k111 * A3;
-				u[eeOffset22 + -3] = k111 * A2 + k00 * A3;
-				k00 = u[eeOffset02 + -4] - u[eeOffset22 + -4];
-				k111 = u[eeOffset02 + -5] - u[eeOffset22 + -5];
-				u[eeOffset02 + -4] = u[eeOffset02 + -4] + u[eeOffset22 + -4];
-				u[eeOffset02 + -5] = u[eeOffset02 + -5] + u[eeOffset22 + -5];
-				u[eeOffset22 + -4] = k00 * A4 - k111 * A5;
-				u[eeOffset22 + -5] = k111 * A4 + k00 * A5;
-				k00 = u[eeOffset02 + -6] - u[eeOffset22 + -6];
-				k111 = u[eeOffset02 + -7] - u[eeOffset22 + -7];
-				u[eeOffset02 + -6] = u[eeOffset02 + -6] + u[eeOffset22 + -6];
-				u[eeOffset02 + -7] = u[eeOffset02 + -7] + u[eeOffset22 + -7];
-				u[eeOffset22 + -6] = k00 * A6 - k111 * A7;
-				u[eeOffset22 + -7] = k111 * A6 + k00 * A7;
-				eeOffset02 -= k01;
-				eeOffset22 -= k01;
-			}
-			aOffset7 += k11 * 4;
-			i_off2 -= 8;
-		}
-	}
-	var i_off3 = n2 - 1;
-	var A21 = a[n >> 3];
-	var zOffset = i_off3;
-	var baseOffset = i_off3 - 16 * (n >> 5);
-	while(zOffset > baseOffset) {
-		var t0 = u[zOffset];
-		var t1 = u[zOffset + -8];
-		u[zOffset + -8] = t0 - t1;
-		u[zOffset] = t0 + t1;
-		t0 = u[zOffset + -1];
-		t1 = u[zOffset + -9];
-		u[zOffset + -9] = t0 - t1;
-		u[zOffset + -1] = t0 + t1;
-		t0 = u[zOffset + -2];
-		t1 = u[zOffset + -10];
-		var k001 = t0 - t1;
-		u[zOffset + -2] = t0 + t1;
-		t0 = u[zOffset + -3];
-		t1 = u[zOffset + -11];
-		var k112 = t0 - t1;
-		u[zOffset + -3] = t0 + t1;
-		u[zOffset + -10] = (k001 + k112) * A21;
-		u[zOffset + -11] = (k112 - k001) * A21;
-		t0 = u[zOffset + -4];
-		t1 = u[zOffset + -12];
-		k001 = t1 - t0;
-		u[zOffset + -4] = t0 + t1;
-		t0 = u[zOffset + -5];
-		t1 = u[zOffset + -13];
-		k112 = t0 - t1;
-		u[zOffset + -5] = t0 + t1;
-		u[zOffset + -12] = k112;
-		u[zOffset + -13] = k001;
-		t0 = u[zOffset + -6];
-		t1 = u[zOffset + -14];
-		k001 = t1 - t0;
-		u[zOffset + -6] = t0 + t1;
-		t0 = u[zOffset + -7];
-		t1 = u[zOffset + -15];
-		k112 = t0 - t1;
-		u[zOffset + -7] = t0 + t1;
-		u[zOffset + -14] = (k001 + k112) * A21;
-		u[zOffset + -15] = (k001 - k112) * A21;
-		var t01 = u[zOffset];
-		var t11 = u[zOffset + -4];
-		var k002 = t01 - t11;
-		var y0 = t01 + t11;
-		t01 = u[zOffset + -2];
-		t11 = u[zOffset + -6];
-		var y2 = t01 + t11;
-		var k22 = t01 - t11;
-		u[zOffset] = y0 + y2;
-		u[zOffset + -2] = y0 - y2;
-		var k33 = u[zOffset + -3] - u[zOffset + -7];
-		u[zOffset + -4] = k002 + k33;
-		u[zOffset + -6] = k002 - k33;
-		t01 = u[zOffset + -1];
-		t11 = u[zOffset + -5];
-		var k113 = t01 - t11;
-		var y1 = t01 + t11;
-		var y3 = u[zOffset + -3] + u[zOffset + -7];
-		u[zOffset + -1] = y1 + y3;
-		u[zOffset + -3] = y1 - y3;
-		u[zOffset + -5] = k113 - k22;
-		u[zOffset + -7] = k113 + k22;
-		var zOffset1 = zOffset - 8;
-		var t02 = u[zOffset1];
-		var t12 = u[zOffset1 + -4];
-		var k003 = t02 - t12;
-		var y01 = t02 + t12;
-		t02 = u[zOffset1 + -2];
-		t12 = u[zOffset1 + -6];
-		var y21 = t02 + t12;
-		var k221 = t02 - t12;
-		u[zOffset1] = y01 + y21;
-		u[zOffset1 + -2] = y01 - y21;
-		var k331 = u[zOffset1 + -3] - u[zOffset1 + -7];
-		u[zOffset1 + -4] = k003 + k331;
-		u[zOffset1 + -6] = k003 - k331;
-		t02 = u[zOffset1 + -1];
-		t12 = u[zOffset1 + -5];
-		var k114 = t02 - t12;
-		var y11 = t02 + t12;
-		var y31 = u[zOffset1 + -3] + u[zOffset1 + -7];
-		u[zOffset1 + -1] = y11 + y31;
-		u[zOffset1 + -3] = y11 - y31;
-		u[zOffset1 + -5] = k114 - k221;
-		u[zOffset1 + -7] = k114 + k221;
-		zOffset -= 16;
-	}
-	var brOffset = 0;
-	var dOffset01 = n4 - 4;
-	var dOffset11 = n2 - 4;
-	while(dOffset01 >= 0) {
-		var k4 = bitReverse[brOffset];
-		v[dOffset11 + 3] = u[k4];
-		v[dOffset11 + 2] = u[k4 + 1];
-		v[dOffset01 + 3] = u[k4 + 2];
-		v[dOffset01 + 2] = u[k4 + 3];
-		k4 = bitReverse[brOffset + 1];
-		v[dOffset11 + 1] = u[k4];
-		v[dOffset11] = u[k4 + 1];
-		v[dOffset01 + 1] = u[k4 + 2];
-		v[dOffset01] = u[k4 + 3];
-		dOffset01 -= 4;
-		dOffset11 -= 4;
-		brOffset += 2;
-	}
-	var cOffset = 0;
-	var dOffset2 = 0;
-	var eOffset3 = n2 - 4;
-	while(dOffset2 < eOffset3) {
-		var a02 = v[dOffset2] - v[eOffset3 + 2];
-		var a11 = v[dOffset2 + 1] + v[eOffset3 + 3];
-		var b0 = c[cOffset + 1] * a02 + c[cOffset] * a11;
-		var b1 = c[cOffset + 1] * a11 - c[cOffset] * a02;
-		var b2 = v[dOffset2] + v[eOffset3 + 2];
-		var b3 = v[dOffset2 + 1] - v[eOffset3 + 3];
-		v[dOffset2] = b2 + b0;
-		v[dOffset2 + 1] = b3 + b1;
-		v[eOffset3 + 2] = b2 - b0;
-		v[eOffset3 + 3] = b1 - b3;
-		a02 = v[dOffset2 + 2] - v[eOffset3];
-		a11 = v[dOffset2 + 3] + v[eOffset3 + 1];
-		b0 = c[cOffset + 3] * a02 + c[cOffset + 2] * a11;
-		b1 = c[cOffset + 3] * a11 - c[cOffset + 2] * a02;
-		b2 = v[dOffset2 + 2] + v[eOffset3];
-		b3 = v[dOffset2 + 3] - v[eOffset3 + 1];
-		v[dOffset2 + 2] = b2 + b0;
-		v[dOffset2 + 3] = b3 + b1;
-		v[eOffset3] = b2 - b0;
-		v[eOffset3 + 1] = b1 - b3;
-		cOffset += 4;
-		dOffset2 += 4;
-		eOffset3 -= 4;
-	}
-	var bOffset = n2 - 8;
-	var eOffset4 = n2 - 8;
-	var dOffset02 = 0;
-	var dOffset12 = n2 - 4;
-	var dOffset21 = n2;
-	var dOffset3 = n - 4;
-	while(eOffset4 >= 0) {
-		var p3 = buf2[eOffset4 + 6] * b[bOffset + 7] - buf2[eOffset4 + 7] * b[bOffset + 6];
-		var p2 = -buf2[eOffset4 + 6] * b[bOffset + 6] - buf2[eOffset4 + 7] * b[bOffset + 7];
-		buffer[dOffset02] = p3;
-		buffer[dOffset12 + 3] = -p3;
-		buffer[dOffset21] = p2;
-		buffer[dOffset3 + 3] = p2;
-		var p1 = buf2[eOffset4 + 4] * b[bOffset + 5] - buf2[eOffset4 + 5] * b[bOffset + 4];
-		var p0 = -buf2[eOffset4 + 4] * b[bOffset + 4] - buf2[eOffset4 + 5] * b[bOffset + 5];
-		buffer[dOffset02 + 1] = p1;
-		buffer[dOffset12 + 2] = -p1;
-		buffer[dOffset21 + 1] = p0;
-		buffer[dOffset3 + 2] = p0;
-		p3 = buf2[eOffset4 + 2] * b[bOffset + 3] - buf2[eOffset4 + 3] * b[bOffset + 2];
-		p2 = -buf2[eOffset4 + 2] * b[bOffset + 2] - buf2[eOffset4 + 3] * b[bOffset + 3];
-		buffer[dOffset02 + 2] = p3;
-		buffer[dOffset12 + 1] = -p3;
-		buffer[dOffset21 + 2] = p2;
-		buffer[dOffset3 + 1] = p2;
-		p1 = buf2[eOffset4] * b[bOffset + 1] - buf2[eOffset4 + 1] * b[bOffset];
-		p0 = -buf2[eOffset4] * b[bOffset] - buf2[eOffset4 + 1] * b[bOffset + 1];
-		buffer[dOffset02 + 3] = p1;
-		buffer[dOffset12] = -p1;
-		buffer[dOffset21 + 3] = p0;
-		buffer[dOffset3] = p0;
-		bOffset -= 8;
-		eOffset4 -= 8;
-		dOffset02 += 4;
-		dOffset21 += 4;
-		dOffset12 -= 4;
-		dOffset3 -= 4;
-	}
-};
-kha_audio2_ogg_tools_Mdct.step3Iter0Loop = function(n,e,i_off,k_off,a) {
-	var eeOffset0 = i_off;
-	var eeOffset2 = i_off + k_off;
-	var aOffset = 0;
-	var i = (n >> 2) + 1;
-	while(--i > 0) {
-		var k00_20 = e[eeOffset0] - e[eeOffset2];
-		var k01_21 = e[eeOffset0 + -1] - e[eeOffset2 + -1];
-		var _g = eeOffset0;
-		e[_g] = e[_g] + e[eeOffset2];
-		var _g1 = eeOffset0 + -1;
-		e[_g1] = e[_g1] + e[eeOffset2 + -1];
-		e[eeOffset2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eeOffset2 + -1] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = e[eeOffset0 + -2] - e[eeOffset2 + -2];
-		k01_21 = e[eeOffset0 + -3] - e[eeOffset2 + -3];
-		var _g2 = eeOffset0 + -2;
-		e[_g2] = e[_g2] + e[eeOffset2 + -2];
-		var _g3 = eeOffset0 + -3;
-		e[_g3] = e[_g3] + e[eeOffset2 + -3];
-		e[eeOffset2 + -2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eeOffset2 + -3] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = e[eeOffset0 + -4] - e[eeOffset2 + -4];
-		k01_21 = e[eeOffset0 + -5] - e[eeOffset2 + -5];
-		var _g4 = eeOffset0 + -4;
-		e[_g4] = e[_g4] + e[eeOffset2 + -4];
-		var _g5 = eeOffset0 + -5;
-		e[_g5] = e[_g5] + e[eeOffset2 + -5];
-		e[eeOffset2 + -4] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eeOffset2 + -5] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		k00_20 = e[eeOffset0 + -6] - e[eeOffset2 + -6];
-		k01_21 = e[eeOffset0 + -7] - e[eeOffset2 + -7];
-		var _g6 = eeOffset0 + -6;
-		e[_g6] = e[_g6] + e[eeOffset2 + -6];
-		var _g7 = eeOffset0 + -7;
-		e[_g7] = e[_g7] + e[eeOffset2 + -7];
-		e[eeOffset2 + -6] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eeOffset2 + -7] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += 8;
-		eeOffset0 -= 8;
-		eeOffset2 -= 8;
-	}
-};
-kha_audio2_ogg_tools_Mdct.step3InnerRLoop = function(lim,e,d0,k_off,a,k1) {
-	var aOffset = 0;
-	var eOffset0 = d0;
-	var eOffset2 = d0 + k_off;
-	var i = (lim >> 2) + 1;
-	while(--i > 0) {
-		var k00_20 = e[eOffset0] - e[eOffset2];
-		var k01_21 = e[eOffset0 + -1] - e[eOffset2 + -1];
-		var _g = eOffset0;
-		e[_g] = e[_g] + e[eOffset2];
-		var _g1 = eOffset0 + -1;
-		e[_g1] = e[_g1] + e[eOffset2 + -1];
-		e[eOffset2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eOffset2 + -1] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += k1;
-		k00_20 = e[eOffset0 + -2] - e[eOffset2 + -2];
-		k01_21 = e[eOffset0 + -3] - e[eOffset2 + -3];
-		var _g2 = eOffset0 + -2;
-		e[_g2] = e[_g2] + e[eOffset2 + -2];
-		var _g3 = eOffset0 + -3;
-		e[_g3] = e[_g3] + e[eOffset2 + -3];
-		e[eOffset2 + -2] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eOffset2 + -3] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += k1;
-		k00_20 = e[eOffset0 + -4] - e[eOffset2 + -4];
-		k01_21 = e[eOffset0 + -5] - e[eOffset2 + -5];
-		var _g4 = eOffset0 + -4;
-		e[_g4] = e[_g4] + e[eOffset2 + -4];
-		var _g5 = eOffset0 + -5;
-		e[_g5] = e[_g5] + e[eOffset2 + -5];
-		e[eOffset2 + -4] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eOffset2 + -5] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		aOffset += k1;
-		k00_20 = e[eOffset0 + -6] - e[eOffset2 + -6];
-		k01_21 = e[eOffset0 + -7] - e[eOffset2 + -7];
-		var _g6 = eOffset0 + -6;
-		e[_g6] = e[_g6] + e[eOffset2 + -6];
-		var _g7 = eOffset0 + -7;
-		e[_g7] = e[_g7] + e[eOffset2 + -7];
-		e[eOffset2 + -6] = k00_20 * a[aOffset] - k01_21 * a[aOffset + 1];
-		e[eOffset2 + -7] = k01_21 * a[aOffset] + k00_20 * a[aOffset + 1];
-		eOffset0 -= 8;
-		eOffset2 -= 8;
-		aOffset += k1;
-	}
-};
-kha_audio2_ogg_tools_Mdct.step3InnerSLoop = function(n,e,i_off,k_off,a,aOffset0,aOffset1,k0) {
-	var A0 = a[aOffset0];
-	var A1 = a[aOffset0 + 1];
-	var A2 = a[aOffset0 + aOffset1];
-	var A3 = a[aOffset0 + aOffset1 + 1];
-	var A4 = a[aOffset0 + aOffset1 * 2];
-	var A5 = a[aOffset0 + aOffset1 * 2 + 1];
-	var A6 = a[aOffset0 + aOffset1 * 3];
-	var A7 = a[aOffset0 + aOffset1 * 3 + 1];
-	var eeOffset0 = i_off;
-	var eeOffset2 = i_off + k_off;
-	var i = n + 1;
-	while(--i > 0) {
-		var k00 = e[eeOffset0] - e[eeOffset2];
-		var k11 = e[eeOffset0 + -1] - e[eeOffset2 + -1];
-		e[eeOffset0] = e[eeOffset0] + e[eeOffset2];
-		e[eeOffset0 + -1] = e[eeOffset0 + -1] + e[eeOffset2 + -1];
-		e[eeOffset2] = k00 * A0 - k11 * A1;
-		e[eeOffset2 + -1] = k11 * A0 + k00 * A1;
-		k00 = e[eeOffset0 + -2] - e[eeOffset2 + -2];
-		k11 = e[eeOffset0 + -3] - e[eeOffset2 + -3];
-		e[eeOffset0 + -2] = e[eeOffset0 + -2] + e[eeOffset2 + -2];
-		e[eeOffset0 + -3] = e[eeOffset0 + -3] + e[eeOffset2 + -3];
-		e[eeOffset2 + -2] = k00 * A2 - k11 * A3;
-		e[eeOffset2 + -3] = k11 * A2 + k00 * A3;
-		k00 = e[eeOffset0 + -4] - e[eeOffset2 + -4];
-		k11 = e[eeOffset0 + -5] - e[eeOffset2 + -5];
-		e[eeOffset0 + -4] = e[eeOffset0 + -4] + e[eeOffset2 + -4];
-		e[eeOffset0 + -5] = e[eeOffset0 + -5] + e[eeOffset2 + -5];
-		e[eeOffset2 + -4] = k00 * A4 - k11 * A5;
-		e[eeOffset2 + -5] = k11 * A4 + k00 * A5;
-		k00 = e[eeOffset0 + -6] - e[eeOffset2 + -6];
-		k11 = e[eeOffset0 + -7] - e[eeOffset2 + -7];
-		e[eeOffset0 + -6] = e[eeOffset0 + -6] + e[eeOffset2 + -6];
-		e[eeOffset0 + -7] = e[eeOffset0 + -7] + e[eeOffset2 + -7];
-		e[eeOffset2 + -6] = k00 * A6 - k11 * A7;
-		e[eeOffset2 + -7] = k11 * A6 + k00 * A7;
-		eeOffset0 -= k0;
-		eeOffset2 -= k0;
-	}
-};
-kha_audio2_ogg_tools_Mdct.iter54 = function(e,zOffset) {
-	var t0 = e[zOffset];
-	var t1 = e[zOffset + -4];
-	var k00 = t0 - t1;
-	var y0 = t0 + t1;
-	t0 = e[zOffset + -2];
-	t1 = e[zOffset + -6];
-	var y2 = t0 + t1;
-	var k22 = t0 - t1;
-	e[zOffset] = y0 + y2;
-	e[zOffset + -2] = y0 - y2;
-	var k33 = e[zOffset + -3] - e[zOffset + -7];
-	e[zOffset + -4] = k00 + k33;
-	e[zOffset + -6] = k00 - k33;
-	t0 = e[zOffset + -1];
-	t1 = e[zOffset + -5];
-	var k11 = t0 - t1;
-	var y1 = t0 + t1;
-	var y3 = e[zOffset + -3] + e[zOffset + -7];
-	e[zOffset + -1] = y1 + y3;
-	e[zOffset + -3] = y1 - y3;
-	e[zOffset + -5] = k11 - k22;
-	e[zOffset + -7] = k11 + k22;
-};
-kha_audio2_ogg_tools_Mdct.step3InnerSLoopLd654 = function(n,e,i_off,a,baseN) {
-	var A2 = a[baseN >> 3];
-	var zOffset = i_off;
-	var baseOffset = i_off - 16 * n;
-	while(zOffset > baseOffset) {
-		var t0 = e[zOffset];
-		var t1 = e[zOffset + -8];
-		e[zOffset + -8] = t0 - t1;
-		e[zOffset] = t0 + t1;
-		t0 = e[zOffset + -1];
-		t1 = e[zOffset + -9];
-		e[zOffset + -9] = t0 - t1;
-		e[zOffset + -1] = t0 + t1;
-		t0 = e[zOffset + -2];
-		t1 = e[zOffset + -10];
-		var k00 = t0 - t1;
-		e[zOffset + -2] = t0 + t1;
-		t0 = e[zOffset + -3];
-		t1 = e[zOffset + -11];
-		var k11 = t0 - t1;
-		e[zOffset + -3] = t0 + t1;
-		e[zOffset + -10] = (k00 + k11) * A2;
-		e[zOffset + -11] = (k11 - k00) * A2;
-		t0 = e[zOffset + -4];
-		t1 = e[zOffset + -12];
-		k00 = t1 - t0;
-		e[zOffset + -4] = t0 + t1;
-		t0 = e[zOffset + -5];
-		t1 = e[zOffset + -13];
-		k11 = t0 - t1;
-		e[zOffset + -5] = t0 + t1;
-		e[zOffset + -12] = k11;
-		e[zOffset + -13] = k00;
-		t0 = e[zOffset + -6];
-		t1 = e[zOffset + -14];
-		k00 = t1 - t0;
-		e[zOffset + -6] = t0 + t1;
-		t0 = e[zOffset + -7];
-		t1 = e[zOffset + -15];
-		k11 = t0 - t1;
-		e[zOffset + -7] = t0 + t1;
-		e[zOffset + -14] = (k00 + k11) * A2;
-		e[zOffset + -15] = (k00 - k11) * A2;
-		var t01 = e[zOffset];
-		var t11 = e[zOffset + -4];
-		var k001 = t01 - t11;
-		var y0 = t01 + t11;
-		t01 = e[zOffset + -2];
-		t11 = e[zOffset + -6];
-		var y2 = t01 + t11;
-		var k22 = t01 - t11;
-		e[zOffset] = y0 + y2;
-		e[zOffset + -2] = y0 - y2;
-		var k33 = e[zOffset + -3] - e[zOffset + -7];
-		e[zOffset + -4] = k001 + k33;
-		e[zOffset + -6] = k001 - k33;
-		t01 = e[zOffset + -1];
-		t11 = e[zOffset + -5];
-		var k111 = t01 - t11;
-		var y1 = t01 + t11;
-		var y3 = e[zOffset + -3] + e[zOffset + -7];
-		e[zOffset + -1] = y1 + y3;
-		e[zOffset + -3] = y1 - y3;
-		e[zOffset + -5] = k111 - k22;
-		e[zOffset + -7] = k111 + k22;
-		var zOffset1 = zOffset - 8;
-		var t02 = e[zOffset1];
-		var t12 = e[zOffset1 + -4];
-		var k002 = t02 - t12;
-		var y01 = t02 + t12;
-		t02 = e[zOffset1 + -2];
-		t12 = e[zOffset1 + -6];
-		var y21 = t02 + t12;
-		var k221 = t02 - t12;
-		e[zOffset1] = y01 + y21;
-		e[zOffset1 + -2] = y01 - y21;
-		var k331 = e[zOffset1 + -3] - e[zOffset1 + -7];
-		e[zOffset1 + -4] = k002 + k331;
-		e[zOffset1 + -6] = k002 - k331;
-		t02 = e[zOffset1 + -1];
-		t12 = e[zOffset1 + -5];
-		var k112 = t02 - t12;
-		var y11 = t02 + t12;
-		var y31 = e[zOffset1 + -3] + e[zOffset1 + -7];
-		e[zOffset1 + -1] = y11 + y31;
-		e[zOffset1 + -3] = y11 - y31;
-		e[zOffset1 + -5] = k112 - k221;
-		e[zOffset1 + -7] = k112 + k221;
-		zOffset -= 16;
 	}
 };
 var kha_audio2_ogg_vorbis_Reader = function(input,seekFunc,inputLength) {
@@ -6292,12 +3524,6 @@ kha_audio2_ogg_vorbis_Reader.prototype = {
 	get_header: function() {
 		return this.decoder.header;
 	}
-	,get_totalSample: function() {
-		return this.decoder.totalSample;
-	}
-	,get_totalMillisecond: function() {
-		return _$UInt_UInt_$Impl_$.toFloat(this.decoder.totalSample) / _$UInt_UInt_$Impl_$.toFloat(this.get_header().sampleRate) * 1000;
-	}
 	,get_currentSample: function() {
 		return this.decoder.currentSample;
 	}
@@ -6327,21 +3553,6 @@ kha_audio2_ogg_vorbis_Reader.prototype = {
 			sampleRate = this.get_header().sampleRate;
 		}
 		return this.decoder.read(output,samples,channels,sampleRate,useFloat);
-	}
-	,clone: function() {
-		var reader = Type.createEmptyInstance(kha_audio2_ogg_vorbis_Reader);
-		reader.seekFunc = this.seekFunc;
-		reader.inputLength = this.inputLength;
-		reader.decoder = this.decoder.clone(this.seekFunc);
-		reader.loopStart = this.loopStart;
-		reader.loopLength = this.loopLength;
-		return reader;
-	}
-	,sampleToMillisecond: function(samples) {
-		return _$UInt_UInt_$Impl_$.toFloat(samples) / _$UInt_UInt_$Impl_$.toFloat(this.get_header().sampleRate) * 1000;
-	}
-	,millisecondToSample: function(millseconds) {
-		return Math.floor(_$UInt_UInt_$Impl_$.toFloat(this.get_header().sampleRate) * (millseconds / 1000));
 	}
 	,__class__: kha_audio2_ogg_vorbis_Reader
 };
@@ -6550,54 +3761,6 @@ kha_audio2_ogg_vorbis_VorbisDecodeState.prototype = {
 			return z1;
 		}
 	}
-	,readPacketRaw: function() {
-		if(this.bytesInSeg == 0 && (this.lastSeg || this.next() == 0)) {
-			return -1;
-		} else {
-			this.bytesInSeg--;
-			this.inputPosition += 1;
-			return this.input.readByte();
-		}
-	}
-	,readPacket: function() {
-		var x;
-		if(this.bytesInSeg == 0 && (this.lastSeg || this.next() == 0)) {
-			x = -1;
-		} else {
-			this.bytesInSeg--;
-			this.inputPosition += 1;
-			x = this.input.readByte();
-		}
-		this.validBits = 0;
-		return x;
-	}
-	,flushPacket: function() {
-		while(this.bytesInSeg != 0 || !this.lastSeg && this.next() != 0) {
-			this.bytesInSeg--;
-			this.inputPosition += 1;
-			this.input.readByte();
-		}
-	}
-	,vorbisValidate: function() {
-		var header = new haxe_io_Bytes(new ArrayBuffer(6));
-		var _g = 0;
-		while(_g < 6) {
-			var i = _g++;
-			var x;
-			if(this.bytesInSeg == 0 && (this.lastSeg || this.next() == 0)) {
-				x = -1;
-			} else {
-				this.bytesInSeg--;
-				this.inputPosition += 1;
-				x = this.input.readByte();
-			}
-			this.validBits = 0;
-			header.b[i] = x & 255;
-		}
-		if(header.toString() != "vorbis") {
-			throw new js__$Boot_HaxeError(new kha_audio2_ogg_vorbis_data_ReaderError(kha_audio2_ogg_vorbis_data_ReaderErrorType.INVALID_SETUP,"vorbis header",{ fileName : "VorbisDecodeState.hx", lineNumber : 300, className : "kha.audio2.ogg.vorbis.VorbisDecodeState", methodName : "vorbisValidate"}));
-		}
-	}
 	,firstPageValidate: function() {
 		if(this.segments.length != 1) {
 			throw new js__$Boot_HaxeError(new kha_audio2_ogg_vorbis_data_ReaderError(kha_audio2_ogg_vorbis_data_ReaderErrorType.INVALID_FIRST_PAGE,"segmentCount",{ fileName : "VorbisDecodeState.hx", lineNumber : 307, className : "kha.audio2.ogg.vorbis.VorbisDecodeState", methodName : "firstPageValidate"}));
@@ -6609,40 +3772,6 @@ kha_audio2_ogg_vorbis_VorbisDecodeState.prototype = {
 	,startFirstDecode: function() {
 		this.firstAudioPageOffset = this.inputPosition;
 		this.firstDecode = true;
-	}
-	,capturePattern: function() {
-		var tmp;
-		var tmp1;
-		var tmp2;
-		this.inputPosition += 1;
-		if(this.input.readByte() == 79) {
-			this.inputPosition += 1;
-			tmp2 = this.input.readByte() != 103;
-		} else {
-			tmp2 = true;
-		}
-		if(!tmp2) {
-			this.inputPosition += 1;
-			tmp1 = this.input.readByte() != 103;
-		} else {
-			tmp1 = true;
-		}
-		if(!tmp1) {
-			this.inputPosition += 1;
-			tmp = this.input.readByte() != 83;
-		} else {
-			tmp = true;
-		}
-		if(tmp) {
-			throw new js__$Boot_HaxeError(new kha_audio2_ogg_vorbis_data_ReaderError(kha_audio2_ogg_vorbis_data_ReaderErrorType.MISSING_CAPTURE_PATTERN,null,{ fileName : "VorbisDecodeState.hx", lineNumber : 323, className : "kha.audio2.ogg.vorbis.VorbisDecodeState", methodName : "capturePattern"}));
-		}
-	}
-	,skip: function(len) {
-		this.inputPosition += len;
-		var vec = new Array(len);
-		var _g1 = 0;
-		var _g = len;
-		while(_g1 < _g) vec[_g1++] = this.input.readByte();
 	}
 	,prepHuffman: function() {
 		if(this.validBits <= 24) {
@@ -6663,56 +3792,6 @@ kha_audio2_ogg_vorbis_VorbisDecodeState.prototype = {
 					break;
 				}
 			}
-		}
-	}
-	,decode: function(c) {
-		if(this.validBits < 10) {
-			this.prepHuffman();
-		}
-		var i = c.fastHuffman[this.acc & 1023];
-		var val;
-		if(i >= 0) {
-			var l = c.codewordLengths[i];
-			this.acc = this.acc >>> l;
-			this.validBits -= l;
-			if(this.validBits < 0) {
-				this.validBits = 0;
-				val = -1;
-			} else {
-				val = i;
-			}
-		} else {
-			val = this.decodeScalarRaw(c);
-		}
-		if(c.sparse) {
-			val = c.sortedValues[val];
-		}
-		return val;
-	}
-	,decodeRaw: function(c) {
-		if(this.validBits < 10) {
-			this.prepHuffman();
-		}
-		var i = c.fastHuffman[this.acc & 1023];
-		if(i >= 0) {
-			var l = c.codewordLengths[i];
-			this.acc = this.acc >>> l;
-			this.validBits -= l;
-			if(this.validBits < 0) {
-				this.validBits = 0;
-				return -1;
-			} else {
-				return i;
-			}
-		} else {
-			return this.decodeScalarRaw(c);
-		}
-	}
-	,isLastByte: function() {
-		if(this.bytesInSeg == 0) {
-			return this.lastSeg;
-		} else {
-			return false;
 		}
 	}
 	,finishDecodePacket: function(previousLength,n,r) {
@@ -6746,30 +3825,6 @@ kha_audio2_ogg_vorbis_VorbisDecodeState.prototype = {
 			this.currentLoc += r.right.start - r.left.start;
 		}
 		return { len : r.right.end, left : left, right : r.right.start};
-	}
-	,readInt32: function() {
-		this.inputPosition += 4;
-		return this.input.readInt32();
-	}
-	,readByte: function() {
-		this.inputPosition += 1;
-		return this.input.readByte();
-	}
-	,read: function(n) {
-		this.inputPosition += n;
-		var vec = new Array(n);
-		var _g1 = 0;
-		var _g = n;
-		while(_g1 < _g) vec[_g1++] = this.input.readByte();
-		return vec;
-	}
-	,readBytes: function(n) {
-		this.inputPosition += n;
-		return this.input.read(n);
-	}
-	,readString: function(n) {
-		this.inputPosition += n;
-		return this.input.readString(n);
 	}
 	,getSampleNumber: function(seekFunc,inputLength) {
 		var restoreOffset = this.inputPosition;
@@ -6827,12 +3882,6 @@ kha_audio2_ogg_vorbis_VorbisDecodeState.prototype = {
 		this.pLast.afterPreviousPageStart = previousSafe;
 		seekFunc(this.inputPosition = restoreOffset);
 		return lo;
-	}
-	,forcePageResync: function() {
-		this.nextSeg = -1;
-	}
-	,setInputOffset: function(seekFunc,n) {
-		seekFunc(this.inputPosition = n);
 	}
 	,findPage: function(seekFunc,inputLength) {
 		try {
@@ -7333,36 +4382,6 @@ kha_audio2_ogg_vorbis_VorbisDecoder.prototype = {
 		this.pumpFirstFrame();
 		this.currentSample = frameStart;
 		this.skipSamples(targetSample - frameStart);
-	}
-	,clone: function(seekFunc) {
-		var decoder = Type.createEmptyInstance(kha_audio2_ogg_vorbis_VorbisDecoder);
-		decoder.currentSample = this.currentSample;
-		decoder.totalSample = this.totalSample;
-		decoder.previousLength = this.previousLength;
-		decoder.channelBufferStart = this.channelBufferStart;
-		decoder.channelBufferEnd = this.channelBufferEnd;
-		decoder.a = this.a;
-		decoder.b = this.b;
-		decoder.c = this.c;
-		decoder.window = this.window;
-		decoder.bitReverseData = this.bitReverseData;
-		decoder.header = this.header;
-		decoder.decodeState = this.decodeState.clone(seekFunc);
-		var length = this.header.channel;
-		decoder.channelBuffers = new Array(length);
-		var length1 = this.header.channel;
-		decoder.previousWindow = new Array(length1);
-		var length2 = this.header.channel;
-		decoder.finalY = new Array(length2);
-		var _g1 = 0;
-		var _g = this.header.channel;
-		while(_g1 < _g) {
-			var i = _g1++;
-			decoder.channelBuffers[i] = kha_audio2_ogg_vorbis_VorbisTools.copyVector(this.channelBuffers[i]);
-			decoder.previousWindow[i] = kha_audio2_ogg_vorbis_VorbisTools.copyVector(this.previousWindow[i]);
-			decoder.finalY[i] = Lambda.array(this.finalY[i]);
-		}
-		return decoder;
 	}
 	,ensurePosition: function(seekFunc) {
 		seekFunc(this.decodeState.inputPosition);
@@ -8642,40 +5661,6 @@ kha_audio2_ogg_vorbis_VorbisDecoder.prototype = {
 var kha_audio2_ogg_vorbis_VorbisTools = function() { };
 $hxClasses["kha.audio2.ogg.vorbis.VorbisTools"] = kha_audio2_ogg_vorbis_VorbisTools;
 kha_audio2_ogg_vorbis_VorbisTools.__name__ = true;
-kha_audio2_ogg_vorbis_VorbisTools.assert = function(b,p) {
-};
-kha_audio2_ogg_vorbis_VorbisTools.neighbors = function(x,n) {
-	var low = -1;
-	var high = 65536;
-	var plow = 0;
-	var phigh = 0;
-	var _g1 = 0;
-	while(_g1 < n) {
-		var i = _g1++;
-		if(x[i] > low && x[i] < x[n]) {
-			plow = i;
-			low = x[i];
-		}
-		if(x[i] < high && x[i] > x[n]) {
-			phigh = i;
-			high = x[i];
-		}
-	}
-	return { low : plow, high : phigh};
-};
-kha_audio2_ogg_vorbis_VorbisTools.floatUnpack = function(x) {
-	var mantissa = _$UInt_UInt_$Impl_$.toFloat(x & 2097151);
-	var sign = x & -2147483648;
-	var exp = (x & 2145386496) >>> 21;
-	return (sign != 0?-mantissa:mantissa) * Math.pow(2,exp - 788);
-};
-kha_audio2_ogg_vorbis_VorbisTools.bitReverse = function(n) {
-	n = (n & -1431655766) >>> 1 | (n & 1431655765) << 1;
-	n = (n & -858993460) >>> 2 | (n & 858993459) << 2;
-	n = (n & -252645136) >>> 4 | (n & 252645135) << 4;
-	n = (n & -16711936) >>> 8 | (n & 16711935) << 8;
-	return n >>> 16 | n << 16;
-};
 kha_audio2_ogg_vorbis_VorbisTools.pointCompare = function(a,b) {
 	if(a.x < b.x) {
 		return -1;
@@ -8809,29 +5794,6 @@ kha_audio2_ogg_vorbis_VorbisTools.drawLine = function(output,x0,y0,x1,y1,n) {
 		var _g21 = i1;
 		output[_g21] = output[_g21] * kha_audio2_ogg_vorbis_VorbisTools.INVERSE_DB_TABLE[y];
 	}
-};
-kha_audio2_ogg_vorbis_VorbisTools.predictPoint = function(x,x0,x1,y0,y1) {
-	var dy = y1 - y0;
-	var off = Math.abs(dy) * (x - x0) / (x1 - x0) | 0;
-	if(dy < 0) {
-		return y0 - off;
-	} else {
-		return y0 + off;
-	}
-};
-kha_audio2_ogg_vorbis_VorbisTools.emptyFloatVector = function(len) {
-	return new Array(len);
-};
-kha_audio2_ogg_vorbis_VorbisTools.copyVector = function(source) {
-	var length = source.length;
-	var dest = new Array(length);
-	var _g1 = 0;
-	var _g = source.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		dest[i] = source[i];
-	}
-	return dest;
 };
 var kha_audio2_ogg_vorbis_data_Codebook = function() {
 };
@@ -9683,27 +6645,7 @@ kha_audio2_ogg_vorbis_data_Codebook.read = function(decodeState) {
 	return c;
 };
 kha_audio2_ogg_vorbis_data_Codebook.prototype = {
-	addEntry: function(huffCode,symbol,count,len,values) {
-		if(!this.sparse) {
-			this.codewords[symbol] = huffCode;
-		} else {
-			this.codewords[count] = huffCode;
-			this.codewordLengths[count] = len;
-			values[count] = symbol;
-		}
-	}
-	,includeInSort: function(len) {
-		if(this.sparse) {
-			return true;
-		} else if(len == 255) {
-			return false;
-		} else if(len > 10) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	,computeCodewords: function(len,n,values) {
+	computeCodewords: function(len,n,values) {
 		var available = new Array(32);
 		var _g = 0;
 		while(_g < 32) available[_g++] = 0;
@@ -9995,30 +6937,6 @@ kha_audio2_ogg_vorbis_data_Codebook.prototype = {
 		}
 		return true;
 	}
-	,decodeStart: function(decodeState) {
-		if(decodeState.validBits < 10) {
-			decodeState.prepHuffman();
-		}
-		var i = this.fastHuffman[decodeState.acc & 1023];
-		var val;
-		if(i >= 0) {
-			var l = this.codewordLengths[i];
-			decodeState.acc = decodeState.acc >>> l;
-			decodeState.validBits -= l;
-			if(decodeState.validBits < 0) {
-				decodeState.validBits = 0;
-				val = -1;
-			} else {
-				val = i;
-			}
-		} else {
-			val = decodeState.decodeScalarRaw(this);
-		}
-		if(this.sparse) {
-			val = this.sortedValues[val];
-		}
-		return val;
-	}
 	,decodeDeinterleaveRepeat: function(decodeState,residueBuffers,ch,cInter,pInter,len,totalDecode) {
 		var effective = this.dimensions;
 		if(this.lookupType == 0) {
@@ -10153,59 +7071,11 @@ var kha_audio2_ogg_vorbis_data_Comment = function() {
 $hxClasses["kha.audio2.ogg.vorbis.data.Comment"] = kha_audio2_ogg_vorbis_data_Comment;
 kha_audio2_ogg_vorbis_data_Comment.__name__ = true;
 kha_audio2_ogg_vorbis_data_Comment.prototype = {
-	get_title: function() {
-		return this.getString("title");
-	}
-	,get_loopStart: function() {
+	get_loopStart: function() {
 		return Std.parseInt(this.getString("loopstart"));
 	}
 	,get_loopLength: function() {
 		return Std.parseInt(this.getString("looplength"));
-	}
-	,get_version: function() {
-		return this.getString("version");
-	}
-	,get_album: function() {
-		return this.getString("album");
-	}
-	,get_organization: function() {
-		return this.getString("organization");
-	}
-	,get_tracknumber: function() {
-		return this.getString("tracknumber");
-	}
-	,get_performer: function() {
-		return this.getString("performer");
-	}
-	,get_copyright: function() {
-		return this.getString("copyright");
-	}
-	,get_license: function() {
-		return this.getString("license");
-	}
-	,get_artist: function() {
-		return this.getString("artist");
-	}
-	,get_description: function() {
-		return this.getString("description");
-	}
-	,get_genre: function() {
-		return this.getString("genre");
-	}
-	,get_date: function() {
-		return this.getString("date");
-	}
-	,get_location: function() {
-		return this.getString("location");
-	}
-	,get_contact: function() {
-		return this.getString("contact");
-	}
-	,get_isrc: function() {
-		return this.getString("isrc");
-	}
-	,get_artists: function() {
-		return this.getArray("artist");
 	}
 	,add: function(key,value) {
 		key = key.toLowerCase();
@@ -10229,16 +7099,6 @@ kha_audio2_ogg_vorbis_data_Comment.prototype = {
 		if(__map_reserved[key] != null?_this.existsReserved(key):_this.h.hasOwnProperty(key)) {
 			var _this1 = this.data;
 			return (__map_reserved[key] != null?_this1.getReserved(key):_this1.h[key])[0];
-		} else {
-			return null;
-		}
-	}
-	,getArray: function(key) {
-		key = key.toLowerCase();
-		var _this = this.data;
-		if(__map_reserved[key] != null?_this.existsReserved(key):_this.h.hasOwnProperty(key)) {
-			var _this1 = this.data;
-			return __map_reserved[key] != null?_this1.getReserved(key):_this1.h[key];
 		} else {
 			return null;
 		}
@@ -12264,9 +9124,6 @@ kha_audio2_ogg_vorbis_data_Page.prototype = {
 	}
 	,__class__: kha_audio2_ogg_vorbis_data_Page
 };
-var kha_audio2_ogg_vorbis_data_PageFlag = function() { };
-$hxClasses["kha.audio2.ogg.vorbis.data.PageFlag"] = kha_audio2_ogg_vorbis_data_PageFlag;
-kha_audio2_ogg_vorbis_data_PageFlag.__name__ = true;
 var kha_audio2_ogg_vorbis_data_ProbedPage = function() {
 };
 $hxClasses["kha.audio2.ogg.vorbis.data.ProbedPage"] = kha_audio2_ogg_vorbis_data_ProbedPage;
@@ -13073,15 +9930,9 @@ kha_audio2_ogg_vorbis_data_Residue.prototype = {
 	}
 	,__class__: kha_audio2_ogg_vorbis_data_Residue
 };
-var kha_audio2_ogg_vorbis_data_Setting = function() { };
-$hxClasses["kha.audio2.ogg.vorbis.data.Setting"] = kha_audio2_ogg_vorbis_data_Setting;
-kha_audio2_ogg_vorbis_data_Setting.__name__ = true;
 var kha_graphics1_Graphics = function() { };
 $hxClasses["kha.graphics1.Graphics"] = kha_graphics1_Graphics;
 kha_graphics1_Graphics.__name__ = true;
-kha_graphics1_Graphics.prototype = {
-	__class__: kha_graphics1_Graphics
-};
 var kha_graphics2_Graphics = function() {
 	this.transformations = [];
 	this.transformations.push(new kha_math_FastMatrix3(1,0,0,0,1,0,0,0,1));
@@ -13103,301 +9954,24 @@ kha_graphics2_Graphics.prototype = {
 	}
 	,end: function() {
 	}
-	,flush: function() {
-	}
-	,clear: function(color) {
-	}
 	,drawImage: function(img,x,y) {
 		this.drawSubImage(img,x,y,0,0,img.get_width(),img.get_height());
 	}
 	,drawSubImage: function(img,x,y,sx,sy,sw,sh) {
 		this.drawScaledSubImage(img,sx,sy,sw,sh,x,y,sw,sh);
 	}
-	,drawScaledImage: function(img,dx,dy,dw,dh) {
-		this.drawScaledSubImage(img,0,0,img.get_width(),img.get_height(),dx,dy,dw,dh);
-	}
 	,drawScaledSubImage: function(image,sx,sy,sw,sh,dx,dy,dw,dh) {
 	}
-	,drawRect: function(x,y,width,height,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-	}
 	,fillRect: function(x,y,width,height) {
-	}
-	,drawString: function(text,x,y) {
-	}
-	,drawLine: function(x1,y1,x2,y2,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-	}
-	,drawVideo: function(video,x,y,width,height) {
-	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-	}
-	,get_imageScaleQuality: function() {
-		return kha_graphics2_ImageScaleQuality.Low;
-	}
-	,set_imageScaleQuality: function(value) {
-		return kha_graphics2_ImageScaleQuality.High;
-	}
-	,get_mipmapScaleQuality: function() {
-		return kha_graphics2_ImageScaleQuality.Low;
-	}
-	,set_mipmapScaleQuality: function(value) {
-		return kha_graphics2_ImageScaleQuality.High;
-	}
-	,get_color: function() {
-		return kha__$Color_Color_$Impl_$.Black;
 	}
 	,set_color: function(color) {
 		return kha__$Color_Color_$Impl_$.Black;
 	}
-	,get_font: function() {
-		return null;
-	}
-	,set_font: function(font) {
-		return null;
-	}
 	,get_fontSize: function() {
 		return this.myFontSize;
 	}
-	,set_fontSize: function(value) {
-		return this.myFontSize = value;
-	}
-	,get_fontGlyphs: function() {
-		return this.myFontGlyphs;
-	}
-	,set_fontGlyphs: function(value) {
-		return this.myFontGlyphs = value;
-	}
-	,pushTransformation: function(transformation) {
-		this.setTransformation(transformation);
-		this.transformations.push(transformation);
-	}
-	,popTransformation: function() {
-		var ret = this.transformations.pop();
-		this.setTransformation(this.transformations[this.transformations.length - 1]);
-		return ret;
-	}
-	,get_transformation: function() {
-		return this.transformations[this.transformations.length - 1];
-	}
-	,set_transformation: function(transformation) {
-		this.setTransformation(transformation);
-		return this.transformations[this.transformations.length - 1] = transformation;
-	}
-	,translation: function(tx,ty) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var m = this.transformations[this.transformations.length - 1];
-		return new kha_math_FastMatrix3(_this__00 * m._00 + _this__10 * m._01 + tx * m._02,_this__00 * m._10 + _this__10 * m._11 + tx * m._12,_this__00 * m._20 + _this__10 * m._21 + tx * m._22,_this__01 * m._00 + _this__11 * m._01 + ty * m._02,_this__01 * m._10 + _this__11 * m._11 + ty * m._12,_this__01 * m._20 + _this__11 * m._21 + ty * m._22,_this__02 * m._00 + _this__12 * m._01 + _this__22 * m._02,_this__02 * m._10 + _this__12 * m._11 + _this__22 * m._12,_this__02 * m._20 + _this__12 * m._21 + _this__22 * m._22);
-	}
-	,translate: function(tx,ty) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var m = this.transformations[this.transformations.length - 1];
-		var transformation = new kha_math_FastMatrix3(_this__00 * m._00 + _this__10 * m._01 + tx * m._02,_this__00 * m._10 + _this__10 * m._11 + tx * m._12,_this__00 * m._20 + _this__10 * m._21 + tx * m._22,_this__01 * m._00 + _this__11 * m._01 + ty * m._02,_this__01 * m._10 + _this__11 * m._11 + ty * m._12,_this__01 * m._20 + _this__11 * m._21 + ty * m._22,_this__02 * m._00 + _this__12 * m._01 + _this__22 * m._02,_this__02 * m._10 + _this__12 * m._11 + _this__22 * m._12,_this__02 * m._20 + _this__12 * m._21 + _this__22 * m._22);
-		this.setTransformation(transformation);
-		this.transformations[this.transformations.length - 1] = transformation;
-	}
-	,pushTranslation: function(tx,ty) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var m = this.transformations[this.transformations.length - 1];
-		this.pushTransformation(new kha_math_FastMatrix3(_this__00 * m._00 + _this__10 * m._01 + tx * m._02,_this__00 * m._10 + _this__10 * m._11 + tx * m._12,_this__00 * m._20 + _this__10 * m._21 + tx * m._22,_this__01 * m._00 + _this__11 * m._01 + ty * m._02,_this__01 * m._10 + _this__11 * m._11 + ty * m._12,_this__01 * m._20 + _this__11 * m._21 + ty * m._22,_this__02 * m._00 + _this__12 * m._01 + _this__22 * m._02,_this__02 * m._10 + _this__12 * m._11 + _this__22 * m._12,_this__02 * m._20 + _this__12 * m._21 + _this__22 * m._22));
-	}
-	,rotation: function(angle,centerx,centery) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var _00 = Math.cos(angle);
-		var _10 = -Math.sin(angle);
-		var _01 = Math.sin(angle);
-		var _11 = Math.cos(angle);
-		var m__20 = 0;
-		var m__21 = 0;
-		var m__02 = 0;
-		var m__12 = 0;
-		var m__22 = 1;
-		var _001 = _this__00 * _00 + _this__10 * _01 + centerx * m__02;
-		var _101 = _this__00 * _10 + _this__10 * _11 + centerx * m__12;
-		var _20 = _this__00 * m__20 + _this__10 * m__21 + centerx * m__22;
-		var _011 = _this__01 * _00 + _this__11 * _01 + centery * m__02;
-		var _111 = _this__01 * _10 + _this__11 * _11 + centery * m__12;
-		var _21 = _this__01 * m__20 + _this__11 * m__21 + centery * m__22;
-		var _02 = _this__02 * _00 + _this__12 * _01 + _this__22 * m__02;
-		var _12 = _this__02 * _10 + _this__12 * _11 + _this__22 * m__12;
-		var _22 = _this__02 * m__20 + _this__12 * m__21 + _this__22 * m__22;
-		var m__00 = 1;
-		var m__10 = 0;
-		var m__201 = -centerx;
-		var m__01 = 0;
-		var m__11 = 1;
-		var m__211 = -centery;
-		var m__021 = 0;
-		var m__121 = 0;
-		var m__221 = 1;
-		var _002 = _001 * m__00 + _101 * m__01 + _20 * m__021;
-		var _102 = _001 * m__10 + _101 * m__11 + _20 * m__121;
-		var _201 = _001 * m__201 + _101 * m__211 + _20 * m__221;
-		var _012 = _011 * m__00 + _111 * m__01 + _21 * m__021;
-		var _112 = _011 * m__10 + _111 * m__11 + _21 * m__121;
-		var _211 = _011 * m__201 + _111 * m__211 + _21 * m__221;
-		var _021 = _02 * m__00 + _12 * m__01 + _22 * m__021;
-		var _121 = _02 * m__10 + _12 * m__11 + _22 * m__121;
-		var _221 = _02 * m__201 + _12 * m__211 + _22 * m__221;
-		var m = this.transformations[this.transformations.length - 1];
-		return new kha_math_FastMatrix3(_002 * m._00 + _102 * m._01 + _201 * m._02,_002 * m._10 + _102 * m._11 + _201 * m._12,_002 * m._20 + _102 * m._21 + _201 * m._22,_012 * m._00 + _112 * m._01 + _211 * m._02,_012 * m._10 + _112 * m._11 + _211 * m._12,_012 * m._20 + _112 * m._21 + _211 * m._22,_021 * m._00 + _121 * m._01 + _221 * m._02,_021 * m._10 + _121 * m._11 + _221 * m._12,_021 * m._20 + _121 * m._21 + _221 * m._22);
-	}
-	,rotate: function(angle,centerx,centery) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var _00 = Math.cos(angle);
-		var _10 = -Math.sin(angle);
-		var _01 = Math.sin(angle);
-		var _11 = Math.cos(angle);
-		var m__20 = 0;
-		var m__21 = 0;
-		var m__02 = 0;
-		var m__12 = 0;
-		var m__22 = 1;
-		var _001 = _this__00 * _00 + _this__10 * _01 + centerx * m__02;
-		var _101 = _this__00 * _10 + _this__10 * _11 + centerx * m__12;
-		var _20 = _this__00 * m__20 + _this__10 * m__21 + centerx * m__22;
-		var _011 = _this__01 * _00 + _this__11 * _01 + centery * m__02;
-		var _111 = _this__01 * _10 + _this__11 * _11 + centery * m__12;
-		var _21 = _this__01 * m__20 + _this__11 * m__21 + centery * m__22;
-		var _02 = _this__02 * _00 + _this__12 * _01 + _this__22 * m__02;
-		var _12 = _this__02 * _10 + _this__12 * _11 + _this__22 * m__12;
-		var _22 = _this__02 * m__20 + _this__12 * m__21 + _this__22 * m__22;
-		var m__00 = 1;
-		var m__10 = 0;
-		var m__201 = -centerx;
-		var m__01 = 0;
-		var m__11 = 1;
-		var m__211 = -centery;
-		var m__021 = 0;
-		var m__121 = 0;
-		var m__221 = 1;
-		var _002 = _001 * m__00 + _101 * m__01 + _20 * m__021;
-		var _102 = _001 * m__10 + _101 * m__11 + _20 * m__121;
-		var _201 = _001 * m__201 + _101 * m__211 + _20 * m__221;
-		var _012 = _011 * m__00 + _111 * m__01 + _21 * m__021;
-		var _112 = _011 * m__10 + _111 * m__11 + _21 * m__121;
-		var _211 = _011 * m__201 + _111 * m__211 + _21 * m__221;
-		var _021 = _02 * m__00 + _12 * m__01 + _22 * m__021;
-		var _121 = _02 * m__10 + _12 * m__11 + _22 * m__121;
-		var _221 = _02 * m__201 + _12 * m__211 + _22 * m__221;
-		var m = this.transformations[this.transformations.length - 1];
-		var transformation = new kha_math_FastMatrix3(_002 * m._00 + _102 * m._01 + _201 * m._02,_002 * m._10 + _102 * m._11 + _201 * m._12,_002 * m._20 + _102 * m._21 + _201 * m._22,_012 * m._00 + _112 * m._01 + _211 * m._02,_012 * m._10 + _112 * m._11 + _211 * m._12,_012 * m._20 + _112 * m._21 + _211 * m._22,_021 * m._00 + _121 * m._01 + _221 * m._02,_021 * m._10 + _121 * m._11 + _221 * m._12,_021 * m._20 + _121 * m._21 + _221 * m._22);
-		this.setTransformation(transformation);
-		this.transformations[this.transformations.length - 1] = transformation;
-	}
-	,pushRotation: function(angle,centerx,centery) {
-		var _this__00 = 1;
-		var _this__10 = 0;
-		var _this__01 = 0;
-		var _this__11 = 1;
-		var _this__02 = 0;
-		var _this__12 = 0;
-		var _this__22 = 1;
-		var _00 = Math.cos(angle);
-		var _10 = -Math.sin(angle);
-		var _01 = Math.sin(angle);
-		var _11 = Math.cos(angle);
-		var m__20 = 0;
-		var m__21 = 0;
-		var m__02 = 0;
-		var m__12 = 0;
-		var m__22 = 1;
-		var _001 = _this__00 * _00 + _this__10 * _01 + centerx * m__02;
-		var _101 = _this__00 * _10 + _this__10 * _11 + centerx * m__12;
-		var _20 = _this__00 * m__20 + _this__10 * m__21 + centerx * m__22;
-		var _011 = _this__01 * _00 + _this__11 * _01 + centery * m__02;
-		var _111 = _this__01 * _10 + _this__11 * _11 + centery * m__12;
-		var _21 = _this__01 * m__20 + _this__11 * m__21 + centery * m__22;
-		var _02 = _this__02 * _00 + _this__12 * _01 + _this__22 * m__02;
-		var _12 = _this__02 * _10 + _this__12 * _11 + _this__22 * m__12;
-		var _22 = _this__02 * m__20 + _this__12 * m__21 + _this__22 * m__22;
-		var m__00 = 1;
-		var m__10 = 0;
-		var m__201 = -centerx;
-		var m__01 = 0;
-		var m__11 = 1;
-		var m__211 = -centery;
-		var m__021 = 0;
-		var m__121 = 0;
-		var m__221 = 1;
-		var _002 = _001 * m__00 + _101 * m__01 + _20 * m__021;
-		var _102 = _001 * m__10 + _101 * m__11 + _20 * m__121;
-		var _201 = _001 * m__201 + _101 * m__211 + _20 * m__221;
-		var _012 = _011 * m__00 + _111 * m__01 + _21 * m__021;
-		var _112 = _011 * m__10 + _111 * m__11 + _21 * m__121;
-		var _211 = _011 * m__201 + _111 * m__211 + _21 * m__221;
-		var _021 = _02 * m__00 + _12 * m__01 + _22 * m__021;
-		var _121 = _02 * m__10 + _12 * m__11 + _22 * m__121;
-		var _221 = _02 * m__201 + _12 * m__211 + _22 * m__221;
-		var m = this.transformations[this.transformations.length - 1];
-		this.pushTransformation(new kha_math_FastMatrix3(_002 * m._00 + _102 * m._01 + _201 * m._02,_002 * m._10 + _102 * m._11 + _201 * m._12,_002 * m._20 + _102 * m._21 + _201 * m._22,_012 * m._00 + _112 * m._01 + _211 * m._02,_012 * m._10 + _112 * m._11 + _211 * m._12,_012 * m._20 + _112 * m._21 + _211 * m._22,_021 * m._00 + _121 * m._01 + _221 * m._02,_021 * m._10 + _121 * m._11 + _221 * m._12,_021 * m._20 + _121 * m._21 + _221 * m._22));
-	}
-	,pushOpacity: function(opacity) {
-		this.setOpacity(opacity);
-		this.opacities.push(opacity);
-	}
-	,popOpacity: function() {
-		var ret = this.opacities.pop();
-		this.setOpacity(this.get_opacity());
-		return ret;
-	}
 	,get_opacity: function() {
 		return this.opacities[this.opacities.length - 1];
-	}
-	,set_opacity: function(opacity) {
-		this.setOpacity(opacity);
-		return this.opacities[this.opacities.length - 1] = opacity;
-	}
-	,scissor: function(x,y,width,height) {
-	}
-	,disableScissor: function() {
-	}
-	,get_pipeline: function() {
-		return this.pipe;
-	}
-	,set_pipeline: function(pipeline) {
-		this.setPipeline(pipeline);
-		return this.pipe = pipeline;
-	}
-	,setTransformation: function(transformation) {
-	}
-	,setOpacity: function(opacity) {
-	}
-	,setPipeline: function(pipeline) {
 	}
 	,__class__: kha_graphics2_Graphics
 };
@@ -13408,22 +9982,7 @@ $hxClasses["kha.graphics2.Graphics1"] = kha_graphics2_Graphics1;
 kha_graphics2_Graphics1.__name__ = true;
 kha_graphics2_Graphics1.__interfaces__ = [kha_graphics1_Graphics];
 kha_graphics2_Graphics1.prototype = {
-	begin: function() {
-		if(this.texture == null) {
-			this.texture = kha_Image.create(this.canvas.get_width(),this.canvas.get_height(),kha_graphics4_TextureFormat.RGBA32,kha_graphics4_Usage.ReadableUsage);
-		}
-		this.pixels = this.texture.lock();
-	}
-	,end: function() {
-		this.texture.unlock();
-		this.canvas.get_g2().begin();
-		this.canvas.get_g2().drawImage(this.texture,0,0);
-		this.canvas.get_g2().end();
-	}
-	,setPixel: function(x,y,color) {
-		this.pixels.setInt32(y * this.texture.get_realWidth() * 4 + x * 4,color);
-	}
-	,__class__: kha_graphics2_Graphics1
+	__class__: kha_graphics2_Graphics1
 };
 var kha_graphics2_ImageScaleQuality = $hxClasses["kha.graphics2.ImageScaleQuality"] = { __ename__ : true, __constructs__ : ["Low","High"] };
 kha_graphics2_ImageScaleQuality.Low = ["Low",0];
@@ -13432,1822 +9991,6 @@ kha_graphics2_ImageScaleQuality.Low.__enum__ = kha_graphics2_ImageScaleQuality;
 kha_graphics2_ImageScaleQuality.High = ["High",1];
 kha_graphics2_ImageScaleQuality.High.toString = $estr;
 kha_graphics2_ImageScaleQuality.High.__enum__ = kha_graphics2_ImageScaleQuality;
-var kha_graphics2_truetype_VectorOfIntPointer = function() {
-};
-$hxClasses["kha.graphics2.truetype.VectorOfIntPointer"] = kha_graphics2_truetype_VectorOfIntPointer;
-kha_graphics2_truetype_VectorOfIntPointer.__name__ = true;
-kha_graphics2_truetype_VectorOfIntPointer.prototype = {
-	__class__: kha_graphics2_truetype_VectorOfIntPointer
-};
-var kha_graphics2_truetype_Stbtt_$temp_$rect = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_temp_rect"] = kha_graphics2_truetype_Stbtt_$temp_$rect;
-kha_graphics2_truetype_Stbtt_$temp_$rect.__name__ = true;
-kha_graphics2_truetype_Stbtt_$temp_$rect.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$temp_$rect
-};
-var kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_temp_glyph_h_metrics"] = kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics;
-kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics.__name__ = true;
-kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics
-};
-var kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_temp_font_v_metrics"] = kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics;
-kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics.__name__ = true;
-kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics
-};
-var kha_graphics2_truetype_Stbtt_$temp_$region = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_temp_region"] = kha_graphics2_truetype_Stbtt_$temp_$region;
-kha_graphics2_truetype_Stbtt_$temp_$region.__name__ = true;
-kha_graphics2_truetype_Stbtt_$temp_$region.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$temp_$region
-};
-var kha_graphics2_truetype_Stbtt_$bakedchar = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_bakedchar"] = kha_graphics2_truetype_Stbtt_$bakedchar;
-kha_graphics2_truetype_Stbtt_$bakedchar.__name__ = true;
-kha_graphics2_truetype_Stbtt_$bakedchar.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$bakedchar
-};
-var kha_graphics2_truetype_Stbtt_$aligned_$quad = function() { };
-$hxClasses["kha.graphics2.truetype.Stbtt_aligned_quad"] = kha_graphics2_truetype_Stbtt_$aligned_$quad;
-kha_graphics2_truetype_Stbtt_$aligned_$quad.__name__ = true;
-kha_graphics2_truetype_Stbtt_$aligned_$quad.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$aligned_$quad
-};
-var kha_graphics2_truetype_Stbtt_$packedchar = function() { };
-$hxClasses["kha.graphics2.truetype.Stbtt_packedchar"] = kha_graphics2_truetype_Stbtt_$packedchar;
-kha_graphics2_truetype_Stbtt_$packedchar.__name__ = true;
-kha_graphics2_truetype_Stbtt_$packedchar.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$packedchar
-};
-var kha_graphics2_truetype_Stbtt_$pack_$range = function() { };
-$hxClasses["kha.graphics2.truetype.Stbtt_pack_range"] = kha_graphics2_truetype_Stbtt_$pack_$range;
-kha_graphics2_truetype_Stbtt_$pack_$range.__name__ = true;
-kha_graphics2_truetype_Stbtt_$pack_$range.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$pack_$range
-};
-var kha_graphics2_truetype_Stbtt_$pack_$context = function() { };
-$hxClasses["kha.graphics2.truetype.Stbtt_pack_context"] = kha_graphics2_truetype_Stbtt_$pack_$context;
-kha_graphics2_truetype_Stbtt_$pack_$context.__name__ = true;
-kha_graphics2_truetype_Stbtt_$pack_$context.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$pack_$context
-};
-var kha_graphics2_truetype_Stbtt_$fontinfo = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_fontinfo"] = kha_graphics2_truetype_Stbtt_$fontinfo;
-kha_graphics2_truetype_Stbtt_$fontinfo.__name__ = true;
-kha_graphics2_truetype_Stbtt_$fontinfo.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$fontinfo
-};
-var kha_graphics2_truetype_Stbtt_$vertex = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt_vertex"] = kha_graphics2_truetype_Stbtt_$vertex;
-kha_graphics2_truetype_Stbtt_$vertex.__name__ = true;
-kha_graphics2_truetype_Stbtt_$vertex.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$vertex
-};
-var kha_graphics2_truetype_Stbtt_$_$bitmap = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt__bitmap"] = kha_graphics2_truetype_Stbtt_$_$bitmap;
-kha_graphics2_truetype_Stbtt_$_$bitmap.__name__ = true;
-kha_graphics2_truetype_Stbtt_$_$bitmap.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$_$bitmap
-};
-var kha_graphics2_truetype_Stbtt_$_$edge = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt__edge"] = kha_graphics2_truetype_Stbtt_$_$edge;
-kha_graphics2_truetype_Stbtt_$_$edge.__name__ = true;
-kha_graphics2_truetype_Stbtt_$_$edge.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$_$edge
-};
-var kha_graphics2_truetype_Stbtt_$_$active_$edge = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt__active_edge"] = kha_graphics2_truetype_Stbtt_$_$active_$edge;
-kha_graphics2_truetype_Stbtt_$_$active_$edge.__name__ = true;
-kha_graphics2_truetype_Stbtt_$_$active_$edge.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$_$active_$edge
-};
-var kha_graphics2_truetype_Stbtt_$_$point = function() {
-};
-$hxClasses["kha.graphics2.truetype.Stbtt__point"] = kha_graphics2_truetype_Stbtt_$_$point;
-kha_graphics2_truetype_Stbtt_$_$point.__name__ = true;
-kha_graphics2_truetype_Stbtt_$_$point.prototype = {
-	__class__: kha_graphics2_truetype_Stbtt_$_$point
-};
-var kha_graphics2_truetype_StbTruetype = function() { };
-$hxClasses["kha.graphics2.truetype.StbTruetype"] = kha_graphics2_truetype_StbTruetype;
-kha_graphics2_truetype_StbTruetype.__name__ = true;
-kha_graphics2_truetype_StbTruetype.STBTT_assert = function(value) {
-	if(!value) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-};
-kha_graphics2_truetype_StbTruetype.STBTT_POINT_SIZE = function(x) {
-	return -x;
-};
-kha_graphics2_truetype_StbTruetype.ttBYTE = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	return p.readU8(pos);
-};
-kha_graphics2_truetype_StbTruetype.ttCHAR = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var n = p.readU8(pos);
-	if(n >= 128) {
-		return n - 256;
-	}
-	return n;
-};
-kha_graphics2_truetype_StbTruetype.ttUSHORT = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var ch1 = p.readU8(pos);
-	return p.readU8(pos + 1) | ch1 << 8;
-};
-kha_graphics2_truetype_StbTruetype.ttSHORT = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var ch1 = p.readU8(pos);
-	var n = p.readU8(pos + 1) | ch1 << 8;
-	if((n & 32768) != 0) {
-		return n - 65536;
-	}
-	return n;
-};
-kha_graphics2_truetype_StbTruetype.ttULONG = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var ch1 = p.readU8(pos);
-	var ch2 = p.readU8(pos + 1);
-	var ch3 = p.readU8(pos + 2);
-	return p.readU8(pos + 3) | ch3 << 8 | ch2 << 16 | ch1 << 24;
-};
-kha_graphics2_truetype_StbTruetype.ttLONG = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var ch1 = p.readU8(pos);
-	var ch2 = p.readU8(pos + 1);
-	var ch3 = p.readU8(pos + 2);
-	return p.readU8(pos + 3) | ch3 << 8 | ch2 << 16 | ch1 << 24;
-};
-kha_graphics2_truetype_StbTruetype.ttFixed = function(p,pos) {
-	if(pos == null) {
-		pos = 0;
-	}
-	var ch1 = p.readU8(pos);
-	var ch2 = p.readU8(pos + 1);
-	var ch3 = p.readU8(pos + 2);
-	return p.readU8(pos + 3) | ch3 << 8 | ch2 << 16 | ch1 << 24;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_tag4 = function(p,pos,c0,c1,c2,c3) {
-	if(p.readU8(pos) == c0 && p.readU8(pos + 1) == c1 && p.readU8(pos + 2) == c2) {
-		return p.readU8(pos + 3) == c3;
-	} else {
-		return false;
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_tag = function(p,pos,str) {
-	var c0 = HxOverrides.cca(str,0);
-	var c1 = HxOverrides.cca(str,1);
-	var c2 = HxOverrides.cca(str,2);
-	var c3 = HxOverrides.cca(str,3);
-	if(p.readU8(pos) == c0 && p.readU8(pos + 1) == c1 && p.readU8(pos + 2) == c2) {
-		return p.readU8(pos + 3) == c3;
-	} else {
-		return false;
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt__isfont = function(font) {
-	var c0 = HxOverrides.cca("1",0);
-	if(font.readU8(0) == c0 && font.readU8(1) == 0 && font.readU8(2) == 0 && font.readU8(3) == 0) {
-		return true;
-	}
-	var c01 = HxOverrides.cca("typ1",0);
-	var c1 = HxOverrides.cca("typ1",1);
-	var c2 = HxOverrides.cca("typ1",2);
-	var c3 = HxOverrides.cca("typ1",3);
-	if(font.readU8(0) == c01 && font.readU8(1) == c1 && font.readU8(2) == c2 && font.readU8(3) == c3) {
-		return true;
-	}
-	var c02 = HxOverrides.cca("OTTO",0);
-	var c11 = HxOverrides.cca("OTTO",1);
-	var c21 = HxOverrides.cca("OTTO",2);
-	var c31 = HxOverrides.cca("OTTO",3);
-	if(font.readU8(0) == c02 && font.readU8(1) == c11 && font.readU8(2) == c21 && font.readU8(3) == c31) {
-		return true;
-	}
-	if(font.readU8(0) == 0 && font.readU8(1) == 1 && font.readU8(2) == 0 && font.readU8(3) == 0) {
-		return true;
-	}
-	return false;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__find_table = function(data,fontstart,tag) {
-	var pos = fontstart + 4;
-	var ch1 = data.readU8(pos);
-	var num_tables = data.readU8(pos + 1) | ch1 << 8;
-	var tabledir = fontstart + 12;
-	var _g1 = 0;
-	while(_g1 < num_tables) {
-		var loc = tabledir + 16 * _g1++;
-		var c0 = HxOverrides.cca(tag,0);
-		var c1 = HxOverrides.cca(tag,1);
-		var c2 = HxOverrides.cca(tag,2);
-		var c3 = HxOverrides.cca(tag,3);
-		if(data.readU8(loc) == c0 && data.readU8(loc + 1) == c1 && data.readU8(loc + 2) == c2 && data.readU8(loc + 3) == c3) {
-			var pos1 = loc + 8;
-			var ch11 = data.readU8(pos1);
-			var ch2 = data.readU8(pos1 + 1);
-			var ch3 = data.readU8(pos1 + 2);
-			return data.readU8(pos1 + 3) | ch3 << 8 | ch2 << 16 | ch11 << 24;
-		}
-	}
-	return 0;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetFontOffsetForIndex = function(font_collection,index) {
-	if(kha_graphics2_truetype_StbTruetype.stbtt__isfont(font_collection)) {
-		if(index == 0) {
-			return 0;
-		} else {
-			return -1;
-		}
-	}
-	var c0 = HxOverrides.cca("ttcf",0);
-	var c1 = HxOverrides.cca("ttcf",1);
-	var c2 = HxOverrides.cca("ttcf",2);
-	var c3 = HxOverrides.cca("ttcf",3);
-	if(font_collection.readU8(0) == c0 && font_collection.readU8(1) == c1 && font_collection.readU8(2) == c2 && font_collection.readU8(3) == c3) {
-		var tmp;
-		var ch1 = font_collection.readU8(4);
-		var ch2 = font_collection.readU8(5);
-		var ch3 = font_collection.readU8(6);
-		if((font_collection.readU8(7) | ch3 << 8 | ch2 << 16 | ch1 << 24) != 65536) {
-			var ch11 = font_collection.readU8(4);
-			var ch21 = font_collection.readU8(5);
-			var ch31 = font_collection.readU8(6);
-			tmp = (font_collection.readU8(7) | ch31 << 8 | ch21 << 16 | ch11 << 24) == 131072;
-		} else {
-			tmp = true;
-		}
-		if(tmp) {
-			var ch12 = font_collection.readU8(8);
-			var ch22 = font_collection.readU8(9);
-			var ch32 = font_collection.readU8(10);
-			if(index >= (font_collection.readU8(11) | ch32 << 8 | ch22 << 16 | ch12 << 24)) {
-				return -1;
-			}
-			var pos = 12 + index * 4;
-			var ch13 = font_collection.readU8(pos);
-			var ch23 = font_collection.readU8(pos + 1);
-			var ch33 = font_collection.readU8(pos + 2);
-			return font_collection.readU8(pos + 3) | ch33 << 8 | ch23 << 16 | ch13 << 24;
-		}
-	}
-	return -1;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_InitFont = function(info,data,fontstart) {
-	var cmap;
-	var t;
-	var numTables;
-	info.data = data;
-	info.fontstart = fontstart;
-	cmap = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"cmap");
-	info.loca = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"loca");
-	info.head = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"head");
-	info.glyf = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"glyf");
-	info.hhea = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"hhea");
-	info.hmtx = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"hmtx");
-	info.kern = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"kern");
-	if(cmap == 0 || info.loca == 0 || info.head == 0 || info.glyf == 0 || info.hhea == 0 || info.hmtx == 0) {
-		return false;
-	}
-	t = kha_graphics2_truetype_StbTruetype.stbtt__find_table(data,fontstart,"maxp");
-	if(t != 0) {
-		var pos = t + 4;
-		var ch1 = data.readU8(pos);
-		info.numGlyphs = data.readU8(pos + 1) | ch1 << 8;
-	} else {
-		info.numGlyphs = 65535;
-	}
-	var pos1 = cmap + 2;
-	var ch11 = data.readU8(pos1);
-	numTables = data.readU8(pos1 + 1) | ch11 << 8;
-	info.index_map = 0;
-	var _g1 = 0;
-	while(_g1 < numTables) {
-		var encoding_record = cmap + 4 + 8 * _g1++;
-		var ch12 = data.readU8(encoding_record);
-		switch(data.readU8(encoding_record + 1) | ch12 << 8) {
-		case 0:
-			var pos2 = encoding_record + 4;
-			var ch13 = data.readU8(pos2);
-			var ch2 = data.readU8(pos2 + 1);
-			var ch3 = data.readU8(pos2 + 2);
-			info.index_map = cmap + (data.readU8(pos2 + 3) | ch3 << 8 | ch2 << 16 | ch13 << 24);
-			break;
-		case 3:
-			var pos3 = encoding_record + 2;
-			var ch14 = data.readU8(pos3);
-			switch(data.readU8(pos3 + 1) | ch14 << 8) {
-			case 1:case 10:
-				var pos4 = encoding_record + 4;
-				var ch15 = data.readU8(pos4);
-				var ch21 = data.readU8(pos4 + 1);
-				var ch31 = data.readU8(pos4 + 2);
-				info.index_map = cmap + (data.readU8(pos4 + 3) | ch31 << 8 | ch21 << 16 | ch15 << 24);
-				break;
-			}
-			break;
-		}
-	}
-	if(info.index_map == 0) {
-		return false;
-	}
-	var pos5 = info.head + 50;
-	var ch16 = data.readU8(pos5);
-	info.indexToLocFormat = data.readU8(pos5 + 1) | ch16 << 8;
-	return true;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex = function(info,unicode_codepoint) {
-	var data = info.data;
-	var index_map = info.index_map;
-	var ch1 = data.readU8(index_map);
-	var format = data.readU8(index_map + 1) | ch1 << 8;
-	if(format == 0) {
-		var pos = index_map + 2;
-		var ch11 = data.readU8(pos);
-		if(unicode_codepoint < (data.readU8(pos + 1) | ch11 << 8) - 6) {
-			return data.readU8(index_map + 6 + unicode_codepoint);
-		}
-		return 0;
-	} else if(format == 6) {
-		var pos1 = index_map + 6;
-		var ch12 = data.readU8(pos1);
-		var first = data.readU8(pos1 + 1) | ch12 << 8;
-		var pos2 = index_map + 8;
-		var ch13 = data.readU8(pos2);
-		var count = data.readU8(pos2 + 1) | ch13 << 8;
-		if(unicode_codepoint >= first && unicode_codepoint < first + count) {
-			var pos3 = index_map + 10 + (unicode_codepoint - first) * 2;
-			var ch14 = data.readU8(pos3);
-			return data.readU8(pos3 + 1) | ch14 << 8;
-		}
-		return 0;
-	} else if(format == 2) {
-		throw new js__$Boot_HaxeError("Error");
-	} else if(format == 4) {
-		var pos4 = index_map + 6;
-		var ch15 = data.readU8(pos4);
-		var segcount = (data.readU8(pos4 + 1) | ch15 << 8) >> 1;
-		var pos5 = index_map + 8;
-		var ch16 = data.readU8(pos5);
-		var searchRange = (data.readU8(pos5 + 1) | ch16 << 8) >> 1;
-		var pos6 = index_map + 10;
-		var ch17 = data.readU8(pos6);
-		var entrySelector = data.readU8(pos6 + 1) | ch17 << 8;
-		var pos7 = index_map + 12;
-		var ch18 = data.readU8(pos7);
-		var rangeShift = (data.readU8(pos7 + 1) | ch18 << 8) >> 1;
-		var endCount = index_map + 14;
-		var search = endCount;
-		if(unicode_codepoint > 65535) {
-			return 0;
-		}
-		var pos8 = endCount + rangeShift * 2;
-		var ch19 = data.readU8(pos8);
-		if(unicode_codepoint >= (data.readU8(pos8 + 1) | ch19 << 8)) {
-			search = endCount + rangeShift * 2;
-		}
-		search -= 2;
-		while(entrySelector != 0) {
-			var end;
-			searchRange >>= 1;
-			var pos9 = search + searchRange * 2;
-			var ch110 = data.readU8(pos9);
-			end = data.readU8(pos9 + 1) | ch110 << 8;
-			if(unicode_codepoint > end) {
-				search += searchRange * 2;
-			}
-			--entrySelector;
-		}
-		search += 2;
-		var offset;
-		var start;
-		var item = search - endCount >> 1;
-		var pos10 = endCount + 2 * item;
-		var ch111 = data.readU8(pos10);
-		if(unicode_codepoint > (data.readU8(pos10 + 1) | ch111 << 8)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-		var pos11 = index_map + 14 + segcount * 2 + 2 + 2 * item;
-		var ch112 = data.readU8(pos11);
-		start = data.readU8(pos11 + 1) | ch112 << 8;
-		if(unicode_codepoint < start) {
-			return 0;
-		}
-		var pos12 = index_map + 14 + segcount * 6 + 2 + 2 * item;
-		var ch113 = data.readU8(pos12);
-		offset = data.readU8(pos12 + 1) | ch113 << 8;
-		if(offset == 0) {
-			var pos13 = index_map + 14 + segcount * 4 + 2 + 2 * item;
-			var ch114 = data.readU8(pos13);
-			var n = data.readU8(pos13 + 1) | ch114 << 8;
-			return unicode_codepoint + ((n & 32768) != 0?n - 65536:n);
-		}
-		var pos14 = offset + (unicode_codepoint - start) * 2 + index_map + 14 + segcount * 6 + 2 + 2 * item;
-		var ch115 = data.readU8(pos14);
-		return data.readU8(pos14 + 1) | ch115 << 8;
-	} else if(format == 12 || format == 13) {
-		var pos15 = index_map + 12;
-		var ch116 = data.readU8(pos15);
-		var ch2 = data.readU8(pos15 + 1);
-		var ch3 = data.readU8(pos15 + 2);
-		var ngroups = data.readU8(pos15 + 3) | ch3 << 8 | ch2 << 16 | ch116 << 24;
-		var low;
-		var high;
-		low = 0;
-		high = ngroups;
-		while(low < high) {
-			var mid = low + (high - low >> 1);
-			var pos16 = index_map + 16 + mid * 12;
-			var ch117 = data.readU8(pos16);
-			var ch21 = data.readU8(pos16 + 1);
-			var ch31 = data.readU8(pos16 + 2);
-			var start_char = data.readU8(pos16 + 3) | ch31 << 8 | ch21 << 16 | ch117 << 24;
-			var pos17 = index_map + 16 + mid * 12 + 4;
-			var ch118 = data.readU8(pos17);
-			var ch22 = data.readU8(pos17 + 1);
-			var ch32 = data.readU8(pos17 + 2);
-			var end_char = data.readU8(pos17 + 3) | ch32 << 8 | ch22 << 16 | ch118 << 24;
-			if(unicode_codepoint < start_char) {
-				high = mid;
-			} else if(unicode_codepoint > end_char) {
-				low = mid + 1;
-			} else {
-				var pos18 = index_map + 16 + mid * 12 + 8;
-				var ch119 = data.readU8(pos18);
-				var ch23 = data.readU8(pos18 + 1);
-				var ch33 = data.readU8(pos18 + 2);
-				var start_glyph = data.readU8(pos18 + 3) | ch33 << 8 | ch23 << 16 | ch119 << 24;
-				if(format == 12) {
-					return start_glyph + unicode_codepoint - start_char;
-				} else {
-					return start_glyph;
-				}
-			}
-		}
-		return 0;
-	}
-	throw new js__$Boot_HaxeError("Error");
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointShape = function(info,unicode_codepoint) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphShape(info,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,unicode_codepoint));
-};
-kha_graphics2_truetype_StbTruetype.stbtt_setvertex = function(v,type,x,y,cx,cy) {
-	v.type = type;
-	v.x = x;
-	v.y = y;
-	v.cx = cx;
-	v.cy = cy;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__GetGlyfOffset = function(info,glyph_index) {
-	var g1;
-	var g2;
-	if(glyph_index >= info.numGlyphs) {
-		return -1;
-	}
-	if(info.indexToLocFormat >= 2) {
-		return -1;
-	}
-	if(info.indexToLocFormat == 0) {
-		var tmp = info.glyf;
-		var p = info.data;
-		var pos = info.loca + glyph_index * 2;
-		var ch1 = p.readU8(pos);
-		g1 = tmp + (p.readU8(pos + 1) | ch1 << 8) * 2;
-		var tmp1 = info.glyf;
-		var p1 = info.data;
-		var pos1 = info.loca + glyph_index * 2 + 2;
-		var ch11 = p1.readU8(pos1);
-		g2 = tmp1 + (p1.readU8(pos1 + 1) | ch11 << 8) * 2;
-	} else {
-		var p2 = info.data;
-		var pos2 = info.loca + glyph_index * 4;
-		var ch12 = p2.readU8(pos2);
-		var ch2 = p2.readU8(pos2 + 1);
-		var ch3 = p2.readU8(pos2 + 2);
-		var tmp2 = p2.readU8(pos2 + 3) | ch3 << 8 | ch2 << 16 | ch12 << 24;
-		g1 = info.glyf + tmp2;
-		var p3 = info.data;
-		var pos3 = info.loca + glyph_index * 4 + 4;
-		var ch13 = p3.readU8(pos3);
-		var ch21 = p3.readU8(pos3 + 1);
-		var ch31 = p3.readU8(pos3 + 2);
-		var tmp3 = p3.readU8(pos3 + 3) | ch31 << 8 | ch21 << 16 | ch13 << 24;
-		g2 = info.glyf + tmp3;
-	}
-	if(g1 == g2) {
-		return -1;
-	} else {
-		return g1;
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBox = function(info,glyph_index,rect) {
-	var g = kha_graphics2_truetype_StbTruetype.stbtt__GetGlyfOffset(info,glyph_index);
-	if(g < 0) {
-		return false;
-	}
-	var p = info.data;
-	var pos = g + 2;
-	var ch1 = p.readU8(pos);
-	var n = p.readU8(pos + 1) | ch1 << 8;
-	rect.x0 = (n & 32768) != 0?n - 65536:n;
-	var p1 = info.data;
-	var pos1 = g + 4;
-	var ch11 = p1.readU8(pos1);
-	var n1 = p1.readU8(pos1 + 1) | ch11 << 8;
-	rect.y0 = (n1 & 32768) != 0?n1 - 65536:n1;
-	var p2 = info.data;
-	var pos2 = g + 6;
-	var ch12 = p2.readU8(pos2);
-	var n2 = p2.readU8(pos2 + 1) | ch12 << 8;
-	rect.x1 = (n2 & 32768) != 0?n2 - 65536:n2;
-	var p3 = info.data;
-	var pos3 = g + 8;
-	var ch13 = p3.readU8(pos3);
-	var n3 = p3.readU8(pos3 + 1) | ch13 << 8;
-	rect.y1 = (n3 & 32768) != 0?n3 - 65536:n3;
-	return true;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBox = function(info,codepoint,rect) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBox(info,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,codepoint),rect);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_IsGlyphEmpty = function(info,glyph_index) {
-	var numberOfContours;
-	var g = kha_graphics2_truetype_StbTruetype.stbtt__GetGlyfOffset(info,glyph_index);
-	if(g < 0) {
-		return true;
-	}
-	var p = info.data;
-	var ch1 = p.readU8(g);
-	var n = p.readU8(g + 1) | ch1 << 8;
-	if((n & 32768) != 0) {
-		numberOfContours = n - 65536;
-	} else {
-		numberOfContours = n;
-	}
-	return numberOfContours == 0;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__close_shape = function(vertices,num_vertices,was_off,start_off,sx,sy,scx,scy,cx,cy) {
-	if(start_off) {
-		if(was_off) {
-			kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],3,cx + scx >> 1,cy + scy >> 1,cx,cy);
-		}
-		kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],3,sx,sy,scx,scy);
-	} else if(was_off) {
-		kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],3,sx,sy,cx,cy);
-	} else {
-		kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],2,sx,sy,0,0);
-	}
-	return num_vertices;
-};
-kha_graphics2_truetype_StbTruetype.copyVertices = function(from,to,offset,count) {
-	var _g1 = 0;
-	while(_g1 < count) {
-		var i = _g1++;
-		to[offset + i] = from[i];
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphShape = function(info,glyph_index) {
-	var numberOfContours;
-	var endPtsOfContours;
-	var data = info.data;
-	var vertices = null;
-	var num_vertices = 0;
-	var g = kha_graphics2_truetype_StbTruetype.stbtt__GetGlyfOffset(info,glyph_index);
-	if(g < 0) {
-		return null;
-	}
-	var ch1 = data.readU8(g);
-	var n = data.readU8(g + 1) | ch1 << 8;
-	if((n & 32768) != 0) {
-		numberOfContours = n - 65536;
-	} else {
-		numberOfContours = n;
-	}
-	if(numberOfContours > 0) {
-		var flags = 0;
-		var flagcount;
-		var ins;
-		var j = 0;
-		var m;
-		var n1;
-		var next_move = 0;
-		var off = 0;
-		var was_off = false;
-		var start_off = false;
-		var x;
-		var y;
-		var cx;
-		var cy;
-		var sx;
-		var sy;
-		var scx;
-		var scy;
-		var points;
-		var pointsIndex = 0;
-		endPtsOfContours = data.sub(g + 10,data.get_length() - (g + 10));
-		var pos = g + 10 + numberOfContours * 2;
-		var ch11 = data.readU8(pos);
-		ins = data.readU8(pos + 1) | ch11 << 8;
-		points = data.sub(g + 10 + numberOfContours * 2 + 2 + ins,data.get_length() - (g + 10 + numberOfContours * 2 + 2 + ins));
-		var pos1 = numberOfContours * 2 - 2;
-		var ch12 = endPtsOfContours.readU8(pos1);
-		n1 = 1 + (endPtsOfContours.readU8(pos1 + 1) | ch12 << 8);
-		m = n1 + 2 * numberOfContours;
-		vertices = new Array(m);
-		if(vertices == null) {
-			return null;
-		} else {
-			var _g1 = 0;
-			var _g = vertices.length;
-			while(_g1 < _g) vertices[_g1++] = new kha_graphics2_truetype_Stbtt_$vertex();
-		}
-		next_move = 0;
-		flagcount = 0;
-		off = m - n1;
-		var _g11 = 0;
-		var _g2 = n1;
-		while(_g11 < _g2) {
-			var i = _g11++;
-			if(flagcount == 0) {
-				flags = points.readU8(pointsIndex++);
-				if((flags & 8) != 0) {
-					flagcount = points.readU8(pointsIndex++);
-				}
-			} else {
-				--flagcount;
-			}
-			vertices[off + i].type = flags;
-		}
-		x = 0;
-		var _g12 = 0;
-		var _g3 = n1;
-		while(_g12 < _g3) {
-			var i1 = _g12++;
-			flags = vertices[off + i1].type;
-			if((flags & 2) != 0) {
-				var dx = points.readU8(pointsIndex++);
-				x += (flags & 16) != 0?dx:-dx;
-			} else if((flags & 16) == 0) {
-				var value;
-				var ch13 = points.readU8(pointsIndex);
-				var n2 = points.readU8(pointsIndex + 1) | ch13 << 8;
-				if((n2 & 32768) != 0) {
-					value = n2 - 65536;
-				} else {
-					value = n2;
-				}
-				x += value;
-				pointsIndex += 2;
-			}
-			vertices[off + i1].x = x;
-		}
-		y = 0;
-		var _g13 = 0;
-		var _g4 = n1;
-		while(_g13 < _g4) {
-			var i2 = _g13++;
-			flags = vertices[off + i2].type;
-			if((flags & 4) != 0) {
-				var dy = points.readU8(pointsIndex++);
-				y += (flags & 32) != 0?dy:-dy;
-			} else if((flags & 32) == 0) {
-				var value1;
-				var ch14 = points.readU8(pointsIndex);
-				var n3 = points.readU8(pointsIndex + 1) | ch14 << 8;
-				if((n3 & 32768) != 0) {
-					value1 = n3 - 65536;
-				} else {
-					value1 = n3;
-				}
-				y += value1;
-				pointsIndex += 2;
-			}
-			vertices[off + i2].y = y;
-		}
-		num_vertices = 0;
-		scy = 0;
-		scx = scy;
-		cy = scx;
-		cx = cy;
-		sy = cx;
-		sx = sy;
-		var i3 = 0;
-		while(i3 < n1) {
-			flags = vertices[off + i3].type;
-			x = vertices[off + i3].x;
-			y = vertices[off + i3].y;
-			if(next_move == i3) {
-				if(i3 != 0) {
-					num_vertices = kha_graphics2_truetype_StbTruetype.stbtt__close_shape(vertices,num_vertices,was_off,start_off,sx,sy,scx,scy,cx,cy);
-				}
-				start_off = (flags & 1) == 0;
-				if(start_off) {
-					scx = x;
-					scy = y;
-					if((vertices[off + i3 + 1].type & 1) == 0) {
-						sx = x + vertices[off + i3 + 1].x >> 1;
-						sy = y + vertices[off + i3 + 1].y >> 1;
-					} else {
-						sx = vertices[off + i3 + 1].x;
-						sy = vertices[off + i3 + 1].y;
-						++i3;
-					}
-				} else {
-					sx = x;
-					sy = y;
-				}
-				kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],1,sx,sy,0,0);
-				was_off = false;
-				var pos2 = j * 2;
-				var ch15 = endPtsOfContours.readU8(pos2);
-				next_move = 1 + (endPtsOfContours.readU8(pos2 + 1) | ch15 << 8);
-				++j;
-			} else if((flags & 1) == 0) {
-				if(was_off) {
-					kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],3,cx + x >> 1,cy + y >> 1,cx,cy);
-				}
-				cx = x;
-				cy = y;
-				was_off = true;
-			} else {
-				if(was_off) {
-					kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],3,x,y,cx,cy);
-				} else {
-					kha_graphics2_truetype_StbTruetype.stbtt_setvertex(vertices[num_vertices++],2,x,y,0,0);
-				}
-				was_off = false;
-			}
-			++i3;
-		}
-		num_vertices = kha_graphics2_truetype_StbTruetype.stbtt__close_shape(vertices,num_vertices,was_off,start_off,sx,sy,scx,scy,cx,cy);
-	} else if(numberOfContours == -1) {
-		var more = 1;
-		var comp = data.sub(g + 10,data.get_length() - (g + 10));
-		var compIndex = 0;
-		num_vertices = 0;
-		vertices = null;
-		while(more != 0) {
-			var flags1;
-			var gidx;
-			var comp_num_verts = 0;
-			var i4;
-			var comp_verts = null;
-			var tmp = null;
-			var mtx0 = 1;
-			var mtx1 = 0;
-			var mtx2 = 0;
-			var mtx3 = 1;
-			var mtx4 = 0;
-			var mtx5 = 0;
-			var m1;
-			var n4;
-			var ch16 = comp.readU8(compIndex);
-			var n5 = comp.readU8(compIndex + 1) | ch16 << 8;
-			if((n5 & 32768) != 0) {
-				flags1 = n5 - 65536;
-			} else {
-				flags1 = n5;
-			}
-			compIndex += 2;
-			var ch17 = comp.readU8(compIndex);
-			var n6 = comp.readU8(compIndex + 1) | ch17 << 8;
-			if((n6 & 32768) != 0) {
-				gidx = n6 - 65536;
-			} else {
-				gidx = n6;
-			}
-			compIndex += 2;
-			if((flags1 & 2) != 0) {
-				if((flags1 & 1) != 0) {
-					var ch18 = comp.readU8(compIndex);
-					var n7 = comp.readU8(compIndex + 1) | ch18 << 8;
-					if((n7 & 32768) != 0) {
-						mtx4 = n7 - 65536;
-					} else {
-						mtx4 = n7;
-					}
-					compIndex += 2;
-					var ch19 = comp.readU8(compIndex);
-					var n8 = comp.readU8(compIndex + 1) | ch19 << 8;
-					if((n8 & 32768) != 0) {
-						mtx5 = n8 - 65536;
-					} else {
-						mtx5 = n8;
-					}
-					compIndex += 2;
-				} else {
-					var n9 = comp.readU8(compIndex);
-					if(n9 >= 128) {
-						mtx4 = n9 - 256;
-					} else {
-						mtx4 = n9;
-					}
-					++compIndex;
-					var n10 = comp.readU8(compIndex);
-					if(n10 >= 128) {
-						mtx5 = n10 - 256;
-					} else {
-						mtx5 = n10;
-					}
-					++compIndex;
-				}
-			} else {
-				throw new js__$Boot_HaxeError("Error");
-			}
-			if((flags1 & 8) != 0) {
-				var ch110 = comp.readU8(compIndex);
-				var n11 = comp.readU8(compIndex + 1) | ch110 << 8;
-				mtx3 = ((n11 & 32768) != 0?n11 - 65536:n11) / 16384.0;
-				mtx0 = mtx3;
-				compIndex += 2;
-				mtx2 = 0;
-				mtx1 = mtx2;
-			} else if((flags1 & 64) != 0) {
-				var ch111 = comp.readU8(compIndex);
-				var n12 = comp.readU8(compIndex + 1) | ch111 << 8;
-				mtx0 = ((n12 & 32768) != 0?n12 - 65536:n12) / 16384.0;
-				compIndex += 2;
-				mtx2 = 0;
-				mtx1 = mtx2;
-				var ch112 = comp.readU8(compIndex);
-				var n13 = comp.readU8(compIndex + 1) | ch112 << 8;
-				mtx3 = ((n13 & 32768) != 0?n13 - 65536:n13) / 16384.0;
-				compIndex += 2;
-			} else if((flags1 & 128) != 0) {
-				var ch113 = comp.readU8(compIndex);
-				var n14 = comp.readU8(compIndex + 1) | ch113 << 8;
-				mtx0 = ((n14 & 32768) != 0?n14 - 65536:n14) / 16384.0;
-				compIndex += 2;
-				var ch114 = comp.readU8(compIndex);
-				var n15 = comp.readU8(compIndex + 1) | ch114 << 8;
-				mtx1 = ((n15 & 32768) != 0?n15 - 65536:n15) / 16384.0;
-				compIndex += 2;
-				var ch115 = comp.readU8(compIndex);
-				var n16 = comp.readU8(compIndex + 1) | ch115 << 8;
-				mtx2 = ((n16 & 32768) != 0?n16 - 65536:n16) / 16384.0;
-				compIndex += 2;
-				var ch116 = comp.readU8(compIndex);
-				var n17 = comp.readU8(compIndex + 1) | ch116 << 8;
-				mtx3 = ((n17 & 32768) != 0?n17 - 65536:n17) / 16384.0;
-				compIndex += 2;
-			}
-			m1 = Math.sqrt(mtx0 * mtx0 + mtx1 * mtx1);
-			n4 = Math.sqrt(mtx2 * mtx2 + mtx3 * mtx3);
-			comp_verts = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphShape(info,gidx);
-			if(comp_verts == null) {
-				comp_num_verts = 0;
-			} else {
-				comp_num_verts = comp_verts.length;
-			}
-			if(comp_num_verts > 0) {
-				var _g14 = 0;
-				var _g5 = comp_num_verts;
-				while(_g14 < _g5) {
-					var v = comp_verts[_g14++];
-					var x1;
-					var y1;
-					x1 = v.x;
-					y1 = v.y;
-					v.x = m1 * (mtx0 * x1 + mtx2 * y1 + mtx4) | 0;
-					v.y = n4 * (mtx1 * x1 + mtx3 * y1 + mtx5) | 0;
-					x1 = v.cx;
-					y1 = v.cy;
-					v.cx = m1 * (mtx0 * x1 + mtx2 * y1 + mtx4) | 0;
-					v.cy = n4 * (mtx1 * x1 + mtx3 * y1 + mtx5) | 0;
-				}
-				tmp = new Array(num_vertices + comp_num_verts);
-				if(tmp == null) {
-					return null;
-				}
-				if(num_vertices > 0) {
-					kha_graphics2_truetype_StbTruetype.copyVertices(vertices,tmp,0,num_vertices);
-				}
-				kha_graphics2_truetype_StbTruetype.copyVertices(comp_verts,tmp,num_vertices,comp_num_verts);
-				vertices = tmp;
-				num_vertices += comp_num_verts;
-			}
-			more = flags1 & 32;
-		}
-	} else if(numberOfContours < 0) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-	if(vertices == null) {
-		return null;
-	}
-	if(vertices.length < num_vertices) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-	if(num_vertices < vertices.length) {
-		var tmp1 = new Array(num_vertices);
-		kha_graphics2_truetype_StbTruetype.copyVertices(vertices,tmp1,0,num_vertices);
-		return tmp1;
-	} else {
-		return vertices;
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphHMetrics = function(info,glyph_index) {
-	var p = info.data;
-	var pos = info.hhea + 34;
-	var ch1 = p.readU8(pos);
-	var numOfLongHorMetrics = p.readU8(pos + 1) | ch1 << 8;
-	var metrics = new kha_graphics2_truetype_Stbtt_$temp_$glyph_$h_$metrics();
-	if(glyph_index < numOfLongHorMetrics) {
-		var p1 = info.data;
-		var pos1 = info.hmtx + 4 * glyph_index;
-		var ch11 = p1.readU8(pos1);
-		var n = p1.readU8(pos1 + 1) | ch11 << 8;
-		metrics.advanceWidth = (n & 32768) != 0?n - 65536:n;
-		var p2 = info.data;
-		var pos2 = info.hmtx + 4 * glyph_index + 2;
-		var ch12 = p2.readU8(pos2);
-		var n1 = p2.readU8(pos2 + 1) | ch12 << 8;
-		metrics.leftSideBearing = (n1 & 32768) != 0?n1 - 65536:n1;
-	} else {
-		var p3 = info.data;
-		var pos3 = info.hmtx + 4 * (numOfLongHorMetrics - 1);
-		var ch13 = p3.readU8(pos3);
-		var n2 = p3.readU8(pos3 + 1) | ch13 << 8;
-		metrics.advanceWidth = (n2 & 32768) != 0?n2 - 65536:n2;
-		var p4 = info.data;
-		var pos4 = info.hmtx + 4 * numOfLongHorMetrics + 2 * (glyph_index - numOfLongHorMetrics);
-		var ch14 = p4.readU8(pos4);
-		var n3 = p4.readU8(pos4 + 1) | ch14 << 8;
-		metrics.leftSideBearing = (n3 & 32768) != 0?n3 - 65536:n3;
-	}
-	return metrics;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphKernAdvance = function(info,glyph1,glyph2) {
-	var data = info.data.sub(info.kern,info.data.get_length() - info.kern);
-	var needle;
-	var straw;
-	var l;
-	var r;
-	var m;
-	if(info.kern == 0) {
-		return 0;
-	}
-	var ch1 = data.readU8(2);
-	if((data.readU8(3) | ch1 << 8) < 1) {
-		return 0;
-	}
-	var ch11 = data.readU8(8);
-	if((data.readU8(9) | ch11 << 8) != 1) {
-		return 0;
-	}
-	l = 0;
-	var ch12 = data.readU8(10);
-	r = (data.readU8(11) | ch12 << 8) - 1;
-	needle = glyph1 << 16 | glyph2;
-	while(l <= r) {
-		m = l + r >> 1;
-		var pos = 18 + m * 6;
-		var ch13 = data.readU8(pos);
-		var ch2 = data.readU8(pos + 1);
-		var ch3 = data.readU8(pos + 2);
-		straw = data.readU8(pos + 3) | ch3 << 8 | ch2 << 16 | ch13 << 24;
-		if(needle < straw) {
-			r = m - 1;
-		} else if(needle > straw) {
-			l = m + 1;
-		} else {
-			var pos1 = 22 + m * 6;
-			var ch14 = data.readU8(pos1);
-			var n = data.readU8(pos1 + 1) | ch14 << 8;
-			if((n & 32768) != 0) {
-				return n - 65536;
-			} else {
-				return n;
-			}
-		}
-	}
-	return 0;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointKernAdvance = function(info,ch1,ch2) {
-	if(info.kern == 0) {
-		return 0;
-	}
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphKernAdvance(info,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,ch1),kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,ch2));
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointHMetrics = function(info,codepoint) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphHMetrics(info,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,codepoint));
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetFontVMetrics = function(info) {
-	var metrics = new kha_graphics2_truetype_Stbtt_$temp_$font_$v_$metrics();
-	var p = info.data;
-	var pos = info.hhea + 4;
-	var ch1 = p.readU8(pos);
-	var n = p.readU8(pos + 1) | ch1 << 8;
-	metrics.ascent = (n & 32768) != 0?n - 65536:n;
-	var p1 = info.data;
-	var pos1 = info.hhea + 6;
-	var ch11 = p1.readU8(pos1);
-	var n1 = p1.readU8(pos1 + 1) | ch11 << 8;
-	metrics.descent = (n1 & 32768) != 0?n1 - 65536:n1;
-	var p2 = info.data;
-	var pos2 = info.hhea + 8;
-	var ch12 = p2.readU8(pos2);
-	var n2 = p2.readU8(pos2 + 1) | ch12 << 8;
-	metrics.lineGap = (n2 & 32768) != 0?n2 - 65536:n2;
-	return metrics;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetFontBoundingBox = function(info) {
-	var rect = new kha_graphics2_truetype_Stbtt_$temp_$rect();
-	var p = info.data;
-	var pos = info.head + 36;
-	var ch1 = p.readU8(pos);
-	var n = p.readU8(pos + 1) | ch1 << 8;
-	rect.x0 = (n & 32768) != 0?n - 65536:n;
-	var p1 = info.data;
-	var pos1 = info.head + 38;
-	var ch11 = p1.readU8(pos1);
-	var n1 = p1.readU8(pos1 + 1) | ch11 << 8;
-	rect.y0 = (n1 & 32768) != 0?n1 - 65536:n1;
-	var p2 = info.data;
-	var pos2 = info.head + 40;
-	var ch12 = p2.readU8(pos2);
-	var n2 = p2.readU8(pos2 + 1) | ch12 << 8;
-	rect.x1 = (n2 & 32768) != 0?n2 - 65536:n2;
-	var p3 = info.data;
-	var pos3 = info.head + 42;
-	var ch13 = p3.readU8(pos3);
-	var n3 = p3.readU8(pos3 + 1) | ch13 << 8;
-	rect.y1 = (n3 & 32768) != 0?n3 - 65536:n3;
-	return rect;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_ScaleForPixelHeight = function(info,height) {
-	var p = info.data;
-	var pos = info.hhea + 4;
-	var ch1 = p.readU8(pos);
-	var n = p.readU8(pos + 1) | ch1 << 8;
-	var tmp = (n & 32768) != 0?n - 65536:n;
-	var p1 = info.data;
-	var pos1 = info.hhea + 6;
-	var ch11 = p1.readU8(pos1);
-	var n1 = p1.readU8(pos1 + 1) | ch11 << 8;
-	return height / (tmp - ((n1 & 32768) != 0?n1 - 65536:n1));
-};
-kha_graphics2_truetype_StbTruetype.stbtt_ScaleForMappingEmToPixels = function(info,pixels) {
-	var p = info.data;
-	var pos = info.head + 18;
-	var ch1 = p.readU8(pos);
-	return pixels / (p.readU8(pos + 1) | ch1 << 8);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBoxSubpixel = function(font,glyph,scale_x,scale_y,shift_x,shift_y) {
-	var rect = new kha_graphics2_truetype_Stbtt_$temp_$rect();
-	if(!kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBox(font,glyph,rect)) {
-		rect.x0 = 0;
-		rect.y0 = 0;
-		rect.x1 = 0;
-		rect.y1 = 0;
-	} else {
-		var x0 = rect.x0;
-		var x1 = rect.x1;
-		var y0 = rect.y0;
-		var y1 = rect.y1;
-		rect.x0 = Math.floor(x0 * scale_x + shift_x);
-		rect.y0 = Math.floor(-y1 * scale_y + shift_y);
-		rect.x1 = Math.ceil(x1 * scale_x + shift_x);
-		rect.y1 = Math.ceil(-y0 * scale_y + shift_y);
-	}
-	return rect;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBox = function(font,glyph,scale_x,scale_y) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBoxSubpixel(font,glyph,scale_x,scale_y,0.0,0.0);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmapBoxSubpixel = function(font,codepoint,scale_x,scale_y,shift_x,shift_y) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBoxSubpixel(font,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(font,codepoint),scale_x,scale_y,shift_x,shift_y);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmapBox = function(font,codepoint,scale_x,scale_y) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmapBoxSubpixel(font,codepoint,scale_x,scale_y,0.0,0.0);
-};
-kha_graphics2_truetype_StbTruetype.stbtt__new_active = function(e,eIndex,off_x,start_point) {
-	var z = new kha_graphics2_truetype_Stbtt_$_$active_$edge();
-	var dxdy = (e[eIndex].x1 - e[eIndex].x0) / (e[eIndex].y1 - e[eIndex].y0);
-	if(z == null) {
-		return z;
-	}
-	z.fdx = dxdy;
-	z.fdy = dxdy != 0.0?1.0 / dxdy:0.0;
-	z.fx = e[eIndex].x0 + dxdy * (start_point - e[eIndex].y0);
-	z.fx -= off_x;
-	z.direction = e[eIndex].invert?1.0:-1.0;
-	z.sy = e[eIndex].y0;
-	z.ey = e[eIndex].y1;
-	z.next = null;
-	return z;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge = function(scanline,scanlineIndex,x,e,x0,y0,x1,y1) {
-	if(y0 == y1) {
-		return;
-	}
-	if(!(y0 < y1)) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-	if(!(e.sy <= e.ey)) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-	if(y0 > e.ey) {
-		return;
-	}
-	if(y1 < e.sy) {
-		return;
-	}
-	if(y0 < e.sy) {
-		x0 += (x1 - x0) * (e.sy - y0) / (y1 - y0);
-		y0 = e.sy;
-	}
-	if(y1 > e.ey) {
-		x1 += (x1 - x0) * (e.ey - y1) / (y1 - y0);
-		y1 = e.ey;
-	}
-	if(x0 == x) {
-		if(!(x1 <= x + 1)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-	} else if(x0 == x + 1) {
-		if(!(x1 >= x)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-	} else if(x0 <= x) {
-		if(!(x1 <= x)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-	} else if(x0 >= x + 1) {
-		if(!(x1 >= x + 1)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-	} else if(!(x1 >= x && x1 <= x + 1)) {
-		throw new js__$Boot_HaxeError("Error");
-	}
-	if(x0 <= x && x1 <= x) {
-		var _g = scanlineIndex + x;
-		scanline[_g] = scanline[_g] + e.direction * (y1 - y0);
-	} else if(!(x0 >= x + 1 && x1 >= x + 1)) {
-		if(!(x0 >= x && x0 <= x + 1 && x1 >= x && x1 <= x + 1)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-		var _g1 = scanlineIndex + x;
-		scanline[_g1] = scanline[_g1] + e.direction * (y1 - y0) * (1 - (x0 - x + (x1 - x)) / 2);
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt__fill_active_edges_new = function(scanline,scanline_fill,scanline_fillIndex,len,e,y_top) {
-	var y_bottom = y_top + 1;
-	while(e != null) {
-		if(!(e.ey >= y_top)) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-		if(e.fdx == 0) {
-			var x0 = e.fx;
-			if(x0 < len) {
-				if(x0 >= 0) {
-					kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x0 | 0,e,x0,y_top,x0,y_bottom);
-					kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline_fill,scanline_fillIndex - 1,x0 + 1 | 0,e,x0,y_top,x0,y_bottom);
-				} else {
-					kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline_fill,scanline_fillIndex - 1,0,e,x0,y_top,x0,y_bottom);
-				}
-			}
-		} else {
-			var x01 = e.fx;
-			var dx = e.fdx;
-			var xb = x01 + dx;
-			var x_top;
-			var x_bottom;
-			var sy0;
-			var sy1;
-			var dy = e.fdy;
-			if(!(e.sy <= y_bottom && e.ey >= y_top)) {
-				throw new js__$Boot_HaxeError("Error");
-			}
-			if(e.sy > y_top) {
-				x_top = x01 + dx * (e.sy - y_top);
-				sy0 = e.sy;
-			} else {
-				x_top = x01;
-				sy0 = y_top;
-			}
-			if(e.ey < y_bottom) {
-				x_bottom = x01 + dx * (e.ey - y_top);
-				sy1 = e.ey;
-			} else {
-				x_bottom = xb;
-				sy1 = y_bottom;
-			}
-			if(x_top >= 0 && x_bottom >= 0 && x_top < len && x_bottom < len) {
-				if((x_top | 0) == (x_bottom | 0)) {
-					var height;
-					var x = x_top | 0;
-					height = sy1 - sy0;
-					if(!(x >= 0 && x < len)) {
-						throw new js__$Boot_HaxeError("Error");
-					}
-					scanline[x] = scanline[x] + e.direction * (1 - (x_top - x + (x_bottom - x)) / 2) * height;
-					var _g = scanline_fillIndex + x;
-					scanline_fill[_g] = scanline_fill[_g] + e.direction * height;
-				} else {
-					var x1;
-					var x2;
-					var y_crossing;
-					var step;
-					var sign;
-					var area;
-					if(x_top > x_bottom) {
-						var t;
-						sy0 = y_bottom - (sy0 - y_top);
-						sy1 = y_bottom - (sy1 - y_top);
-						t = sy0;
-						sy0 = sy1;
-						sy1 = t;
-						t = x_bottom;
-						x_bottom = x_top;
-						x_top = t;
-						dx = -dx;
-						dy = -dy;
-						t = x01;
-						x01 = xb;
-						xb = t;
-					}
-					x1 = x_top | 0;
-					x2 = x_bottom | 0;
-					y_crossing = (x1 + 1 - x01) * dy + y_top;
-					sign = e.direction;
-					area = sign * (y_crossing - sy0);
-					scanline[x1] = scanline[x1] + area * (1 - (x_top - x1 + (x1 + 1 - x1)) / 2);
-					step = sign * dy;
-					var _g1 = x1 + 1;
-					while(_g1 < x2) {
-						var x3 = _g1++;
-						scanline[x3] = scanline[x3] + (area + step / 2);
-						area += step;
-					}
-					y_crossing += dy * (x2 - (x1 + 1));
-					if(!(Math.abs(area) <= 1.01)) {
-						throw new js__$Boot_HaxeError("Error");
-					}
-					scanline[x2] = scanline[x2] + (area + sign * (1 - (x2 - x2 + (x_bottom - x2)) / 2) * (sy1 - y_crossing));
-					var _g2 = scanline_fillIndex + x2;
-					scanline_fill[_g2] = scanline_fill[_g2] + sign * (sy1 - sy0);
-				}
-			} else {
-				var _g11 = 0;
-				while(_g11 < len) {
-					var x4 = _g11++;
-					var x11 = x4;
-					var x21 = x4 + 1;
-					var x31 = xb;
-					var y1;
-					var y2;
-					y1 = (x4 - x01) / dx + y_top;
-					y2 = (x4 + 1 - x01) / dx + y_top;
-					if(x01 < x11 && x31 > x21) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x11,y1);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x11,y1,x21,y2);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x21,y2,x31,y_bottom);
-					} else if(x31 < x11 && x01 > x21) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x21,y2);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x21,y2,x11,y1);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x11,y1,x31,y_bottom);
-					} else if(x01 < x11 && x31 > x11) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x11,y1);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x11,y1,x31,y_bottom);
-					} else if(x31 < x11 && x01 > x11) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x11,y1);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x11,y1,x31,y_bottom);
-					} else if(x01 < x21 && x31 > x21) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x21,y2);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x21,y2,x31,y_bottom);
-					} else if(x31 < x21 && x01 > x21) {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x21,y2);
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x21,y2,x31,y_bottom);
-					} else {
-						kha_graphics2_truetype_StbTruetype.stbtt__handle_clipped_edge(scanline,0,x4,e,x01,y_top,x31,y_bottom);
-					}
-				}
-			}
-		}
-		e = e.next;
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt__rasterize_sorted_edges = function(result,e,n,vsubsample,off_x,off_y) {
-	var active = null;
-	var y;
-	var j = 0;
-	var i;
-	var scanline;
-	var scanline2;
-	var scanline2Index = 0;
-	var eIndex = 0;
-	if(result.w > 64) {
-		var length = result.w * 2 + 1;
-		scanline = new Array(length);
-	} else {
-		scanline = new Array(129);
-	}
-	scanline2 = scanline;
-	scanline2Index = result.w;
-	y = off_y;
-	e[eIndex + n].y0 = off_y + result.h + 1;
-	while(j < result.h) {
-		var scan_y_top = y + 0.0;
-		var scan_y_bottom = y + 1.0;
-		var step_value;
-		var step_parent;
-		step_value = active;
-		step_parent = null;
-		var _g1 = 0;
-		var _g = result.w;
-		while(_g1 < _g) scanline[_g1++] = 0;
-		var _g11 = 0;
-		var _g2 = result.w + 1;
-		while(_g11 < _g2) scanline2[scanline2Index + _g11++] = 0;
-		while(step_value != null) {
-			var z = step_value;
-			if(z.ey <= scan_y_top) {
-				if(step_parent == null) {
-					active = z.next;
-					step_value = z.next;
-				} else {
-					step_parent.next = z.next;
-					step_value = z.next;
-				}
-				if(z.direction == 0) {
-					throw new js__$Boot_HaxeError("Error");
-				}
-				z.direction = 0;
-			} else {
-				step_parent = step_value;
-				step_value = step_value.next;
-			}
-		}
-		while(e[eIndex].y0 <= scan_y_bottom) {
-			if(e[eIndex].y0 != e[eIndex].y1) {
-				var z1 = kha_graphics2_truetype_StbTruetype.stbtt__new_active(e,eIndex,off_x,scan_y_top);
-				if(!(z1.ey >= scan_y_top)) {
-					throw new js__$Boot_HaxeError("Error");
-				}
-				z1.next = active;
-				active = z1;
-			}
-			++eIndex;
-		}
-		if(active != null) {
-			kha_graphics2_truetype_StbTruetype.stbtt__fill_active_edges_new(scanline,scanline2,scanline2Index + 1,result.w,active,scan_y_top);
-		}
-		var sum = 0;
-		var _g12 = 0;
-		var _g3 = result.w;
-		while(_g12 < _g3) {
-			var i1 = _g12++;
-			var k;
-			var m;
-			sum += scanline2[scanline2Index + i1];
-			k = scanline[i1] + sum;
-			k = Math.abs(k) * 255.0 + 0.5;
-			m = k | 0;
-			if(m > 255) {
-				m = 255;
-			}
-			result.pixels.writeU8(result.pixels_offset + j * result.stride + i1,m);
-		}
-		step_parent = null;
-		step_value = active;
-		while(step_value != null) {
-			var z2 = step_value;
-			z2.fx += z2.fdx;
-			step_parent = step_value;
-			step_value = step_value.next;
-		}
-		++y;
-		++j;
-	}
-};
-kha_graphics2_truetype_StbTruetype.STBTT__COMPARE = function(a,b) {
-	return a.y0 < b.y0;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_ins_sort = function(p,n) {
-	var j;
-	var _g1 = 1;
-	while(_g1 < n) {
-		var i = _g1++;
-		var t = p[i];
-		j = i;
-		while(j > 0) {
-			if(!kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(t,p[j - 1])) {
-				break;
-			}
-			p[j] = p[j - 1];
-			--j;
-		}
-		if(i != j) {
-			p[j] = t;
-		}
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_quicksort = function(p,pIndex,n) {
-	while(n > 12) {
-		var t;
-		var c01;
-		var c12;
-		var c;
-		var m;
-		var i;
-		var j;
-		m = n >> 1;
-		c01 = kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(p[pIndex],p[pIndex + m]);
-		c12 = kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(p[pIndex + m],p[pIndex + n - 1]);
-		if(c01 != c12) {
-			var z;
-			c = kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(p[pIndex],p[pIndex + n - 1]);
-			if(c == c12) {
-				z = 0;
-			} else {
-				z = n - 1;
-			}
-			t = p[pIndex + z];
-			p[pIndex + z] = p[pIndex + m];
-			p[pIndex + m] = t;
-		}
-		t = p[pIndex];
-		p[pIndex] = p[pIndex + m];
-		p[pIndex + m] = t;
-		i = 1;
-		j = n - 1;
-		while(true) {
-			while(kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(p[pIndex + i],p[pIndex])) ++i;
-			while(kha_graphics2_truetype_StbTruetype.STBTT__COMPARE(p[pIndex],p[pIndex + j])) --j;
-			if(i >= j) {
-				break;
-			}
-			t = p[pIndex + i];
-			p[pIndex + i] = p[pIndex + j];
-			p[pIndex + j] = t;
-			++i;
-			--j;
-		}
-		if(j < n - i) {
-			kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_quicksort(p,pIndex,j);
-			pIndex += i;
-			n -= i;
-		} else {
-			kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_quicksort(p,pIndex + i,n - i);
-			n = j;
-		}
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt__sort_edges = function(p,n) {
-	kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_quicksort(p,0,n);
-	kha_graphics2_truetype_StbTruetype.stbtt__sort_edges_ins_sort(p,n);
-};
-kha_graphics2_truetype_StbTruetype.stbtt__rasterize = function(result,pts,wcount,windings,scale_x,scale_y,shift_x,shift_y,off_x,off_y,invert) {
-	var y_scale_inv = invert?-scale_y:scale_y;
-	var e;
-	var n;
-	var i;
-	var j;
-	var k;
-	var m;
-	var vsubsample = 1;
-	var ptsIndex = 0;
-	n = 0;
-	var _g1 = 0;
-	var _g = windings;
-	while(_g1 < _g) n += wcount[_g1++];
-	e = new Array(n + 1);
-	if(e == null) {
-		return;
-	} else {
-		var _g11 = 0;
-		var _g2 = e.length;
-		while(_g11 < _g2) e[_g11++] = new kha_graphics2_truetype_Stbtt_$_$edge();
-	}
-	n = 0;
-	m = 0;
-	var _g12 = 0;
-	var _g3 = windings;
-	while(_g12 < _g3) {
-		var i1 = _g12++;
-		var p = pts;
-		var pIndex = ptsIndex + m;
-		m += wcount[i1];
-		j = wcount[i1] - 1;
-		var _g31 = 0;
-		var _g21 = wcount[i1];
-		while(_g31 < _g21) {
-			var k1 = _g31++;
-			var a = k1;
-			var b = j;
-			if(p[pIndex + j].y == p[pIndex + k1].y) {
-				j = k1;
-				continue;
-			}
-			e[n].invert = false;
-			if(invert?p[pIndex + j].y > p[pIndex + k1].y:p[pIndex + j].y < p[pIndex + k1].y) {
-				e[n].invert = true;
-				a = j;
-				b = k1;
-			}
-			e[n].x0 = p[pIndex + a].x * scale_x + shift_x;
-			e[n].y0 = (p[pIndex + a].y * y_scale_inv + shift_y) * vsubsample;
-			e[n].x1 = p[pIndex + b].x * scale_x + shift_x;
-			e[n].y1 = (p[pIndex + b].y * y_scale_inv + shift_y) * vsubsample;
-			++n;
-			j = k1;
-		}
-	}
-	kha_graphics2_truetype_StbTruetype.stbtt__sort_edges(e,n);
-	kha_graphics2_truetype_StbTruetype.stbtt__rasterize_sorted_edges(result,e,n,vsubsample,off_x,off_y);
-};
-kha_graphics2_truetype_StbTruetype.stbtt__add_point = function(points,n,x,y) {
-	if(points == null) {
-		return;
-	}
-	points[n].x = x;
-	points[n].y = y;
-};
-kha_graphics2_truetype_StbTruetype.stbtt__tesselate_curve = function(points,num_points,x0,y0,x1,y1,x2,y2,objspace_flatness_squared,n) {
-	var mx = (x0 + 2 * x1 + x2) / 4;
-	var my = (y0 + 2 * y1 + y2) / 4;
-	var dx = (x0 + x2) / 2 - mx;
-	var dy = (y0 + y2) / 2 - my;
-	if(n > 16) {
-		return 1;
-	}
-	if(dx * dx + dy * dy > objspace_flatness_squared) {
-		kha_graphics2_truetype_StbTruetype.stbtt__tesselate_curve(points,num_points,x0,y0,(x0 + x1) / 2.0,(y0 + y1) / 2.0,mx,my,objspace_flatness_squared,n + 1);
-		kha_graphics2_truetype_StbTruetype.stbtt__tesselate_curve(points,num_points,mx,my,(x1 + x2) / 2.0,(y1 + y2) / 2.0,x2,y2,objspace_flatness_squared,n + 1);
-	} else {
-		kha_graphics2_truetype_StbTruetype.stbtt__add_point(points,num_points.value,x2,y2);
-		num_points.value = num_points.value + 1;
-	}
-	return 1;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_FlattenCurves = function(vertices,num_verts,objspace_flatness,contour_lengths,num_contours) {
-	var points = null;
-	var num_points = 0;
-	var objspace_flatness_squared = objspace_flatness * objspace_flatness;
-	var i;
-	var n = 0;
-	var start = 0;
-	var pass;
-	var _g1 = 0;
-	var _g = num_verts;
-	while(_g1 < _g) if(vertices[_g1++].type == 1) {
-		++n;
-	}
-	num_contours.value = n;
-	if(n == 0) {
-		return null;
-	}
-	contour_lengths.value = new Array(n);
-	if(contour_lengths.value == null) {
-		num_contours.value = 0;
-		return null;
-	}
-	var _g2 = 0;
-	while(_g2 < 2) {
-		var pass1 = _g2++;
-		var x = 0;
-		var y = 0;
-		if(pass1 == 1) {
-			points = new Array(num_points);
-			if(points == null) {
-				contour_lengths.value = null;
-				num_contours.value = 0;
-				return null;
-			} else {
-				var _g21 = 0;
-				var _g11 = points.length;
-				while(_g21 < _g11) points[_g21++] = new kha_graphics2_truetype_Stbtt_$_$point();
-			}
-		}
-		num_points = 0;
-		n = -1;
-		var _g22 = 0;
-		var _g12 = num_verts;
-		while(_g22 < _g12) {
-			var i1 = _g22++;
-			switch(vertices[i1].type) {
-			case 1:
-				if(n >= 0) {
-					contour_lengths.value[n] = num_points - start;
-				}
-				++n;
-				start = num_points;
-				x = vertices[i1].x;
-				y = vertices[i1].y;
-				kha_graphics2_truetype_StbTruetype.stbtt__add_point(points,num_points++,x,y);
-				break;
-			case 2:
-				x = vertices[i1].x;
-				y = vertices[i1].y;
-				kha_graphics2_truetype_StbTruetype.stbtt__add_point(points,num_points++,x,y);
-				break;
-			case 3:
-				var num_points_reference = { value : num_points};
-				kha_graphics2_truetype_StbTruetype.stbtt__tesselate_curve(points,num_points_reference,x,y,vertices[i1].cx,vertices[i1].cy,vertices[i1].x,vertices[i1].y,objspace_flatness_squared,0);
-				num_points = num_points_reference.value;
-				x = vertices[i1].x;
-				y = vertices[i1].y;
-				break;
-			}
-		}
-		contour_lengths.value[n] = num_points - start;
-	}
-	return points;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_Rasterize = function(result,flatness_in_pixels,vertices,num_verts,scale_x,scale_y,shift_x,shift_y,x_off,y_off,invert) {
-	var scale = scale_x > scale_y?scale_y:scale_x;
-	var winding_count = 0;
-	var winding_lengths = null;
-	var winding_count_reference = { value : 0};
-	var winding_lengths_reference = new kha_graphics2_truetype_VectorOfIntPointer();
-	var windings = kha_graphics2_truetype_StbTruetype.stbtt_FlattenCurves(vertices,num_verts,flatness_in_pixels / scale,winding_lengths_reference,winding_count_reference);
-	winding_count = winding_count_reference.value;
-	winding_lengths = winding_lengths_reference.value;
-	if(windings != null) {
-		kha_graphics2_truetype_StbTruetype.stbtt__rasterize(result,windings,winding_lengths,winding_count,scale_x,scale_y,shift_x,shift_y,x_off,y_off,invert);
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapSubpixel = function(info,scale_x,scale_y,shift_x,shift_y,glyph,region) {
-	var ix0;
-	var iy0;
-	var ix1;
-	var iy1;
-	var gbm = new kha_graphics2_truetype_Stbtt_$_$bitmap();
-	var vertices = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphShape(info,glyph);
-	var num_verts = vertices.length;
-	if(scale_x == 0) {
-		scale_x = scale_y;
-	}
-	if(scale_y == 0) {
-		if(scale_x == 0) {
-			return null;
-		}
-		scale_y = scale_x;
-	}
-	var rect = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBoxSubpixel(info,glyph,scale_x,scale_y,shift_x,shift_y);
-	ix0 = rect.x0;
-	iy0 = rect.y0;
-	ix1 = rect.x1;
-	iy1 = rect.y1;
-	gbm.w = ix1 - ix0;
-	gbm.h = iy1 - iy0;
-	gbm.pixels = null;
-	region.width = gbm.w;
-	region.height = gbm.h;
-	region.xoff = ix0;
-	region.yoff = iy0;
-	if(gbm.w != 0 && gbm.h != 0) {
-		gbm.pixels = kha_internal_BytesBlob.alloc(gbm.w * gbm.h);
-		if(gbm.pixels != null) {
-			gbm.stride = gbm.w;
-			kha_graphics2_truetype_StbTruetype.stbtt_Rasterize(gbm,0.35,vertices,num_verts,scale_x,scale_y,shift_x,shift_y,ix0,iy0,true);
-		}
-	}
-	return gbm.pixels;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmap = function(info,scale_x,scale_y,glyph,region) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapSubpixel(info,scale_x,scale_y,0.0,0.0,glyph,region);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_MakeGlyphBitmapSubpixel = function(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,shift_x,shift_y,glyph) {
-	var ix0 = 0;
-	var iy0 = 0;
-	var vertices = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphShape(info,glyph);
-	var num_verts = vertices == null?0:vertices.length;
-	var gbm = new kha_graphics2_truetype_Stbtt_$_$bitmap();
-	var rect = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBoxSubpixel(info,glyph,scale_x,scale_y,shift_x,shift_y);
-	ix0 = rect.x0;
-	iy0 = rect.y0;
-	gbm.pixels = output;
-	gbm.pixels_offset = output_offset;
-	gbm.w = out_w;
-	gbm.h = out_h;
-	gbm.stride = out_stride;
-	if(gbm.w != 0 && gbm.h != 0) {
-		kha_graphics2_truetype_StbTruetype.stbtt_Rasterize(gbm,0.35,vertices,num_verts,scale_x,scale_y,shift_x,shift_y,ix0,iy0,true);
-	}
-};
-kha_graphics2_truetype_StbTruetype.stbtt_MakeGlyphBitmap = function(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,glyph) {
-	kha_graphics2_truetype_StbTruetype.stbtt_MakeGlyphBitmapSubpixel(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,0.0,0.0,glyph);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmapSubpixel = function(info,scale_x,scale_y,shift_x,shift_y,codepoint,region) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapSubpixel(info,scale_x,scale_y,shift_x,shift_y,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,codepoint),region);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_MakeCodepointBitmapSubpixel = function(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,shift_x,shift_y,codepoint) {
-	kha_graphics2_truetype_StbTruetype.stbtt_MakeGlyphBitmapSubpixel(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,shift_x,shift_y,kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(info,codepoint));
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmap = function(info,scale_x,scale_y,codepoint,region) {
-	return kha_graphics2_truetype_StbTruetype.stbtt_GetCodepointBitmapSubpixel(info,scale_x,scale_y,0.0,0.0,codepoint,region);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_MakeCodepointBitmap = function(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,codepoint) {
-	kha_graphics2_truetype_StbTruetype.stbtt_MakeCodepointBitmapSubpixel(info,output,output_offset,out_w,out_h,out_stride,scale_x,scale_y,0.0,0.0,codepoint);
-};
-kha_graphics2_truetype_StbTruetype.stbtt_BakeFontBitmap = function(data,offset,pixel_height,pixels,pw,ph,chars,chardata) {
-	var scale;
-	var x;
-	var y;
-	var bottom_y;
-	var f = new kha_graphics2_truetype_Stbtt_$fontinfo();
-	if(!kha_graphics2_truetype_StbTruetype.stbtt_InitFont(f,data,offset)) {
-		return -1;
-	}
-	var _g1 = 0;
-	var _g = pw * ph;
-	while(_g1 < _g) pixels.writeU8(_g1++,0);
-	y = 1;
-	x = 1;
-	bottom_y = 1;
-	scale = kha_graphics2_truetype_StbTruetype.stbtt_ScaleForPixelHeight(f,pixel_height);
-	var i = 0;
-	var _g2 = 0;
-	while(_g2 < chars.length) {
-		var index = chars[_g2];
-		++_g2;
-		var advance;
-		var x0;
-		var y0;
-		var x1;
-		var y1;
-		var gw;
-		var gh;
-		var g = kha_graphics2_truetype_StbTruetype.stbtt_FindGlyphIndex(f,index);
-		advance = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphHMetrics(f,g).advanceWidth;
-		var rect = kha_graphics2_truetype_StbTruetype.stbtt_GetGlyphBitmapBox(f,g,scale,scale);
-		x0 = rect.x0;
-		y0 = rect.y0;
-		x1 = rect.x1;
-		y1 = rect.y1;
-		gw = x1 - x0;
-		gh = y1 - y0;
-		if(x + gw + 1 >= pw) {
-			y = bottom_y;
-			x = 1;
-		}
-		if(y + gh + 1 >= ph) {
-			return -i;
-		}
-		if(x + gw >= pw) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-		if(y + gh >= ph) {
-			throw new js__$Boot_HaxeError("Error");
-		}
-		kha_graphics2_truetype_StbTruetype.stbtt_MakeGlyphBitmap(f,pixels,x + y * pw,gw,gh,pw,scale,scale,g);
-		chardata[i].x0 = x;
-		chardata[i].y0 = y;
-		chardata[i].x1 = x + gw;
-		chardata[i].y1 = y + gh;
-		chardata[i].xadvance = scale * advance;
-		chardata[i].xoff = x0;
-		chardata[i].yoff = y0;
-		x = x + gw + 1;
-		if(y + gh + 1 > bottom_y) {
-			bottom_y = y + gh + 1;
-		}
-		++i;
-	}
-	return bottom_y;
-};
-kha_graphics2_truetype_StbTruetype.stbtt_GetBakedQuad = function(chardata,pw,ph,char_index,xpos,ypos,q,opengl_fillrule) {
-	var d3d_bias = opengl_fillrule?0:-0.5;
-	var ipw = 1.0 / pw;
-	var iph = 1.0 / ph;
-	var b = chardata[char_index];
-	var round_x = Math.floor(xpos.value + b.xoff + 0.5);
-	var round_y = Math.floor(ypos.value + b.yoff + 0.5);
-	q.x0 = round_x + d3d_bias;
-	q.y0 = round_y + d3d_bias;
-	q.x1 = round_x + b.x1 - b.x0 + d3d_bias;
-	q.y1 = round_y + b.y1 - b.y0 + d3d_bias;
-	q.s0 = b.x0 * ipw;
-	q.t0 = b.y0 * iph;
-	q.s1 = b.x1 * ipw;
-	q.t1 = b.y1 * iph;
-	xpos.value += b.xadvance;
-};
 var kha_graphics4_BlendingFactor = $hxClasses["kha.graphics4.BlendingFactor"] = { __ename__ : true, __constructs__ : ["Undefined","BlendOne","BlendZero","SourceAlpha","DestinationAlpha","InverseSourceAlpha","InverseDestinationAlpha","SourceColor","DestinationColor","InverseSourceColor","InverseDestinationColor"] };
 kha_graphics4_BlendingFactor.Undefined = ["Undefined",0];
 kha_graphics4_BlendingFactor.Undefined.toString = $estr;
@@ -15326,12 +10069,6 @@ kha_graphics4_CompareMode.GreaterEqual.__enum__ = kha_graphics4_CompareMode;
 var kha_graphics4_ConstantLocation = function() { };
 $hxClasses["kha.graphics4.ConstantLocation"] = kha_graphics4_ConstantLocation;
 kha_graphics4_ConstantLocation.__name__ = true;
-var kha_graphics4_CubeMap = function() { };
-$hxClasses["kha.graphics4.CubeMap"] = kha_graphics4_CubeMap;
-kha_graphics4_CubeMap.__name__ = true;
-kha_graphics4_CubeMap.prototype = {
-	__class__: kha_graphics4_CubeMap
-};
 var kha_graphics4_CullMode = $hxClasses["kha.graphics4.CullMode"] = { __ename__ : true, __constructs__ : ["Clockwise","CounterClockwise","None"] };
 kha_graphics4_CullMode.Clockwise = ["Clockwise",0];
 kha_graphics4_CullMode.Clockwise.toString = $estr;
@@ -15350,22 +10087,11 @@ var kha_graphics4_FragmentShader = function(source,file) {
 $hxClasses["kha.graphics4.FragmentShader"] = kha_graphics4_FragmentShader;
 kha_graphics4_FragmentShader.__name__ = true;
 kha_graphics4_FragmentShader.prototype = {
-	'delete': function() {
-		kha_SystemImpl.gl.deleteShader(this.shader);
-		this.shader = null;
-		this.source = null;
-	}
-	,__class__: kha_graphics4_FragmentShader
+	__class__: kha_graphics4_FragmentShader
 };
-var kha_graphics4_GeometryShader = function(source) {
-};
+var kha_graphics4_GeometryShader = function() { };
 $hxClasses["kha.graphics4.GeometryShader"] = kha_graphics4_GeometryShader;
 kha_graphics4_GeometryShader.__name__ = true;
-kha_graphics4_GeometryShader.prototype = {
-	'delete': function() {
-	}
-	,__class__: kha_graphics4_GeometryShader
-};
 var kha_graphics4_Graphics = function() { };
 $hxClasses["kha.graphics4.Graphics"] = kha_graphics4_Graphics;
 kha_graphics4_Graphics.__name__ = true;
@@ -15373,8 +10099,6 @@ kha_graphics4_Graphics.prototype = {
 	__class__: kha_graphics4_Graphics
 };
 var kha_graphics4_ImageShaderPainter = function(g4) {
-	this.destinationBlend = kha_graphics4_BlendingFactor.Undefined;
-	this.sourceBlend = kha_graphics4_BlendingFactor.Undefined;
 	this.myPipeline = null;
 	this.bilinearMipmaps = false;
 	this.bilinear = false;
@@ -15409,16 +10133,6 @@ kha_graphics4_ImageShaderPainter.prototype = {
 	get_pipeline: function() {
 		return this.myPipeline;
 	}
-	,set_pipeline: function(pipe) {
-		if(pipe == null) {
-			this.projectionLocation = kha_graphics4_ImageShaderPainter.shaderPipeline.getConstantLocation("projectionMatrix");
-			this.textureLocation = kha_graphics4_ImageShaderPainter.shaderPipeline.getTextureUnit("tex");
-		} else {
-			this.projectionLocation = pipe.getConstantLocation("projectionMatrix");
-			this.textureLocation = pipe.getTextureUnit("tex");
-		}
-		return this.myPipeline = pipe;
-	}
 	,setProjection: function(projectionMatrix) {
 		this.projectionMatrix = projectionMatrix;
 	}
@@ -15440,51 +10154,6 @@ kha_graphics4_ImageShaderPainter.prototype = {
 		}
 		this.indexBuffer.unlock();
 	}
-	,setRectVertices: function(bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty) {
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex] = bottomleftx;
-		this.rectVertices[baseIndex + 1] = bottomlefty;
-		this.rectVertices[baseIndex + 2] = -5.0;
-		this.rectVertices[baseIndex + 9] = topleftx;
-		this.rectVertices[baseIndex + 10] = toplefty;
-		this.rectVertices[baseIndex + 11] = -5.0;
-		this.rectVertices[baseIndex + 18] = toprightx;
-		this.rectVertices[baseIndex + 19] = toprighty;
-		this.rectVertices[baseIndex + 20] = -5.0;
-		this.rectVertices[baseIndex + 27] = bottomrightx;
-		this.rectVertices[baseIndex + 28] = bottomrighty;
-		this.rectVertices[baseIndex + 29] = -5.0;
-	}
-	,setRectTexCoords: function(left,top,right,bottom) {
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex + 3] = left;
-		this.rectVertices[baseIndex + 4] = bottom;
-		this.rectVertices[baseIndex + 12] = left;
-		this.rectVertices[baseIndex + 13] = top;
-		this.rectVertices[baseIndex + 21] = right;
-		this.rectVertices[baseIndex + 22] = top;
-		this.rectVertices[baseIndex + 30] = right;
-		this.rectVertices[baseIndex + 31] = bottom;
-	}
-	,setRectColor: function(r,g,b,a) {
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex + 5] = r;
-		this.rectVertices[baseIndex + 6] = g;
-		this.rectVertices[baseIndex + 7] = b;
-		this.rectVertices[baseIndex + 8] = a;
-		this.rectVertices[baseIndex + 14] = r;
-		this.rectVertices[baseIndex + 15] = g;
-		this.rectVertices[baseIndex + 16] = b;
-		this.rectVertices[baseIndex + 17] = a;
-		this.rectVertices[baseIndex + 23] = r;
-		this.rectVertices[baseIndex + 24] = g;
-		this.rectVertices[baseIndex + 25] = b;
-		this.rectVertices[baseIndex + 26] = a;
-		this.rectVertices[baseIndex + 32] = r;
-		this.rectVertices[baseIndex + 33] = g;
-		this.rectVertices[baseIndex + 34] = b;
-		this.rectVertices[baseIndex + 35] = a;
-	}
 	,drawBuffer: function() {
 		this.rectVertexBuffer.unlock();
 		this.g.setVertexBuffer(this.rectVertexBuffer);
@@ -15498,173 +10167,6 @@ kha_graphics4_ImageShaderPainter.prototype = {
 		this.bufferIndex = 0;
 		this.rectVertices = this.rectVertexBuffer.lock();
 	}
-	,setBilinearFilter: function(bilinear) {
-		this.end();
-		this.bilinear = bilinear;
-	}
-	,setBilinearMipmapFilter: function(bilinear) {
-		this.end();
-		this.bilinearMipmaps = bilinear;
-	}
-	,drawImage: function(img,bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty,opacity,color) {
-		if(this.bufferIndex + 1 >= kha_graphics4_ImageShaderPainter.bufferSize || this.lastTexture != null && img != this.lastTexture) {
-			this.drawBuffer();
-		}
-		var r = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		var g = ((color & 65280) >>> 8) * 0.00392156862745098;
-		var b = (color & 255) * 0.00392156862745098;
-		var a = (color >>> 24) * 0.00392156862745098 * opacity;
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex + 5] = r;
-		this.rectVertices[baseIndex + 6] = g;
-		this.rectVertices[baseIndex + 7] = b;
-		this.rectVertices[baseIndex + 8] = a;
-		this.rectVertices[baseIndex + 14] = r;
-		this.rectVertices[baseIndex + 15] = g;
-		this.rectVertices[baseIndex + 16] = b;
-		this.rectVertices[baseIndex + 17] = a;
-		this.rectVertices[baseIndex + 23] = r;
-		this.rectVertices[baseIndex + 24] = g;
-		this.rectVertices[baseIndex + 25] = b;
-		this.rectVertices[baseIndex + 26] = a;
-		this.rectVertices[baseIndex + 32] = r;
-		this.rectVertices[baseIndex + 33] = g;
-		this.rectVertices[baseIndex + 34] = b;
-		this.rectVertices[baseIndex + 35] = a;
-		var right = img.get_width() / img.get_realWidth();
-		var bottom = img.get_height() / img.get_realHeight();
-		var baseIndex1 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex1 + 3] = 0;
-		this.rectVertices[baseIndex1 + 4] = bottom;
-		this.rectVertices[baseIndex1 + 12] = 0;
-		this.rectVertices[baseIndex1 + 13] = 0;
-		this.rectVertices[baseIndex1 + 21] = right;
-		this.rectVertices[baseIndex1 + 22] = 0;
-		this.rectVertices[baseIndex1 + 30] = right;
-		this.rectVertices[baseIndex1 + 31] = bottom;
-		var baseIndex2 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex2] = bottomleftx;
-		this.rectVertices[baseIndex2 + 1] = bottomlefty;
-		this.rectVertices[baseIndex2 + 2] = -5.0;
-		this.rectVertices[baseIndex2 + 9] = topleftx;
-		this.rectVertices[baseIndex2 + 10] = toplefty;
-		this.rectVertices[baseIndex2 + 11] = -5.0;
-		this.rectVertices[baseIndex2 + 18] = toprightx;
-		this.rectVertices[baseIndex2 + 19] = toprighty;
-		this.rectVertices[baseIndex2 + 20] = -5.0;
-		this.rectVertices[baseIndex2 + 27] = bottomrightx;
-		this.rectVertices[baseIndex2 + 28] = bottomrighty;
-		this.rectVertices[baseIndex2 + 29] = -5.0;
-		++this.bufferIndex;
-		this.lastTexture = img;
-	}
-	,drawImage2: function(img,sx,sy,sw,sh,bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty,opacity,color) {
-		if(this.bufferIndex + 1 >= kha_graphics4_ImageShaderPainter.bufferSize || this.lastTexture != null && img != this.lastTexture) {
-			this.drawBuffer();
-		}
-		var left = sx / img.get_realWidth();
-		var top = sy / img.get_realHeight();
-		var right = (sx + sw) / img.get_realWidth();
-		var bottom = (sy + sh) / img.get_realHeight();
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex + 3] = left;
-		this.rectVertices[baseIndex + 4] = bottom;
-		this.rectVertices[baseIndex + 12] = left;
-		this.rectVertices[baseIndex + 13] = top;
-		this.rectVertices[baseIndex + 21] = right;
-		this.rectVertices[baseIndex + 22] = top;
-		this.rectVertices[baseIndex + 30] = right;
-		this.rectVertices[baseIndex + 31] = bottom;
-		var r = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		var g = ((color & 65280) >>> 8) * 0.00392156862745098;
-		var b = (color & 255) * 0.00392156862745098;
-		var a = (color >>> 24) * 0.00392156862745098 * opacity;
-		var baseIndex1 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex1 + 5] = r;
-		this.rectVertices[baseIndex1 + 6] = g;
-		this.rectVertices[baseIndex1 + 7] = b;
-		this.rectVertices[baseIndex1 + 8] = a;
-		this.rectVertices[baseIndex1 + 14] = r;
-		this.rectVertices[baseIndex1 + 15] = g;
-		this.rectVertices[baseIndex1 + 16] = b;
-		this.rectVertices[baseIndex1 + 17] = a;
-		this.rectVertices[baseIndex1 + 23] = r;
-		this.rectVertices[baseIndex1 + 24] = g;
-		this.rectVertices[baseIndex1 + 25] = b;
-		this.rectVertices[baseIndex1 + 26] = a;
-		this.rectVertices[baseIndex1 + 32] = r;
-		this.rectVertices[baseIndex1 + 33] = g;
-		this.rectVertices[baseIndex1 + 34] = b;
-		this.rectVertices[baseIndex1 + 35] = a;
-		var baseIndex2 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex2] = bottomleftx;
-		this.rectVertices[baseIndex2 + 1] = bottomlefty;
-		this.rectVertices[baseIndex2 + 2] = -5.0;
-		this.rectVertices[baseIndex2 + 9] = topleftx;
-		this.rectVertices[baseIndex2 + 10] = toplefty;
-		this.rectVertices[baseIndex2 + 11] = -5.0;
-		this.rectVertices[baseIndex2 + 18] = toprightx;
-		this.rectVertices[baseIndex2 + 19] = toprighty;
-		this.rectVertices[baseIndex2 + 20] = -5.0;
-		this.rectVertices[baseIndex2 + 27] = bottomrightx;
-		this.rectVertices[baseIndex2 + 28] = bottomrighty;
-		this.rectVertices[baseIndex2 + 29] = -5.0;
-		++this.bufferIndex;
-		this.lastTexture = img;
-	}
-	,drawImageScale: function(img,sx,sy,sw,sh,left,top,right,bottom,opacity,color) {
-		if(this.bufferIndex + 1 >= kha_graphics4_ImageShaderPainter.bufferSize || this.lastTexture != null && img != this.lastTexture) {
-			this.drawBuffer();
-		}
-		var left1 = sx / img.get_realWidth();
-		var top1 = sy / img.get_realHeight();
-		var right1 = (sx + sw) / img.get_realWidth();
-		var bottom1 = (sy + sh) / img.get_realHeight();
-		var baseIndex = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex + 3] = left1;
-		this.rectVertices[baseIndex + 4] = bottom1;
-		this.rectVertices[baseIndex + 12] = left1;
-		this.rectVertices[baseIndex + 13] = top1;
-		this.rectVertices[baseIndex + 21] = right1;
-		this.rectVertices[baseIndex + 22] = top1;
-		this.rectVertices[baseIndex + 30] = right1;
-		this.rectVertices[baseIndex + 31] = bottom1;
-		var r = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		var g = ((color & 65280) >>> 8) * 0.00392156862745098;
-		var b = (color & 255) * 0.00392156862745098;
-		var baseIndex1 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex1 + 5] = r;
-		this.rectVertices[baseIndex1 + 6] = g;
-		this.rectVertices[baseIndex1 + 7] = b;
-		this.rectVertices[baseIndex1 + 8] = opacity;
-		this.rectVertices[baseIndex1 + 14] = r;
-		this.rectVertices[baseIndex1 + 15] = g;
-		this.rectVertices[baseIndex1 + 16] = b;
-		this.rectVertices[baseIndex1 + 17] = opacity;
-		this.rectVertices[baseIndex1 + 23] = r;
-		this.rectVertices[baseIndex1 + 24] = g;
-		this.rectVertices[baseIndex1 + 25] = b;
-		this.rectVertices[baseIndex1 + 26] = opacity;
-		this.rectVertices[baseIndex1 + 32] = r;
-		this.rectVertices[baseIndex1 + 33] = g;
-		this.rectVertices[baseIndex1 + 34] = b;
-		this.rectVertices[baseIndex1 + 35] = opacity;
-		var baseIndex2 = this.bufferIndex * kha_graphics4_ImageShaderPainter.vertexSize * 4;
-		this.rectVertices[baseIndex2] = left;
-		this.rectVertices[baseIndex2 + 1] = bottom;
-		this.rectVertices[baseIndex2 + 2] = -5.0;
-		this.rectVertices[baseIndex2 + 9] = left;
-		this.rectVertices[baseIndex2 + 10] = top;
-		this.rectVertices[baseIndex2 + 11] = -5.0;
-		this.rectVertices[baseIndex2 + 18] = right;
-		this.rectVertices[baseIndex2 + 19] = top;
-		this.rectVertices[baseIndex2 + 20] = -5.0;
-		this.rectVertices[baseIndex2 + 27] = right;
-		this.rectVertices[baseIndex2 + 28] = bottom;
-		this.rectVertices[baseIndex2 + 29] = -5.0;
-		++this.bufferIndex;
-		this.lastTexture = img;
-	}
 	,end: function() {
 		if(this.bufferIndex > 0) {
 			this.drawBuffer();
@@ -15674,8 +10176,6 @@ kha_graphics4_ImageShaderPainter.prototype = {
 	,__class__: kha_graphics4_ImageShaderPainter
 };
 var kha_graphics4_ColoredShaderPainter = function(g4) {
-	this.destinationBlend = kha_graphics4_BlendingFactor.Undefined;
-	this.sourceBlend = kha_graphics4_BlendingFactor.Undefined;
 	this.myPipeline = null;
 	this.g = g4;
 	this.bufferIndex = 0;
@@ -15706,14 +10206,6 @@ kha_graphics4_ColoredShaderPainter.initShaders = function() {
 kha_graphics4_ColoredShaderPainter.prototype = {
 	get_pipeline: function() {
 		return this.myPipeline;
-	}
-	,set_pipeline: function(pipe) {
-		if(pipe == null) {
-			this.projectionLocation = kha_graphics4_ColoredShaderPainter.shaderPipeline.getConstantLocation("projectionMatrix");
-		} else {
-			this.projectionLocation = pipe.getConstantLocation("projectionMatrix");
-		}
-		return this.myPipeline = pipe;
 	}
 	,setProjection: function(projectionMatrix) {
 		this.projectionMatrix = projectionMatrix;
@@ -15784,34 +10276,6 @@ kha_graphics4_ColoredShaderPainter.prototype = {
 		this.rectVertices[baseIndex + 26] = (color & 255) * 0.00392156862745098;
 		this.rectVertices[baseIndex + 27] = a;
 	}
-	,setTriVertices: function(x1,y1,x2,y2,x3,y3) {
-		var baseIndex = this.triangleBufferIndex * 7 * 3;
-		this.triangleVertices[baseIndex] = x1;
-		this.triangleVertices[baseIndex + 1] = y1;
-		this.triangleVertices[baseIndex + 2] = -5.0;
-		this.triangleVertices[baseIndex + 7] = x2;
-		this.triangleVertices[baseIndex + 8] = y2;
-		this.triangleVertices[baseIndex + 9] = -5.0;
-		this.triangleVertices[baseIndex + 14] = x3;
-		this.triangleVertices[baseIndex + 15] = y3;
-		this.triangleVertices[baseIndex + 16] = -5.0;
-	}
-	,setTriColors: function(opacity,color) {
-		var baseIndex = this.triangleBufferIndex * 7 * 3;
-		var a = opacity * ((color >>> 24) * 0.00392156862745098);
-		this.triangleVertices[baseIndex + 3] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 4] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 5] = (color & 255) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 6] = a;
-		this.triangleVertices[baseIndex + 10] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 11] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 12] = (color & 255) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 13] = a;
-		this.triangleVertices[baseIndex + 17] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 18] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 19] = (color & 255) * 0.00392156862745098;
-		this.triangleVertices[baseIndex + 20] = a;
-	}
 	,drawBuffer: function(trisDone) {
 		if(!trisDone) {
 			if(this.triangleBufferIndex > 0) {
@@ -15853,40 +10317,9 @@ kha_graphics4_ColoredShaderPainter.prototype = {
 		this.setRectVertices(bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty);
 		++this.bufferIndex;
 	}
-	,fillTriangle: function(opacity,color,x1,y1,x2,y2,x3,y3) {
-		if(this.bufferIndex > 0) {
-			this.drawBuffer(true);
-		}
-		if(this.triangleBufferIndex + 1 >= kha_graphics4_ColoredShaderPainter.triangleBufferSize) {
-			this.drawTriBuffer(false);
-		}
-		this.setTriColors(opacity,color);
-		this.setTriVertices(x1,y1,x2,y2,x3,y3);
-		++this.triangleBufferIndex;
-	}
-	,endTris: function(rectsDone) {
-		if(this.triangleBufferIndex > 0) {
-			this.drawTriBuffer(rectsDone);
-		}
-	}
-	,endRects: function(trisDone) {
-		if(this.bufferIndex > 0) {
-			this.drawBuffer(trisDone);
-		}
-	}
-	,end: function() {
-		if(this.triangleBufferIndex > 0) {
-			this.drawTriBuffer(false);
-		}
-		if(this.bufferIndex > 0) {
-			this.drawBuffer(false);
-		}
-	}
 	,__class__: kha_graphics4_ColoredShaderPainter
 };
 var kha_graphics4_TextShaderPainter = function(g4) {
-	this.destinationBlend = kha_graphics4_BlendingFactor.Undefined;
-	this.sourceBlend = kha_graphics4_BlendingFactor.Undefined;
 	this.bilinear = false;
 	this.myPipeline = null;
 	this.g = g4;
@@ -15916,30 +10349,9 @@ kha_graphics4_TextShaderPainter.initShaders = function() {
 	kha_graphics4_TextShaderPainter.shaderPipeline.alphaBlendDestination = kha_graphics4_BlendingFactor.InverseSourceAlpha;
 	kha_graphics4_TextShaderPainter.shaderPipeline.compile();
 };
-kha_graphics4_TextShaderPainter.findIndex = function(charcode,fontGlyphs) {
-	var _g1 = 0;
-	var _g = fontGlyphs.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(fontGlyphs[i] == charcode) {
-			return i;
-		}
-	}
-	return 0;
-};
 kha_graphics4_TextShaderPainter.prototype = {
 	get_pipeline: function() {
 		return this.myPipeline;
-	}
-	,set_pipeline: function(pipe) {
-		if(pipe == null) {
-			this.projectionLocation = kha_graphics4_TextShaderPainter.shaderPipeline.getConstantLocation("projectionMatrix");
-			this.textureLocation = kha_graphics4_TextShaderPainter.shaderPipeline.getTextureUnit("tex");
-		} else {
-			this.projectionLocation = pipe.getConstantLocation("projectionMatrix");
-			this.textureLocation = pipe.getTextureUnit("tex");
-		}
-		return this.myPipeline = pipe;
 	}
 	,setProjection: function(projectionMatrix) {
 		this.projectionMatrix = projectionMatrix;
@@ -15962,52 +10374,6 @@ kha_graphics4_TextShaderPainter.prototype = {
 		}
 		this.indexBuffer.unlock();
 	}
-	,setRectVertices: function(bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty) {
-		var baseIndex = this.bufferIndex * 9 * 4;
-		this.rectVertices[baseIndex] = bottomleftx;
-		this.rectVertices[baseIndex + 1] = bottomlefty;
-		this.rectVertices[baseIndex + 2] = -5.0;
-		this.rectVertices[baseIndex + 9] = topleftx;
-		this.rectVertices[baseIndex + 10] = toplefty;
-		this.rectVertices[baseIndex + 11] = -5.0;
-		this.rectVertices[baseIndex + 18] = toprightx;
-		this.rectVertices[baseIndex + 19] = toprighty;
-		this.rectVertices[baseIndex + 20] = -5.0;
-		this.rectVertices[baseIndex + 27] = bottomrightx;
-		this.rectVertices[baseIndex + 28] = bottomrighty;
-		this.rectVertices[baseIndex + 29] = -5.0;
-	}
-	,setRectTexCoords: function(left,top,right,bottom) {
-		var baseIndex = this.bufferIndex * 9 * 4;
-		this.rectVertices[baseIndex + 3] = left;
-		this.rectVertices[baseIndex + 4] = bottom;
-		this.rectVertices[baseIndex + 12] = left;
-		this.rectVertices[baseIndex + 13] = top;
-		this.rectVertices[baseIndex + 21] = right;
-		this.rectVertices[baseIndex + 22] = top;
-		this.rectVertices[baseIndex + 30] = right;
-		this.rectVertices[baseIndex + 31] = bottom;
-	}
-	,setRectColors: function(opacity,color) {
-		var baseIndex = this.bufferIndex * 9 * 4;
-		var a = opacity * ((color >>> 24) * 0.00392156862745098);
-		this.rectVertices[baseIndex + 5] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 6] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 7] = (color & 255) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 8] = a;
-		this.rectVertices[baseIndex + 14] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 15] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 16] = (color & 255) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 17] = a;
-		this.rectVertices[baseIndex + 23] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 24] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 25] = (color & 255) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 26] = a;
-		this.rectVertices[baseIndex + 32] = ((color & 16711680) >>> 16) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 33] = ((color & 65280) >>> 8) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 34] = (color & 255) * 0.00392156862745098;
-		this.rectVertices[baseIndex + 35] = a;
-	}
 	,drawBuffer: function() {
 		this.rectVertexBuffer.unlock();
 		this.g.setVertexBuffer(this.rectVertexBuffer);
@@ -16021,69 +10387,6 @@ kha_graphics4_TextShaderPainter.prototype = {
 		this.bufferIndex = 0;
 		this.rectVertices = this.rectVertexBuffer.lock();
 	}
-	,setBilinearFilter: function(bilinear) {
-		this.end();
-		this.bilinear = bilinear;
-	}
-	,setFont: function(font) {
-		this.font = js_Boot.__cast(font , kha_Kravur);
-	}
-	,startString: function(text) {
-		this.text = text;
-	}
-	,charCodeAt: function(position) {
-		return HxOverrides.cca(this.text,position);
-	}
-	,stringLength: function() {
-		return this.text.length;
-	}
-	,endString: function() {
-		this.text = null;
-	}
-	,drawString: function(text,opacity,color,x,y,transformation,fontGlyphs) {
-		var font = this.font._get(this.fontSize,fontGlyphs);
-		var tex = font.getTexture();
-		if(this.lastTexture != null && tex != this.lastTexture) {
-			this.drawBuffer();
-		}
-		this.lastTexture = tex;
-		var xpos = x;
-		this.startString(text);
-		var _g1 = 0;
-		var _g = this.stringLength();
-		while(_g1 < _g) {
-			var q = font.getBakedQuad(kha_graphics4_TextShaderPainter.findIndex(this.charCodeAt(_g1++),fontGlyphs),xpos,y);
-			if(q != null) {
-				if(this.bufferIndex + 1 >= kha_graphics4_TextShaderPainter.bufferSize) {
-					this.drawBuffer();
-				}
-				this.setRectColors(opacity,color);
-				this.setRectTexCoords(q.s0 * tex.get_width() / tex.get_realWidth(),q.t0 * tex.get_height() / tex.get_realHeight(),q.s1 * tex.get_width() / tex.get_realWidth(),q.t1 * tex.get_height() / tex.get_realHeight());
-				var x1 = q.x0;
-				var y1 = q.y1;
-				var w = transformation._02 * x1 + transformation._12 * y1 + transformation._22;
-				var x2 = (transformation._00 * x1 + transformation._10 * y1 + transformation._20) / w;
-				var y2 = (transformation._01 * x1 + transformation._11 * y1 + transformation._21) / w;
-				var x3 = q.x0;
-				var y3 = q.y0;
-				var w1 = transformation._02 * x3 + transformation._12 * y3 + transformation._22;
-				var x4 = (transformation._00 * x3 + transformation._10 * y3 + transformation._20) / w1;
-				var y4 = (transformation._01 * x3 + transformation._11 * y3 + transformation._21) / w1;
-				var x5 = q.x1;
-				var y5 = q.y0;
-				var w2 = transformation._02 * x5 + transformation._12 * y5 + transformation._22;
-				var x6 = (transformation._00 * x5 + transformation._10 * y5 + transformation._20) / w2;
-				var y6 = (transformation._01 * x5 + transformation._11 * y5 + transformation._21) / w2;
-				var x7 = q.x1;
-				var y7 = q.y1;
-				var w3 = transformation._02 * x7 + transformation._12 * y7 + transformation._22;
-				this.setRectVertices(x2,y2,x4,y4,x6,y6,(transformation._00 * x7 + transformation._10 * y7 + transformation._20) / w3,(transformation._01 * x7 + transformation._11 * y7 + transformation._21) / w3);
-				xpos += q.xadvance;
-				++this.bufferIndex;
-			}
-		}
-		this.endString();
-	}
 	,end: function() {
 		if(this.bufferIndex > 0) {
 			this.drawBuffer();
@@ -16093,8 +10396,6 @@ kha_graphics4_TextShaderPainter.prototype = {
 	,__class__: kha_graphics4_TextShaderPainter
 };
 var kha_graphics4_Graphics2 = function(canvas) {
-	this.myMipmapScaleQuality = kha_graphics2_ImageScaleQuality.High;
-	this.myImageScaleQuality = kha_graphics2_ImageScaleQuality.High;
 	kha_graphics2_Graphics.call(this);
 	this.set_color(kha__$Color_Color_$Impl_$.White);
 	this.canvas = canvas;
@@ -16321,87 +10622,6 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 	,set_color: function(color) {
 		return this.myColor = color;
 	}
-	,drawRect: function(x,y,width,height,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.imagePainter.end();
-		this.textPainter.end();
-		var _this = this.transformations[this.transformations.length - 1];
-		var value_x = x - strength / 2;
-		var value_y = y + strength / 2;
-		var w = _this._02 * value_x + _this._12 * value_y + _this._22;
-		var p1 = new kha_math_FastVector2((_this._00 * value_x + _this._10 * value_y + _this._20) / w,(_this._01 * value_x + _this._11 * value_y + _this._21) / w);
-		var _this1 = this.transformations[this.transformations.length - 1];
-		var value_x1 = x - strength / 2;
-		var value_y1 = y - strength / 2;
-		var w1 = _this1._02 * value_x1 + _this1._12 * value_y1 + _this1._22;
-		var p2 = new kha_math_FastVector2((_this1._00 * value_x1 + _this1._10 * value_y1 + _this1._20) / w1,(_this1._01 * value_x1 + _this1._11 * value_y1 + _this1._21) / w1);
-		var _this2 = this.transformations[this.transformations.length - 1];
-		var value_x2 = x + width + strength / 2;
-		var value_y2 = y - strength / 2;
-		var w2 = _this2._02 * value_x2 + _this2._12 * value_y2 + _this2._22;
-		var p3 = new kha_math_FastVector2((_this2._00 * value_x2 + _this2._10 * value_y2 + _this2._20) / w2,(_this2._01 * value_x2 + _this2._11 * value_y2 + _this2._21) / w2);
-		var _this3 = this.transformations[this.transformations.length - 1];
-		var value_x3 = x + width + strength / 2;
-		var value_y3 = y + strength / 2;
-		var w3 = _this3._02 * value_x3 + _this3._12 * value_y3 + _this3._22;
-		var p4 = new kha_math_FastVector2((_this3._00 * value_x3 + _this3._10 * value_y3 + _this3._20) / w3,(_this3._01 * value_x3 + _this3._11 * value_y3 + _this3._21) / w3);
-		this.coloredPainter.fillRect(this.get_opacity(),this.get_color(),p1.x,p1.y,p2.x,p2.y,p3.x,p3.y,p4.x,p4.y);
-		var _this4 = this.transformations[this.transformations.length - 1];
-		var value_x4 = x - strength / 2;
-		var value_y4 = y + height + strength / 2;
-		var w4 = _this4._02 * value_x4 + _this4._12 * value_y4 + _this4._22;
-		p1 = new kha_math_FastVector2((_this4._00 * value_x4 + _this4._10 * value_y4 + _this4._20) / w4,(_this4._01 * value_x4 + _this4._11 * value_y4 + _this4._21) / w4);
-		var _this5 = this.transformations[this.transformations.length - 1];
-		var value_x5 = x + strength / 2;
-		var value_y5 = y - strength / 2;
-		var w5 = _this5._02 * value_x5 + _this5._12 * value_y5 + _this5._22;
-		p3 = new kha_math_FastVector2((_this5._00 * value_x5 + _this5._10 * value_y5 + _this5._20) / w5,(_this5._01 * value_x5 + _this5._11 * value_y5 + _this5._21) / w5);
-		var _this6 = this.transformations[this.transformations.length - 1];
-		var value_x6 = x + strength / 2;
-		var value_y6 = y + height + strength / 2;
-		var w6 = _this6._02 * value_x6 + _this6._12 * value_y6 + _this6._22;
-		p4 = new kha_math_FastVector2((_this6._00 * value_x6 + _this6._10 * value_y6 + _this6._20) / w6,(_this6._01 * value_x6 + _this6._11 * value_y6 + _this6._21) / w6);
-		this.coloredPainter.fillRect(this.get_opacity(),this.get_color(),p1.x,p1.y,p2.x,p2.y,p3.x,p3.y,p4.x,p4.y);
-		var _this7 = this.transformations[this.transformations.length - 1];
-		var value_x7 = x - strength / 2;
-		var value_y7 = y + height - strength / 2;
-		var w7 = _this7._02 * value_x7 + _this7._12 * value_y7 + _this7._22;
-		p2 = new kha_math_FastVector2((_this7._00 * value_x7 + _this7._10 * value_y7 + _this7._20) / w7,(_this7._01 * value_x7 + _this7._11 * value_y7 + _this7._21) / w7);
-		var _this8 = this.transformations[this.transformations.length - 1];
-		var value_x8 = x + width + strength / 2;
-		var value_y8 = y + height - strength / 2;
-		var w8 = _this8._02 * value_x8 + _this8._12 * value_y8 + _this8._22;
-		p3 = new kha_math_FastVector2((_this8._00 * value_x8 + _this8._10 * value_y8 + _this8._20) / w8,(_this8._01 * value_x8 + _this8._11 * value_y8 + _this8._21) / w8);
-		var _this9 = this.transformations[this.transformations.length - 1];
-		var value_x9 = x + width + strength / 2;
-		var value_y9 = y + height + strength / 2;
-		var w9 = _this9._02 * value_x9 + _this9._12 * value_y9 + _this9._22;
-		p4 = new kha_math_FastVector2((_this9._00 * value_x9 + _this9._10 * value_y9 + _this9._20) / w9,(_this9._01 * value_x9 + _this9._11 * value_y9 + _this9._21) / w9);
-		this.coloredPainter.fillRect(this.get_opacity(),this.get_color(),p1.x,p1.y,p2.x,p2.y,p3.x,p3.y,p4.x,p4.y);
-		var _this10 = this.transformations[this.transformations.length - 1];
-		var value_x10 = x + width - strength / 2;
-		var value_y10 = y + height + strength / 2;
-		var w10 = _this10._02 * value_x10 + _this10._12 * value_y10 + _this10._22;
-		p1 = new kha_math_FastVector2((_this10._00 * value_x10 + _this10._10 * value_y10 + _this10._20) / w10,(_this10._01 * value_x10 + _this10._11 * value_y10 + _this10._21) / w10);
-		var _this11 = this.transformations[this.transformations.length - 1];
-		var value_x11 = x + width - strength / 2;
-		var value_y11 = y - strength / 2;
-		var w11 = _this11._02 * value_x11 + _this11._12 * value_y11 + _this11._22;
-		p2 = new kha_math_FastVector2((_this11._00 * value_x11 + _this11._10 * value_y11 + _this11._20) / w11,(_this11._01 * value_x11 + _this11._11 * value_y11 + _this11._21) / w11);
-		var _this12 = this.transformations[this.transformations.length - 1];
-		var value_x12 = x + width + strength / 2;
-		var value_y12 = y - strength / 2;
-		var w12 = _this12._02 * value_x12 + _this12._12 * value_y12 + _this12._22;
-		p3 = new kha_math_FastVector2((_this12._00 * value_x12 + _this12._10 * value_y12 + _this12._20) / w12,(_this12._01 * value_x12 + _this12._11 * value_y12 + _this12._21) / w12);
-		var _this13 = this.transformations[this.transformations.length - 1];
-		var value_x13 = x + width + strength / 2;
-		var value_y13 = y + height + strength / 2;
-		var w13 = _this13._02 * value_x13 + _this13._12 * value_y13 + _this13._22;
-		p4 = new kha_math_FastVector2((_this13._00 * value_x13 + _this13._10 * value_y13 + _this13._20) / w13,(_this13._01 * value_x13 + _this13._11 * value_y13 + _this13._21) / w13);
-		this.coloredPainter.fillRect(this.get_opacity(),this.get_color(),p1.x,p1.y,p2.x,p2.y,p3.x,p3.y,p4.x,p4.y);
-	}
 	,fillRect: function(x,y,width,height) {
 		this.imagePainter.end();
 		this.textPainter.end();
@@ -16426,103 +10646,6 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		var x4 = (_this3._00 * value_x1 + _this3._10 * value_y1 + _this3._20) / w3;
 		var y4 = (_this3._01 * value_x1 + _this3._11 * value_y1 + _this3._21) / w3;
 		this.coloredPainter.fillRect(this.get_opacity(),this.get_color(),x1,y1,x2,y2,x3,y3,x4,y4);
-	}
-	,drawString: function(text,x,y) {
-		this.imagePainter.end();
-		var _this = this.coloredPainter;
-		if(_this.triangleBufferIndex > 0) {
-			_this.drawTriBuffer(false);
-		}
-		if(_this.bufferIndex > 0) {
-			_this.drawBuffer(false);
-		}
-		this.textPainter.drawString(text,this.get_opacity(),this.get_color(),x,y,this.transformations[this.transformations.length - 1],this.get_fontGlyphs());
-	}
-	,get_font: function() {
-		return this.myFont;
-	}
-	,set_font: function(font) {
-		this.textPainter.setFont(font);
-		return this.myFont = font;
-	}
-	,set_fontSize: function(value) {
-		return kha_graphics2_Graphics.prototype.set_fontSize.call(this,this.textPainter.fontSize = value);
-	}
-	,drawLine: function(x1,y1,x2,y2,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.imagePainter.end();
-		this.textPainter.end();
-		var vec = y2 == y1?new kha_math_FastVector2(0,-1):new kha_math_FastVector2(1,-(x2 - x1) / (y2 - y1));
-		vec.set_length(strength);
-		var p1 = new kha_math_FastVector2(x1 + 0.5 * vec.x,y1 + 0.5 * vec.y);
-		var p2 = new kha_math_FastVector2(x2 + 0.5 * vec.x,y2 + 0.5 * vec.y);
-		var p3 = new kha_math_FastVector2(p1.x - vec.x,p1.y - vec.y);
-		var p4 = new kha_math_FastVector2(p2.x - vec.x,p2.y - vec.y);
-		var _this = this.transformations[this.transformations.length - 1];
-		var w = _this._02 * p1.x + _this._12 * p1.y + _this._22;
-		p1 = new kha_math_FastVector2((_this._00 * p1.x + _this._10 * p1.y + _this._20) / w,(_this._01 * p1.x + _this._11 * p1.y + _this._21) / w);
-		var _this1 = this.transformations[this.transformations.length - 1];
-		var w1 = _this1._02 * p2.x + _this1._12 * p2.y + _this1._22;
-		p2 = new kha_math_FastVector2((_this1._00 * p2.x + _this1._10 * p2.y + _this1._20) / w1,(_this1._01 * p2.x + _this1._11 * p2.y + _this1._21) / w1);
-		var _this2 = this.transformations[this.transformations.length - 1];
-		var w2 = _this2._02 * p3.x + _this2._12 * p3.y + _this2._22;
-		p3 = new kha_math_FastVector2((_this2._00 * p3.x + _this2._10 * p3.y + _this2._20) / w2,(_this2._01 * p3.x + _this2._11 * p3.y + _this2._21) / w2);
-		var _this3 = this.transformations[this.transformations.length - 1];
-		var w3 = _this3._02 * p4.x + _this3._12 * p4.y + _this3._22;
-		p4 = new kha_math_FastVector2((_this3._00 * p4.x + _this3._10 * p4.y + _this3._20) / w3,(_this3._01 * p4.x + _this3._11 * p4.y + _this3._21) / w3);
-		this.coloredPainter.fillTriangle(this.get_opacity(),this.get_color(),p1.x,p1.y,p2.x,p2.y,p3.x,p3.y);
-		this.coloredPainter.fillTriangle(this.get_opacity(),this.get_color(),p3.x,p3.y,p2.x,p2.y,p4.x,p4.y);
-	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-		this.imagePainter.end();
-		this.textPainter.end();
-		var _this = this.transformations[this.transformations.length - 1];
-		var w = _this._02 * x1 + _this._12 * y1 + _this._22;
-		var x = (_this._00 * x1 + _this._10 * y1 + _this._20) / w;
-		var y = (_this._01 * x1 + _this._11 * y1 + _this._21) / w;
-		var _this1 = this.transformations[this.transformations.length - 1];
-		var w1 = _this1._02 * x2 + _this1._12 * y2 + _this1._22;
-		var x4 = (_this1._00 * x2 + _this1._10 * y2 + _this1._20) / w1;
-		var y4 = (_this1._01 * x2 + _this1._11 * y2 + _this1._21) / w1;
-		var _this2 = this.transformations[this.transformations.length - 1];
-		var w2 = _this2._02 * x3 + _this2._12 * y3 + _this2._22;
-		var x5 = (_this2._00 * x3 + _this2._10 * y3 + _this2._20) / w2;
-		var y5 = (_this2._01 * x3 + _this2._11 * y3 + _this2._21) / w2;
-		this.coloredPainter.fillTriangle(this.get_opacity(),this.get_color(),x,y,x4,y4,x5,y5);
-	}
-	,get_imageScaleQuality: function() {
-		return this.myImageScaleQuality;
-	}
-	,set_imageScaleQuality: function(value) {
-		this.imagePainter.setBilinearFilter(value == kha_graphics2_ImageScaleQuality.High);
-		this.textPainter.setBilinearFilter(value == kha_graphics2_ImageScaleQuality.High);
-		return this.myImageScaleQuality = value;
-	}
-	,get_mipmapScaleQuality: function() {
-		return this.myMipmapScaleQuality;
-	}
-	,set_mipmapScaleQuality: function(value) {
-		this.imagePainter.setBilinearMipmapFilter(value == kha_graphics2_ImageScaleQuality.High);
-		return this.myMipmapScaleQuality = value;
-	}
-	,setPipeline: function(pipeline) {
-		this.flush();
-		this.imagePainter.set_pipeline(pipeline);
-		this.coloredPainter.set_pipeline(pipeline);
-		this.textPainter.set_pipeline(pipeline);
-		if(pipeline != null) {
-			this.g.setPipeline(pipeline);
-		}
-	}
-	,scissor: function(x,y,width,height) {
-		this.flush();
-		this.g.scissor(x,y,width,height);
-	}
-	,disableScissor: function() {
-		this.flush();
-		this.g.disableScissor();
 	}
 	,begin: function(clear,clearColor) {
 		if(clear == null) {
@@ -16553,13 +10676,6 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		this.flush();
 		this.g.end();
 	}
-	,drawVideoInternal: function(video,x,y,width,height) {
-	}
-	,drawVideo: function(video,x,y,width,height) {
-		this.setPipeline(kha_graphics4_Graphics2.videoPipeline);
-		this.drawVideoInternal(video,x,y,width,height);
-		this.setPipeline(null);
-	}
 	,__class__: kha_graphics4_Graphics2
 });
 var kha_graphics4_IndexBuffer = function(indexCount,usage,canRead) {
@@ -16575,11 +10691,7 @@ var kha_graphics4_IndexBuffer = function(indexCount,usage,canRead) {
 $hxClasses["kha.graphics4.IndexBuffer"] = kha_graphics4_IndexBuffer;
 kha_graphics4_IndexBuffer.__name__ = true;
 kha_graphics4_IndexBuffer.prototype = {
-	'delete': function() {
-		this.data = null;
-		kha_SystemImpl.gl.deleteBuffer(this.buffer);
-	}
-	,lock: function() {
+	lock: function() {
 		return this.data;
 	}
 	,unlock: function() {
@@ -16632,10 +10744,7 @@ var kha_graphics4_PipelineStateBase = function() {
 $hxClasses["kha.graphics4.PipelineStateBase"] = kha_graphics4_PipelineStateBase;
 kha_graphics4_PipelineStateBase.__name__ = true;
 kha_graphics4_PipelineStateBase.prototype = {
-	set_colorWriteMask: function(value) {
-		return this.colorWriteMaskRed = this.colorWriteMaskBlue = this.colorWriteMaskGreen = this.colorWriteMaskAlpha = value;
-	}
-	,__class__: kha_graphics4_PipelineStateBase
+	__class__: kha_graphics4_PipelineStateBase
 };
 var kha_graphics4_PipelineState = function() {
 	kha_graphics4_PipelineStateBase.call(this);
@@ -16647,10 +10756,7 @@ $hxClasses["kha.graphics4.PipelineState"] = kha_graphics4_PipelineState;
 kha_graphics4_PipelineState.__name__ = true;
 kha_graphics4_PipelineState.__super__ = kha_graphics4_PipelineStateBase;
 kha_graphics4_PipelineState.prototype = $extend(kha_graphics4_PipelineStateBase.prototype,{
-	'delete': function() {
-		kha_SystemImpl.gl.deleteProgram(this.program);
-	}
-	,compile: function() {
+	compile: function() {
 		this.compileShader(this.vertexShader);
 		this.compileShader(this.fragmentShader);
 		kha_SystemImpl.gl.attachShader(this.program,this.vertexShader.shader);
@@ -16752,31 +10858,12 @@ kha_graphics4_StencilAction.DecrementWrap.__enum__ = kha_graphics4_StencilAction
 kha_graphics4_StencilAction.Invert = ["Invert",7];
 kha_graphics4_StencilAction.Invert.toString = $estr;
 kha_graphics4_StencilAction.Invert.__enum__ = kha_graphics4_StencilAction;
-var kha_graphics4_TesselationControlShader = function(source) {
-};
+var kha_graphics4_TesselationControlShader = function() { };
 $hxClasses["kha.graphics4.TesselationControlShader"] = kha_graphics4_TesselationControlShader;
 kha_graphics4_TesselationControlShader.__name__ = true;
-kha_graphics4_TesselationControlShader.prototype = {
-	'delete': function() {
-	}
-	,__class__: kha_graphics4_TesselationControlShader
-};
-var kha_graphics4_TesselationEvaluationShader = function(source) {
-};
+var kha_graphics4_TesselationEvaluationShader = function() { };
 $hxClasses["kha.graphics4.TesselationEvaluationShader"] = kha_graphics4_TesselationEvaluationShader;
 kha_graphics4_TesselationEvaluationShader.__name__ = true;
-kha_graphics4_TesselationEvaluationShader.prototype = {
-	'delete': function() {
-	}
-	,__class__: kha_graphics4_TesselationEvaluationShader
-};
-var kha_graphics4_TexDir = $hxClasses["kha.graphics4.TexDir"] = { __ename__ : true, __constructs__ : ["U","V"] };
-kha_graphics4_TexDir.U = ["U",0];
-kha_graphics4_TexDir.U.toString = $estr;
-kha_graphics4_TexDir.U.__enum__ = kha_graphics4_TexDir;
-kha_graphics4_TexDir.V = ["V",1];
-kha_graphics4_TexDir.V.toString = $estr;
-kha_graphics4_TexDir.V.__enum__ = kha_graphics4_TexDir;
 var kha_graphics4_TextureAddressing = $hxClasses["kha.graphics4.TextureAddressing"] = { __ename__ : true, __constructs__ : ["Repeat","Mirror","Clamp"] };
 kha_graphics4_TextureAddressing.Repeat = ["Repeat",0];
 kha_graphics4_TextureAddressing.Repeat.toString = $estr;
@@ -16922,22 +11009,12 @@ var kha_graphics4_VertexBuffer = function(vertexCount,structure,usage,instanceDa
 $hxClasses["kha.graphics4.VertexBuffer"] = kha_graphics4_VertexBuffer;
 kha_graphics4_VertexBuffer.__name__ = true;
 kha_graphics4_VertexBuffer.prototype = {
-	'delete': function() {
-		this.data = null;
-		kha_SystemImpl.gl.deleteBuffer(this.buffer);
-	}
-	,lock: function(start,count) {
+	lock: function(start,count) {
 		return this.data;
 	}
 	,unlock: function() {
 		kha_SystemImpl.gl.bindBuffer(34962,this.buffer);
 		kha_SystemImpl.gl.bufferData(34962,this.data,this.usage == kha_graphics4_Usage.DynamicUsage?35048:35044);
-	}
-	,stride: function() {
-		return this.myStride;
-	}
-	,count: function() {
-		return this.mySize;
 	}
 	,set: function(offset) {
 		var ext = kha_SystemImpl.gl.getExtension("ANGLE_instanced_arrays");
@@ -17006,12 +11083,7 @@ var kha_graphics4_VertexShader = function(source,file) {
 $hxClasses["kha.graphics4.VertexShader"] = kha_graphics4_VertexShader;
 kha_graphics4_VertexShader.__name__ = true;
 kha_graphics4_VertexShader.prototype = {
-	'delete': function() {
-		kha_SystemImpl.gl.deleteShader(this.shader);
-		this.shader = null;
-		this.source = null;
-	}
-	,__class__: kha_graphics4_VertexShader
+	__class__: kha_graphics4_VertexShader
 };
 var kha_graphics4_VertexStructure = function() {
 	this.elements = [];
@@ -17021,33 +11093,6 @@ kha_graphics4_VertexStructure.__name__ = true;
 kha_graphics4_VertexStructure.prototype = {
 	add: function(name,data) {
 		this.elements.push(new kha_graphics4_VertexElement(name,data));
-	}
-	,size: function() {
-		return this.elements.length;
-	}
-	,byteSize: function() {
-		var byteSize = 0;
-		var _g1 = 0;
-		var _g = this.elements.length;
-		while(_g1 < _g) byteSize += this.dataByteSize(this.elements[_g1++].data);
-		return byteSize;
-	}
-	,dataByteSize: function(data) {
-		switch(data[1]) {
-		case 0:
-			return 4;
-		case 1:
-			return 8;
-		case 2:
-			return 12;
-		case 3:
-			return 16;
-		case 4:
-			return 64;
-		}
-	}
-	,get: function(index) {
-		return this.elements[index];
 	}
 	,__class__: kha_graphics4_VertexStructure
 };
@@ -17061,33 +11106,8 @@ var kha_input_Gamepad = $hx_exports["kha"]["input"]["Gamepad"] = function(id) {
 };
 $hxClasses["kha.input.Gamepad"] = kha_input_Gamepad;
 kha_input_Gamepad.__name__ = true;
-kha_input_Gamepad.get = function(num) {
-	if(num == null) {
-		num = 0;
-	}
-	if(num >= kha_input_Gamepad.instances.length) {
-		return null;
-	}
-	return kha_input_Gamepad.instances[num];
-};
 kha_input_Gamepad.prototype = {
-	notify: function(axisListener,buttonListener) {
-		if(axisListener != null) {
-			this.axisListeners.push(axisListener);
-		}
-		if(buttonListener != null) {
-			this.buttonListeners.push(buttonListener);
-		}
-	}
-	,remove: function(axisListener,buttonListener) {
-		if(axisListener != null) {
-			HxOverrides.remove(this.axisListeners,axisListener);
-		}
-		if(buttonListener != null) {
-			HxOverrides.remove(this.buttonListeners,buttonListener);
-		}
-	}
-	,sendAxisEvent: function(axis,value) {
+	sendAxisEvent: function(axis,value) {
 		var _g = 0;
 		var _g1 = this.axisListeners;
 		while(_g < _g1.length) {
@@ -17117,8 +11137,6 @@ kha_network_Controller.prototype = {
 	_id: function() {
 		return this.__id;
 	}
-	,_receive: function(bytes) {
-	}
 	,__class__: kha_network_Controller
 };
 var kha_input_Keyboard = $hx_exports["kha"]["input"]["Keyboard"] = function() {
@@ -17129,35 +11147,9 @@ var kha_input_Keyboard = $hx_exports["kha"]["input"]["Keyboard"] = function() {
 };
 $hxClasses["kha.input.Keyboard"] = kha_input_Keyboard;
 kha_input_Keyboard.__name__ = true;
-kha_input_Keyboard.get = function(num) {
-	if(num == null) {
-		num = 0;
-	}
-	return kha_SystemImpl.getKeyboard(num);
-};
 kha_input_Keyboard.__super__ = kha_network_Controller;
 kha_input_Keyboard.prototype = $extend(kha_network_Controller.prototype,{
-	notify: function(downListener,upListener) {
-		if(downListener != null) {
-			this.downListeners.push(downListener);
-		}
-		if(upListener != null) {
-			this.upListeners.push(upListener);
-		}
-	}
-	,remove: function(downListener,upListener) {
-		if(downListener != null) {
-			HxOverrides.remove(this.downListeners,downListener);
-		}
-		if(upListener != null) {
-			HxOverrides.remove(this.upListeners,upListener);
-		}
-	}
-	,show: function() {
-	}
-	,hide: function() {
-	}
-	,sendDownEvent: function(key,$char) {
+	sendDownEvent: function(key,$char) {
 		if(kha_network_Session.the() != null) {
 			var bytes = new haxe_io_Bytes(new ArrayBuffer(6));
 			bytes.setInt32(0,0);
@@ -17189,17 +11181,6 @@ kha_input_Keyboard.prototype = $extend(kha_network_Controller.prototype,{
 			listener(key,$char);
 		}
 	}
-	,_receive: function(bytes) {
-		var funcindex = bytes.getInt32(0);
-		if(funcindex == 0) {
-			this.sendDownEvent(Type.createEnumIndex(kha_Key,bytes.b[4],null),String.fromCharCode(bytes.b[5]));
-			return;
-		}
-		if(funcindex == 1) {
-			this.sendUpEvent(Type.createEnumIndex(kha_Key,bytes.b[4],null),String.fromCharCode(bytes.b[5]));
-			return;
-		}
-	}
 	,__class__: kha_input_Keyboard
 });
 var kha_input_Mouse = $hx_exports["kha"]["input"]["Mouse"] = function() {
@@ -17218,9 +11199,6 @@ kha_input_Mouse.__super__ = kha_network_Controller;
 kha_input_Mouse.prototype = $extend(kha_network_Controller.prototype,{
 	notify: function(downListener,upListener,moveListener,wheelListener) {
 		this.notifyWindowed(0,downListener,upListener,moveListener,wheelListener);
-	}
-	,remove: function(downListener,upListener,moveListener,wheelListener) {
-		this.removeWindowed(0,downListener,upListener,moveListener,wheelListener);
 	}
 	,notifyWindowed: function(windowId,downListener,upListener,moveListener,wheelListener) {
 		if(downListener != null) {
@@ -17251,70 +11229,6 @@ kha_input_Mouse.prototype = $extend(kha_network_Controller.prototype,{
 			while(this.windowWheelListeners.length <= windowId) this.windowWheelListeners.push([]);
 			this.windowWheelListeners[windowId].push(wheelListener);
 		}
-	}
-	,removeWindowed: function(windowId,downListener,upListener,moveListener,wheelListener) {
-		if(downListener != null) {
-			if(this.windowDownListeners != null) {
-				if(windowId < this.windowDownListeners.length) {
-					HxOverrides.remove(this.windowDownListeners[windowId],downListener);
-				} else {
-					haxe_Log.trace("no downListeners for window \"" + windowId + "\" are registered",{ fileName : "Mouse.hx", lineNumber : 76, className : "kha.input.Mouse", methodName : "removeWindowed"});
-				}
-			} else {
-				haxe_Log.trace("no downListeners were ever registered",{ fileName : "Mouse.hx", lineNumber : 79, className : "kha.input.Mouse", methodName : "removeWindowed"});
-			}
-		}
-		if(upListener != null) {
-			if(this.windowUpListeners != null) {
-				if(windowId < this.windowUpListeners.length) {
-					HxOverrides.remove(this.windowUpListeners[windowId],upListener);
-				} else {
-					haxe_Log.trace("no upListeners for window \"" + windowId + "\" are registered",{ fileName : "Mouse.hx", lineNumber : 88, className : "kha.input.Mouse", methodName : "removeWindowed"});
-				}
-			} else {
-				haxe_Log.trace("no upListeners were ever registered",{ fileName : "Mouse.hx", lineNumber : 91, className : "kha.input.Mouse", methodName : "removeWindowed"});
-			}
-		}
-		if(moveListener != null) {
-			if(this.windowMoveListeners != null) {
-				if(windowId < this.windowMoveListeners.length) {
-					HxOverrides.remove(this.windowMoveListeners[windowId],moveListener);
-				} else {
-					haxe_Log.trace("no moveListeners for window \"" + windowId + "\" are registered",{ fileName : "Mouse.hx", lineNumber : 100, className : "kha.input.Mouse", methodName : "removeWindowed"});
-				}
-			} else {
-				haxe_Log.trace("no moveListeners were ever registered",{ fileName : "Mouse.hx", lineNumber : 103, className : "kha.input.Mouse", methodName : "removeWindowed"});
-			}
-		}
-		if(wheelListener != null) {
-			if(this.windowWheelListeners != null) {
-				if(windowId < this.windowWheelListeners.length) {
-					HxOverrides.remove(this.windowWheelListeners[windowId],wheelListener);
-				} else {
-					haxe_Log.trace("no wheelListeners for window \"" + windowId + "\" are registered",{ fileName : "Mouse.hx", lineNumber : 112, className : "kha.input.Mouse", methodName : "removeWindowed"});
-				}
-			} else {
-				haxe_Log.trace("no wheelListeners were ever registered",{ fileName : "Mouse.hx", lineNumber : 115, className : "kha.input.Mouse", methodName : "removeWindowed"});
-			}
-		}
-	}
-	,lock: function() {
-	}
-	,unlock: function() {
-	}
-	,canLock: function() {
-		return false;
-	}
-	,isLocked: function() {
-		return false;
-	}
-	,notifyOnLockChange: function(func,error) {
-	}
-	,removeFromLockChange: function(func,error) {
-	}
-	,hideSystemCursor: function() {
-	}
-	,showSystemCursor: function() {
 	}
 	,sendDownEvent: function(windowId,button,x,y) {
 		if(kha_network_Session.the() != null) {
@@ -17395,25 +11309,6 @@ kha_input_Mouse.prototype = $extend(kha_network_Controller.prototype,{
 			}
 		}
 	}
-	,_receive: function(bytes) {
-		var funcindex = bytes.getInt32(0);
-		if(funcindex == 0) {
-			this.sendDownEvent(bytes.getInt32(4),bytes.getInt32(8),bytes.getInt32(12),bytes.getInt32(16));
-			return;
-		}
-		if(funcindex == 1) {
-			this.sendUpEvent(bytes.getInt32(4),bytes.getInt32(8),bytes.getInt32(12),bytes.getInt32(16));
-			return;
-		}
-		if(funcindex == 2) {
-			this.sendMoveEvent(bytes.getInt32(4),bytes.getInt32(8),bytes.getInt32(12),bytes.getInt32(16),bytes.getInt32(20));
-			return;
-		}
-		if(funcindex == 3) {
-			this.sendWheelEvent(bytes.getInt32(4),bytes.getInt32(8));
-			return;
-		}
-	}
 	,__class__: kha_input_Mouse
 });
 var kha_input_MouseImpl = function() {
@@ -17423,16 +11318,7 @@ $hxClasses["kha.input.MouseImpl"] = kha_input_MouseImpl;
 kha_input_MouseImpl.__name__ = true;
 kha_input_MouseImpl.__super__ = kha_input_Mouse;
 kha_input_MouseImpl.prototype = $extend(kha_input_Mouse.prototype,{
-	hideSystemCursor: function() {
-		kha_SystemImpl.khanvas.style.cursor = "none";
-	}
-	,showSystemCursor: function() {
-		kha_SystemImpl.khanvas.style.cursor = "default";
-	}
-	,_receive: function(bytes) {
-		bytes.getInt32(0);
-	}
-	,__class__: kha_input_MouseImpl
+	__class__: kha_input_MouseImpl
 });
 var kha_input_Surface = $hx_exports["kha"]["input"]["Surface"] = function() {
 	this.touchStartListeners = [];
@@ -17458,17 +11344,6 @@ kha_input_Surface.prototype = {
 		}
 		if(touchEndListener != null) {
 			this.touchEndListeners.push(touchEndListener);
-		}
-		if(moveListener != null) {
-			this.moveListeners.push(moveListener);
-		}
-	}
-	,remove: function(touchStartListener,touchEndListener,moveListener) {
-		if(touchStartListener != null) {
-			HxOverrides.remove(this.touchStartListeners,touchStartListener);
-		}
-		if(touchEndListener != null) {
-			HxOverrides.remove(this.touchEndListeners,touchEndListener);
 		}
 		if(moveListener != null) {
 			this.moveListeners.push(moveListener);
@@ -17504,7 +11379,6 @@ kha_input_Surface.prototype = {
 	,__class__: kha_input_Surface
 };
 var kha_internal_BytesBlob = function(bytes) {
-	this.myFirstLine = true;
 	this.bytes = bytes;
 	this.buffer = [];
 };
@@ -17514,228 +11388,13 @@ kha_internal_BytesBlob.__interfaces__ = [kha_Resource];
 kha_internal_BytesBlob.fromBytes = function(bytes) {
 	return new kha_internal_BytesBlob(bytes);
 };
-kha_internal_BytesBlob.alloc = function(size) {
-	return new kha_internal_BytesBlob(new haxe_io_Bytes(new ArrayBuffer(size)));
-};
-kha_internal_BytesBlob.readF32 = function(i) {
-	var sign = (i & -2147483648) == 0?1:-1;
-	var exp = i >> 23 & 255;
-	var man = i & 8388607;
-	switch(exp) {
-	case 0:
-		return 0.0;
-	case 255:
-		if(man != 0) {
-			return NaN;
-		} else if(sign > 0) {
-			return Infinity;
-		} else {
-			return -Infinity;
-		}
-		break;
-	default:
-		return sign * ((man + 8388608) / 8388608.0) * Math.pow(2,exp - 127);
-	}
-};
-kha_internal_BytesBlob.bit = function(value,position) {
-	if((value >>> position & 1) == 1) {
-		return true;
-	} else {
-		return false;
-	}
-};
 kha_internal_BytesBlob.prototype = {
-	sub: function(start,length) {
-		return new kha_internal_BytesBlob(this.bytes.sub(start,length));
-	}
-	,get_length: function() {
-		return this.bytes.length;
-	}
-	,writeU8: function(position,value) {
-		this.bytes.b[position] = value & 255;
-	}
-	,readU8: function(position) {
-		var $byte = this.bytes.b[position];
-		++position;
-		return $byte;
-	}
-	,readS8: function(position) {
-		var $byte = this.bytes.b[position];
-		++position;
-		var sign = ($byte & 128) == 0?1:-1;
-		$byte &= 127;
-		return sign * $byte;
-	}
-	,readU16BE: function(position) {
-		var first = this.bytes.b[position];
-		var second = this.bytes.b[position + 1];
-		position += 2;
-		return first * 256 + second;
-	}
-	,readU16LE: function(position) {
-		var first = this.bytes.b[position];
-		var second = this.bytes.b[position + 1];
-		position += 2;
-		return second * 256 + first;
-	}
-	,readU32LE: function(position) {
-		var fourth = this.bytes.b[position];
-		var third = this.bytes.b[position + 1];
-		var second = this.bytes.b[position + 2];
-		var first = this.bytes.b[position + 3];
-		position += 4;
-		return fourth + third * 256 + second * 256 * 256 + first * 256 * 256 * 256;
-	}
-	,readU32BE: function(position) {
-		var fourth = this.bytes.b[position];
-		var third = this.bytes.b[position + 1];
-		var second = this.bytes.b[position + 2];
-		var first = this.bytes.b[position + 3];
-		position += 4;
-		return first + second * 256 + third * 256 * 256 + fourth * 256 * 256 * 256;
-	}
-	,readS16BE: function(position) {
-		var first = this.bytes.b[position];
-		var second = this.bytes.b[position + 1];
-		position += 2;
-		var sign = (first & 128) == 0?1:-1;
-		first &= 127;
-		if(sign == -1) {
-			return -32767 + first * 256 + second;
-		} else {
-			return first * 256 + second;
-		}
-	}
-	,readS16LE: function(position) {
-		var first = this.bytes.b[position];
-		var second = this.bytes.b[position + 1];
-		var sign = (second & 128) == 0?1:-1;
-		second &= 127;
-		position += 2;
-		if(sign == -1) {
-			return -32767 + second * 256 + first;
-		} else {
-			return second * 256 + first;
-		}
-	}
-	,readS32LE: function(position) {
-		var fourth = this.bytes.b[position];
-		var third = this.bytes.b[position + 1];
-		var second = this.bytes.b[position + 2];
-		var first = this.bytes.b[position + 3];
-		var sign = (first & 128) == 0?1:-1;
-		first &= 127;
-		position += 4;
-		if(sign == -1) {
-			return -2147483647 + fourth + third * 256 + second * 256 * 256 + first * 256 * 256 * 256;
-		} else {
-			return fourth + third * 256 + second * 256 * 256 + first * 256 * 256 * 256;
-		}
-	}
-	,readS32BE: function(position) {
-		var fourth = this.bytes.b[position];
-		var third = this.bytes.b[position + 1];
-		var second = this.bytes.b[position + 2];
-		var first = this.bytes.b[position + 3];
-		var sign = (fourth & 128) == 0?1:-1;
-		fourth &= 127;
-		position += 4;
-		if(sign == -1) {
-			return -2147483647 + first + second * 256 + third * 256 * 256 + fourth * 256 * 256 * 256;
-		}
-		return first + second * 256 + third * 256 * 256 + fourth * 256 * 256 * 256;
-	}
-	,readF32LE: function(position) {
-		return kha_internal_BytesBlob.readF32(this.readS32LE(position));
-	}
-	,readF32BE: function(position) {
-		return kha_internal_BytesBlob.readF32(this.readS32BE(position));
-	}
-	,toString: function() {
+	toString: function() {
 		return this.bytes.toString();
-	}
-	,readUtf8Char: function(position) {
-		if(position.value >= this.get_length()) {
-			return -1;
-		}
-		var c = this.readU8(position.value);
-		++position.value;
-		var value = 0;
-		if(!kha_internal_BytesBlob.bit(c,7)) {
-			value = c;
-		} else if(kha_internal_BytesBlob.bit(c,7) && kha_internal_BytesBlob.bit(c,6) && !kha_internal_BytesBlob.bit(c,5)) {
-			var a = c & 31;
-			var c2 = this.readU8(position.value);
-			++position.value;
-			value = a << 6 | c2 & 63;
-		} else if(kha_internal_BytesBlob.bit(c,7) && kha_internal_BytesBlob.bit(c,6) && kha_internal_BytesBlob.bit(c,5) && !kha_internal_BytesBlob.bit(c,4)) {
-			position.value += 2;
-		} else if(kha_internal_BytesBlob.bit(c,7) && kha_internal_BytesBlob.bit(c,6) && kha_internal_BytesBlob.bit(c,5) && kha_internal_BytesBlob.bit(c,4) && !kha_internal_BytesBlob.bit(c,3)) {
-			position.value += 3;
-		}
-		return value;
-	}
-	,readUtf8Line: function(position) {
-		var bufferindex = 0;
-		var c = this.readUtf8Char(position);
-		if(c < 0) {
-			return "";
-		}
-		while(c != 10 && bufferindex < 2000) {
-			this.buffer[bufferindex] = c;
-			++bufferindex;
-			c = this.readUtf8Char(position);
-			if(position.value >= this.get_length()) {
-				this.buffer[bufferindex] = c;
-				++bufferindex;
-				break;
-			}
-		}
-		if(this.myFirstLine) {
-			this.myFirstLine = false;
-			if(bufferindex > 2 && this.buffer[0] == 239 && this.buffer[1] == 187 && this.buffer[2] == 191) {
-				var chars = [];
-				var _g1 = 3;
-				var _g = bufferindex - 3;
-				while(_g1 < _g) {
-					var i = _g1++;
-					chars[i - 3] = this.buffer[i];
-				}
-				return this.toText(chars,bufferindex - 3);
-			}
-		}
-		var chars1 = [];
-		var _g11 = 0;
-		var _g2 = bufferindex;
-		while(_g11 < _g2) {
-			var i1 = _g11++;
-			chars1[i1] = this.buffer[i1];
-		}
-		return this.toText(chars1,bufferindex);
-	}
-	,toText: function(chars,length) {
-		var value = "";
-		var _g1 = 0;
-		while(_g1 < length) value += String.fromCharCode(chars[_g1++]);
-		return value;
-	}
-	,readUtf8String: function() {
-		var text = "";
-		var position = { value : 0};
-		while(position.value < this.get_length()) text += this.readUtf8Line(position) + "\n";
-		return text;
-	}
-	,toBytes: function() {
-		return this.bytes;
-	}
-	,unload: function() {
-		this.bytes = null;
 	}
 	,__class__: kha_internal_BytesBlob
 };
-var kha_js_AEAudioChannel = function(element) {
-	this.element = element;
-};
+var kha_js_AEAudioChannel = function() { };
 $hxClasses["kha.js.AEAudioChannel"] = kha_js_AEAudioChannel;
 kha_js_AEAudioChannel.__name__ = true;
 kha_js_AEAudioChannel.__interfaces__ = [kha_audio1_AudioChannel];
@@ -17756,74 +11415,12 @@ kha_js_AEAudioChannel.catchUp = function() {
 	}
 };
 kha_js_AEAudioChannel.prototype = {
-	play: function() {
-		if(kha_SystemImpl.mobile) {
-			if(kha_SystemImpl.insideInputEvent) {
-				this.element.play();
-				kha_SystemImpl.mobileAudioPlaying = true;
-			} else if(kha_SystemImpl.mobileAudioPlaying) {
-				this.element.play();
-			} else {
-				kha_js_AEAudioChannel.todo.push(this);
-			}
-		} else {
-			this.element.play();
-		}
-	}
-	,pause: function() {
-		try {
-			this.element.pause();
-		} catch( e ) {
-			if (e instanceof js__$Boot_HaxeError) e = e.val;
-			haxe_Log.trace(e,{ fileName : "AEAudioChannel.hx", lineNumber : 48, className : "kha.js.AEAudioChannel", methodName : "pause"});
-		}
-	}
-	,stop: function() {
-		try {
-			this.element.pause();
-			this.element.currentTime = 0;
-		} catch( e ) {
-			if (e instanceof js__$Boot_HaxeError) e = e.val;
-			haxe_Log.trace(e,{ fileName : "AEAudioChannel.hx", lineNumber : 58, className : "kha.js.AEAudioChannel", methodName : "stop"});
-		}
-	}
-	,get_length: function() {
-		if(isFinite(this.element.duration)) {
-			return this.element.duration;
-		} else {
-			return Infinity;
-		}
-	}
-	,get_position: function() {
-		return this.element.currentTime;
-	}
-	,get_volume: function() {
-		return 1;
-	}
-	,set_volume: function(value) {
-		return 1;
-	}
-	,get_finished: function() {
-		return this.get_position() >= this.get_length();
-	}
-	,__class__: kha_js_AEAudioChannel
+	__class__: kha_js_AEAudioChannel
 };
 var kha_js_AudioElementAudio = function() { };
 $hxClasses["kha.js.AudioElementAudio"] = kha_js_AudioElementAudio;
 kha_js_AudioElementAudio.__name__ = true;
 kha_js_AudioElementAudio._compile = function() {
-};
-kha_js_AudioElementAudio.play = function(sound,loop,stream) {
-	if(stream == null) {
-		stream = false;
-	}
-	if(loop == null) {
-		loop = false;
-	}
-	sound.element.loop = loop;
-	var channel = new kha_js_AEAudioChannel(sound.element);
-	channel.play();
-	return channel;
 };
 var kha_js_CanvasGraphics = function(canvas,width,height) {
 	kha_graphics2_Graphics.call(this);
@@ -17836,14 +11433,6 @@ var kha_js_CanvasGraphics = function(canvas,width,height) {
 };
 $hxClasses["kha.js.CanvasGraphics"] = kha_js_CanvasGraphics;
 kha_js_CanvasGraphics.__name__ = true;
-kha_js_CanvasGraphics.stringWidth = function(font,text) {
-	if(kha_js_CanvasGraphics.instance == null) {
-		return 5 * text.length;
-	} else {
-		kha_js_CanvasGraphics.instance.set_font(font);
-		return kha_js_CanvasGraphics.instance.canvas.measureText(text).width;
-	}
-};
 kha_js_CanvasGraphics.__super__ = kha_graphics2_Graphics;
 kha_js_CanvasGraphics.prototype = $extend(kha_graphics2_Graphics.prototype,{
 	begin: function(clear,clearColor) {
@@ -17905,149 +11494,13 @@ kha_js_CanvasGraphics.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		this.canvas.fillStyle = "rgba(" + ((color & 16711680) >>> 16) + "," + ((color & 65280) >>> 8) + "," + (color & 255) + "," + (color >>> 24) * 0.00392156862745098 + ")";
 		return color;
 	}
-	,get_color: function() {
-		return this.myColor;
-	}
-	,get_imageScaleQuality: function() {
-		return this.scaleQuality;
-	}
-	,set_imageScaleQuality: function(value) {
-		if(value == kha_graphics2_ImageScaleQuality.Low) {
-			this.canvas.mozImageSmoothingEnabled = false;
-			this.canvas.webkitImageSmoothingEnabled = false;
-			this.canvas.msImageSmoothingEnabled = false;
-			this.canvas.imageSmoothingEnabled = false;
-		} else {
-			this.canvas.mozImageSmoothingEnabled = true;
-			this.canvas.webkitImageSmoothingEnabled = true;
-			this.canvas.msImageSmoothingEnabled = true;
-			this.canvas.imageSmoothingEnabled = true;
-		}
-		return this.scaleQuality = value;
-	}
-	,drawRect: function(x,y,width,height,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.canvas.beginPath();
-		var oldStrength = this.canvas.lineWidth;
-		this.canvas.lineWidth = Math.round(strength);
-		this.canvas.rect(x,y,width,height);
-		this.canvas.stroke();
-		this.canvas.lineWidth = oldStrength;
-	}
 	,fillRect: function(x,y,width,height) {
 		this.canvas.globalAlpha = this.get_opacity() * ((this.myColor >>> 24) * 0.00392156862745098);
 		this.canvas.fillRect(x,y,width,height);
 		this.canvas.globalAlpha = this.get_opacity();
 	}
-	,drawCircle: function(cx,cy,radius,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.canvas.beginPath();
-		var oldStrength = this.canvas.lineWidth;
-		this.canvas.lineWidth = Math.round(strength);
-		this.canvas.arc(cx,cy,radius,0,2 * Math.PI,false);
-		this.canvas.stroke();
-		this.canvas.lineWidth = oldStrength;
-	}
-	,fillCircle: function(cx,cy,radius) {
-		this.canvas.beginPath();
-		this.canvas.arc(cx,cy,radius,0,2 * Math.PI,false);
-		this.canvas.fill();
-	}
-	,drawString: function(text,x,y) {
-		var image = this.webfont.getImage(this.get_fontSize(),this.myColor);
-		if(image.width > 0) {
-			var xpos = x;
-			var _g1 = 0;
-			var _g = text.length;
-			while(_g1 < _g) {
-				var i = _g1++;
-				var q = this.webfont.kravur._get(this.get_fontSize()).getBakedQuad(HxOverrides.cca(text,i) - 32,xpos,y);
-				if(q != null) {
-					if(q.s1 - q.s0 > 0 && q.t1 - q.t0 > 0 && q.x1 - q.x0 > 0 && q.y1 - q.y0 > 0) {
-						this.canvas.drawImage(image,q.s0 * image.width,q.t0 * image.height,(q.s1 - q.s0) * image.width,(q.t1 - q.t0) * image.height,q.x0,q.y0,q.x1 - q.x0,q.y1 - q.y0);
-					}
-					xpos += q.xadvance;
-				}
-			}
-		}
-	}
-	,set_font: function(font) {
-		this.webfont = js_Boot.__cast(font , kha_js_Font);
-		return this.webfont;
-	}
-	,get_font: function() {
-		return this.webfont;
-	}
-	,drawLine: function(x1,y1,x2,y2,strength) {
-		if(strength == null) {
-			strength = 1.0;
-		}
-		this.canvas.beginPath();
-		var oldWith = this.canvas.lineWidth;
-		this.canvas.lineWidth = Math.round(strength);
-		this.canvas.moveTo(x1,y1);
-		this.canvas.lineTo(x2,y2);
-		this.canvas.moveTo(0,0);
-		this.canvas.stroke();
-		this.canvas.lineWidth = oldWith;
-	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-		this.canvas.beginPath();
-		this.canvas.closePath();
-		this.canvas.fill();
-	}
-	,scissor: function(x,y,width,height) {
-		this.canvas.beginPath();
-		this.canvas.rect(x,y,width,height);
-		this.canvas.clip();
-	}
-	,disableScissor: function() {
-		this.canvas.restore();
-	}
-	,drawVideo: function(video,x,y,width,height) {
-		this.canvas.drawImage((js_Boot.__cast(video , kha_js_Video)).element,x,y,width,height);
-	}
-	,setTransformation: function(transformation) {
-		this.canvas.setTransform(transformation._00,transformation._01,transformation._10,transformation._11,transformation._20,transformation._21);
-	}
 	,__class__: kha_js_CanvasGraphics
 });
-var kha_js_URLParser = function(url) {
-	this._parts = null;
-	this._parts = ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"];
-	this.url = url;
-	var r = new EReg("^(?:(?![^:@]+:[^:@/]*@)([^:/?#.]+):)?(?://)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:/?#]*)(?::(\\d*))?)(((/(?:[^?#](?![^?#/]*\\.[^?#/.]+(?:[?#]|$)))*/?)?([^?#/]*))(?:\\?([^#]*))?(?:#(.*))?)","");
-	r.match(url);
-	var _g1 = 0;
-	var _g = this._parts.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		var value = r.matched(i);
-		this[this._parts[i]] = value;
-	}
-};
-$hxClasses["kha.js.URLParser"] = kha_js_URLParser;
-kha_js_URLParser.__name__ = true;
-kha_js_URLParser.parse = function(url) {
-	return new kha_js_URLParser(url);
-};
-kha_js_URLParser.prototype = {
-	toString: function() {
-		var s = "For Url -> " + this.url + "\n";
-		var _g1 = 0;
-		var _g = this._parts.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			s += this._parts[i] + ": " + Std.string(Reflect.field(this,this._parts[i])) + (i == this._parts.length - 1?"":"\n");
-		}
-		return s;
-	}
-	,__class__: kha_js_URLParser
-};
 var kha_js_EnvironmentVariables = function() {
 	kha_EnvironmentVariables.call(this);
 };
@@ -18055,286 +11508,7 @@ $hxClasses["kha.js.EnvironmentVariables"] = kha_js_EnvironmentVariables;
 kha_js_EnvironmentVariables.__name__ = true;
 kha_js_EnvironmentVariables.__super__ = kha_EnvironmentVariables;
 kha_js_EnvironmentVariables.prototype = $extend(kha_EnvironmentVariables.prototype,{
-	getVariable: function(name) {
-		var parts = new kha_js_URLParser(window.location.href).query.split("&");
-		var _g = 0;
-		while(_g < parts.length) {
-			var part = parts[_g];
-			++_g;
-			var subparts = part.split("=");
-			if(subparts[0] == name) {
-				return subparts[1];
-			}
-		}
-		haxe_Log.trace("Environment variables requested.",{ fileName : "EnvironmentVariables.hx", lineNumber : 90, className : "kha.js.EnvironmentVariables", methodName : "getVariable"});
-		return "";
-	}
-	,__class__: kha_js_EnvironmentVariables
-});
-var kha_js_Font = function(kravur) {
-	this.images = new haxe_ds_IntMap();
-	this.kravur = kravur;
-};
-$hxClasses["kha.js.Font"] = kha_js_Font;
-kha_js_Font.__name__ = true;
-kha_js_Font.__interfaces__ = [kha_Font];
-kha_js_Font.prototype = {
-	height: function(fontSize) {
-		return this.kravur._get(fontSize).getHeight();
-	}
-	,width: function(fontSize,str) {
-		return this.kravur._get(fontSize).stringWidth(str);
-	}
-	,baseline: function(fontSize) {
-		return this.kravur._get(fontSize).getBaselinePosition();
-	}
-	,getImage: function(fontSize,color) {
-		if(!this.images.h.hasOwnProperty(fontSize)) {
-			var v = new haxe_ds_IntMap();
-			this.images.h[fontSize] = v;
-		}
-		if(!this.images.h[fontSize].exists(color)) {
-			var kravur = this.kravur._get(fontSize);
-			var canvas = window.document.createElement("canvas");
-			canvas.width = kravur.width;
-			canvas.height = kravur.height;
-			var ctx = canvas.getContext("2d");
-			ctx.fillStyle = "black";
-			ctx.fillRect(0,0,kravur.width,kravur.height);
-			var imageData = ctx.getImageData(0,0,kravur.width,kravur.height);
-			var bytes = (js_Boot.__cast(kravur.getTexture() , kha_CanvasImage)).bytes;
-			var _g1 = 0;
-			var _g = bytes.length;
-			while(_g1 < _g) {
-				var i = _g1++;
-				imageData.data[i * 4] = (color & 16711680) >>> 16;
-				imageData.data[i * 4 + 1] = (color & 65280) >>> 8;
-				imageData.data[i * 4 + 2] = color & 255;
-				imageData.data[i * 4 + 3] = bytes.b[i];
-			}
-			ctx.putImageData(imageData,0,0);
-			var img = window.document.createElement("img");
-			img.src = canvas.toDataURL("image/png");
-			this.images.h[fontSize].set(color,img);
-			return img;
-		}
-		return this.images.h[fontSize].get(color);
-	}
-	,unload: function() {
-		this.kravur = null;
-		this.images = null;
-	}
-	,__class__: kha_js_Font
-};
-var kha_js_Sound = function(filenames,done) {
-	kha_Sound.call(this);
-	this.done = done;
-	kha_js_Sound.loading.push(this);
-	this.element = window.document.createElement("audio");
-	this.filenames = [];
-	var _g = 0;
-	while(_g < filenames.length) {
-		var filename = filenames[_g];
-		++_g;
-		if(this.element.canPlayType("audio/ogg") != "" && StringTools.endsWith(filename,".ogg")) {
-			this.filenames.push(filename);
-		}
-		if(this.element.canPlayType("audio/mp4") != "" && StringTools.endsWith(filename,".mp4")) {
-			this.filenames.push(filename);
-		}
-	}
-	this.element.addEventListener("error",$bind(this,this.errorListener),false);
-	this.element.addEventListener("canplay",$bind(this,this.canPlayThroughListener),false);
-	this.element.src = this.filenames[0];
-	this.element.preload = "auto";
-	this.element.load();
-};
-$hxClasses["kha.js.Sound"] = kha_js_Sound;
-kha_js_Sound.__name__ = true;
-kha_js_Sound.__super__ = kha_Sound;
-kha_js_Sound.prototype = $extend(kha_Sound.prototype,{
-	errorListener: function(eventInfo) {
-		if(this.element.error.code == 4) {
-			var _g1 = 0;
-			var _g = this.filenames.length - 1;
-			while(_g1 < _g) {
-				var i = _g1++;
-				if(this.element.src == this.filenames[i]) {
-					this.element.src = this.filenames[i + 1];
-					return;
-				}
-			}
-		}
-		haxe_Log.trace("Error loading " + this.element.src,{ fileName : "Sound.hx", lineNumber : 108, className : "kha.js.Sound", methodName : "errorListener"});
-		window.console.log("loadSound failed");
-		this.finishAsset();
-	}
-	,canPlayThroughListener: function(eventInfo) {
-		this.finishAsset();
-	}
-	,finishAsset: function() {
-		this.element.removeEventListener("error",$bind(this,this.errorListener),false);
-		this.element.removeEventListener("canplaythrough",$bind(this,this.canPlayThroughListener),false);
-		this.done(this);
-		HxOverrides.remove(kha_js_Sound.loading,this);
-	}
-	,uncompress: function(done) {
-		done();
-	}
-	,__class__: kha_js_Sound
-});
-var kha_js_Video = function(filenames,done) {
-	kha_Video.call(this);
-	this.done = done;
-	kha_js_Video.loading.add(this);
-	this.element = window.document.createElement("video");
-	this.filenames = [];
-	var _g = 0;
-	while(_g < filenames.length) {
-		var filename = filenames[_g];
-		++_g;
-		if(this.element.canPlayType("video/webm") != "" && StringTools.endsWith(filename,".webm")) {
-			this.filenames.push(filename);
-		}
-		if(this.element.canPlayType("video/mp4") != "" && StringTools.endsWith(filename,".mp4")) {
-			this.filenames.push(filename);
-		}
-	}
-	this.element.addEventListener("error",$bind(this,this.errorListener),false);
-	this.element.addEventListener("canplaythrough",$bind(this,this.canPlayThroughListener),false);
-	this.element.preload = "auto";
-	this.element.src = this.filenames[0];
-};
-$hxClasses["kha.js.Video"] = kha_js_Video;
-kha_js_Video.__name__ = true;
-kha_js_Video.__super__ = kha_Video;
-kha_js_Video.prototype = $extend(kha_Video.prototype,{
-	width: function() {
-		return this.element.videoWidth;
-	}
-	,height: function() {
-		return this.element.videoHeight;
-	}
-	,play: function(loop) {
-		if(loop == null) {
-			loop = false;
-		}
-		try {
-			this.element.loop = loop;
-			this.element.play();
-		} catch( e ) {
-			if (e instanceof js__$Boot_HaxeError) e = e.val;
-			haxe_Log.trace(e,{ fileName : "Video.hx", lineNumber : 55, className : "kha.js.Video", methodName : "play"});
-		}
-	}
-	,pause: function() {
-		try {
-			this.element.pause();
-		} catch( e ) {
-			if (e instanceof js__$Boot_HaxeError) e = e.val;
-			haxe_Log.trace(e,{ fileName : "Video.hx", lineNumber : 64, className : "kha.js.Video", methodName : "pause"});
-		}
-	}
-	,stop: function() {
-		try {
-			this.element.pause();
-			this.element.currentTime = 0;
-		} catch( e ) {
-			if (e instanceof js__$Boot_HaxeError) e = e.val;
-			haxe_Log.trace(e,{ fileName : "Video.hx", lineNumber : 74, className : "kha.js.Video", methodName : "stop"});
-		}
-	}
-	,getCurrentPos: function() {
-		return Math.ceil(this.element.currentTime * 1000);
-	}
-	,getLength: function() {
-		if(isFinite(this.element.duration)) {
-			return Math.floor(this.element.duration * 1000);
-		} else {
-			return -1;
-		}
-	}
-	,errorListener: function(eventInfo) {
-		if(this.element.error.code == 4) {
-			var _g1 = 0;
-			var _g = this.filenames.length - 1;
-			while(_g1 < _g) {
-				var i = _g1++;
-				if(this.element.src == this.filenames[i]) {
-					this.element.src = this.filenames[i + 1];
-					return;
-				}
-			}
-		}
-		haxe_Log.trace("Error loading " + this.element.src,{ fileName : "Video.hx", lineNumber : 102, className : "kha.js.Video", methodName : "errorListener"});
-		this.finishAsset();
-	}
-	,canPlayThroughListener: function(eventInfo) {
-		this.finishAsset();
-	}
-	,finishAsset: function() {
-		this.element.removeEventListener("error",$bind(this,this.errorListener),false);
-		this.element.removeEventListener("canplaythrough",$bind(this,this.canPlayThroughListener),false);
-		if(kha_SystemImpl.gl != null) {
-			this.texture = kha_Image.fromVideo(this);
-		}
-		this.done(this);
-		kha_js_Video.loading.remove(this);
-	}
-	,__class__: kha_js_Video
-});
-var kha_js_WebAudioSound = function(filename,done) {
-	var _gthis = this;
-	kha_Sound.call(this);
-	var request = new XMLHttpRequest();
-	request.open("GET",filename,true);
-	request.responseType = "arraybuffer";
-	request.onerror = function() {
-		haxe_Log.trace("Error loading " + filename,{ fileName : "WebAudioSound.hx", lineNumber : 76, className : "kha.js.WebAudioSound", methodName : "new"});
-	};
-	request.onload = function() {
-		_gthis.compressedData = haxe_io_Bytes.ofData(request.response);
-		_gthis.uncompressedData = null;
-		done(_gthis);
-	};
-	request.send(null);
-};
-$hxClasses["kha.js.WebAudioSound"] = kha_js_WebAudioSound;
-kha_js_WebAudioSound.__name__ = true;
-kha_js_WebAudioSound.__super__ = kha_Sound;
-kha_js_WebAudioSound.prototype = $extend(kha_Sound.prototype,{
-	superUncompress: function(done) {
-		kha_Sound.prototype.uncompress.call(this,done);
-	}
-	,uncompress: function(done) {
-		var _gthis = this;
-		kha_audio2_Audio._context.decodeAudioData(this.compressedData.b.bufferValue,function(buffer) {
-			var length = buffer.getChannelData(0).length * 2;
-			_gthis.uncompressedData = new Array(length);
-			if(buffer.numberOfChannels == 1) {
-				var _g1 = 0;
-				var _g = buffer.getChannelData(0).length;
-				while(_g1 < _g) {
-					var i = _g1++;
-					_gthis.uncompressedData[i * 2] = buffer.getChannelData(0)[i];
-					_gthis.uncompressedData[i * 2 + 1] = buffer.getChannelData(0)[i];
-				}
-			} else {
-				var _g11 = 0;
-				var _g2 = buffer.getChannelData(0).length;
-				while(_g11 < _g2) {
-					var i1 = _g11++;
-					_gthis.uncompressedData[i1 * 2] = buffer.getChannelData(0)[i1];
-					_gthis.uncompressedData[i1 * 2 + 1] = buffer.getChannelData(1)[i1];
-				}
-			}
-			_gthis.compressedData = null;
-			done();
-		},function() {
-			_gthis.superUncompress(done);
-		});
-	}
-	,__class__: kha_js_WebAudioSound
+	__class__: kha_js_EnvironmentVariables
 });
 var kha_js_graphics4_ConstantLocation = function(value) {
 	this.value = value;
@@ -18420,14 +11594,6 @@ kha_js_graphics4_Graphics.prototype = {
 	}
 	,end: function() {
 	}
-	,flush: function() {
-	}
-	,vsynced: function() {
-		return true;
-	}
-	,refreshRate: function() {
-		return 60;
-	}
 	,clear: function(color,depth,stencil) {
 		var clearMask = 0;
 		if(color != null) {
@@ -18445,9 +11611,6 @@ kha_js_graphics4_Graphics.prototype = {
 			kha_SystemImpl.gl.clearStencil(stencil);
 		}
 		kha_SystemImpl.gl.clear(clearMask);
-	}
-	,viewport: function(x,y,width,height) {
-		kha_SystemImpl.gl.viewport(x,(this.renderTarget == null?kha_System.windowHeight(0):this.renderTarget.get_height()) - y - height,width,height);
 	}
 	,setDepthMode: function(write,mode) {
 		switch(mode[1]) {
@@ -18499,39 +11662,12 @@ kha_js_graphics4_Graphics.prototype = {
 			kha_SystemImpl.gl.blendEquationSeparate(kha_js_graphics4_Graphics.getBlendOp(operation),kha_js_graphics4_Graphics.getBlendOp(alphaOperation));
 		}
 	}
-	,createVertexBuffer: function(vertexCount,structure,usage,canRead) {
-		if(canRead == null) {
-			canRead = false;
-		}
-		return new kha_graphics4_VertexBuffer(vertexCount,structure,usage);
-	}
 	,setVertexBuffer: function(vertexBuffer) {
 		(js_Boot.__cast(vertexBuffer , kha_graphics4_VertexBuffer)).set(0);
-	}
-	,setVertexBuffers: function(vertexBuffers) {
-		var offset = 0;
-		var _g = 0;
-		while(_g < vertexBuffers.length) {
-			var vertexBuffer = vertexBuffers[_g];
-			++_g;
-			offset += (js_Boot.__cast(vertexBuffer , kha_graphics4_VertexBuffer)).set(offset);
-		}
-	}
-	,createIndexBuffer: function(indexCount,usage,canRead) {
-		if(canRead == null) {
-			canRead = false;
-		}
-		return new kha_graphics4_IndexBuffer(indexCount,usage);
 	}
 	,setIndexBuffer: function(indexBuffer) {
 		this.indicesCount = indexBuffer.count();
 		(js_Boot.__cast(indexBuffer , kha_graphics4_IndexBuffer)).set();
-	}
-	,createCubeMap: function(size,format,usage,canRead) {
-		if(canRead == null) {
-			canRead = false;
-		}
-		return null;
 	}
 	,setTexture: function(stage,texture) {
 		if(texture == null) {
@@ -18539,17 +11675,6 @@ kha_js_graphics4_Graphics.prototype = {
 			kha_SystemImpl.gl.bindTexture(3553,null);
 		} else {
 			(js_Boot.__cast(texture , kha_WebGLImage)).set((js_Boot.__cast(stage , kha_js_graphics4_TextureUnit)).value);
-		}
-	}
-	,setTextureDepth: function(stage,texture) {
-		(js_Boot.__cast(texture , kha_WebGLImage)).setDepth((js_Boot.__cast(stage , kha_js_graphics4_TextureUnit)).value);
-	}
-	,setVideoTexture: function(unit,texture) {
-		if(texture == null) {
-			kha_SystemImpl.gl.activeTexture(33984 + (js_Boot.__cast(unit , kha_js_graphics4_TextureUnit)).value);
-			kha_SystemImpl.gl.bindTexture(3553,null);
-		} else {
-			(js_Boot.__cast((js_Boot.__cast(texture , kha_js_Video)).texture , kha_WebGLImage)).set((js_Boot.__cast(unit , kha_js_graphics4_TextureUnit)).value);
 		}
 	}
 	,setTextureParameters: function(texunit,uAddressing,vAddressing,minificationFilter,magnificationFilter,mipmapFilter) {
@@ -18637,36 +11762,6 @@ kha_js_graphics4_Graphics.prototype = {
 		this.setStencilParameters(pipe.stencilMode,pipe.stencilBothPass,pipe.stencilDepthFail,pipe.stencilFail,pipe.stencilReferenceValue,pipe.stencilReadMask,pipe.stencilWriteMask);
 		this.setBlendingMode(pipe.blendSource,pipe.blendDestination,pipe.blendOperation,pipe.alphaBlendSource,pipe.alphaBlendDestination,pipe.alphaBlendOperation);
 		pipe.set();
-	}
-	,setBool: function(location,value) {
-		kha_SystemImpl.gl.uniform1i((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value?1:0);
-	}
-	,setInt: function(location,value) {
-		kha_SystemImpl.gl.uniform1i((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value);
-	}
-	,setFloat: function(location,value) {
-		kha_SystemImpl.gl.uniform1f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value);
-	}
-	,setFloat2: function(location,value1,value2) {
-		kha_SystemImpl.gl.uniform2f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value1,value2);
-	}
-	,setFloat3: function(location,value1,value2,value3) {
-		kha_SystemImpl.gl.uniform3f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value1,value2,value3);
-	}
-	,setFloat4: function(location,value1,value2,value3,value4) {
-		kha_SystemImpl.gl.uniform4f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value1,value2,value3,value4);
-	}
-	,setFloats: function(location,values) {
-		kha_SystemImpl.gl.uniform1fv((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,values);
-	}
-	,setVector2: function(location,value) {
-		kha_SystemImpl.gl.uniform2f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value.x,value.y);
-	}
-	,setVector3: function(location,value) {
-		kha_SystemImpl.gl.uniform3f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value.x,value.y,value.z);
-	}
-	,setVector4: function(location,value) {
-		kha_SystemImpl.gl.uniform4f((js_Boot.__cast(location , kha_js_graphics4_ConstantLocation)).value,value.x,value.y,value.z,value.w);
 	}
 	,setMatrix: function(location,matrix) {
 		this.matrixCache[0] = matrix._00;
@@ -18759,29 +11854,8 @@ kha_js_graphics4_Graphics.prototype = {
 			kha_SystemImpl.gl.stencilFunc(stencilFunc,referenceValue,readMask);
 		}
 	}
-	,scissor: function(x,y,width,height) {
-		kha_SystemImpl.gl.enable(3089);
-		kha_SystemImpl.gl.scissor(x,(this.renderTarget == null?kha_System.windowHeight(0):this.renderTarget.get_height()) - y - height,width,height);
-	}
-	,disableScissor: function() {
-		kha_SystemImpl.gl.disable(3089);
-	}
 	,renderTargetsInvertedY: function() {
 		return true;
-	}
-	,drawIndexedVerticesInstanced: function(instanceCount,start,count) {
-		if(count == null) {
-			count = -1;
-		}
-		if(start == null) {
-			start = 0;
-		}
-		if(this.instancedRenderingAvailable()) {
-			this.instancedExtension.drawElementsInstancedANGLE(4,count == -1?this.indicesCount:count,5123,start * 2,instanceCount);
-		}
-	}
-	,instancedRenderingAvailable: function() {
-		return this.instancedExtension;
 	}
 	,__class__: kha_js_graphics4_Graphics
 };
@@ -18792,11 +11866,7 @@ $hxClasses["kha.js.graphics4.Graphics2"] = kha_js_graphics4_Graphics2;
 kha_js_graphics4_Graphics2.__name__ = true;
 kha_js_graphics4_Graphics2.__super__ = kha_graphics4_Graphics2;
 kha_js_graphics4_Graphics2.prototype = $extend(kha_graphics4_Graphics2.prototype,{
-	drawVideoInternal: function(video,x,y,width,height) {
-		var v = js_Boot.__cast(video , kha_js_Video);
-		this.drawScaledSubImage(v.texture,0,0,v.texture.get_width(),v.texture.get_height(),x,y,width,height);
-	}
-	,begin: function(clear,clearColor) {
+	begin: function(clear,clearColor) {
 		if(clear == null) {
 			clear = true;
 		}
@@ -18829,9 +11899,6 @@ var kha_math_FastMatrix3 = function(_00,_10,_20,_01,_11,_21,_02,_12,_22) {
 };
 $hxClasses["kha.math.FastMatrix3"] = kha_math_FastMatrix3;
 kha_math_FastMatrix3.__name__ = true;
-kha_math_FastMatrix3.fromMatrix3 = function(m) {
-	return new kha_math_FastMatrix3(m._00,m._10,m._20,m._01,m._11,m._21,m._02,m._12,m._22);
-};
 kha_math_FastMatrix3.prototype = {
 	__class__: kha_math_FastMatrix3
 };
@@ -18855,387 +11922,17 @@ var kha_math_FastMatrix4 = function(_00,_10,_20,_30,_01,_11,_21,_31,_02,_12,_22,
 };
 $hxClasses["kha.math.FastMatrix4"] = kha_math_FastMatrix4;
 kha_math_FastMatrix4.__name__ = true;
-kha_math_FastMatrix4.fromMatrix4 = function(m) {
-	return new kha_math_FastMatrix4(m._00,m._10,m._20,m._30,m._01,m._11,m._21,m._31,m._02,m._12,m._22,m._32,m._03,m._13,m._23,m._33);
-};
 kha_math_FastMatrix4.orthogonalProjection = function(left,right,bottom,top,zn,zf) {
 	return new kha_math_FastMatrix4(2 / (right - left),0,0,-(right + left) / (right - left),0,2 / (top - bottom),0,-(top + bottom) / (top - bottom),0,0,-2 / (zf - zn),-(zf + zn) / (zf - zn),0,0,0,1);
-};
-kha_math_FastMatrix4.perspectiveProjection = function(fovY,aspect,zn,zf) {
-	var uh = 1.0 / Math.tan(fovY / 2);
-	return new kha_math_FastMatrix4(uh / aspect,0,0,0,0,uh,0,0,0,0,(zf + zn) / (zn - zf),2 * zf * zn / (zn - zf),0,0,-1,0);
-};
-kha_math_FastMatrix4.lookAt = function(eye,at,up) {
-	var zaxis = new kha_math_FastVector3(at.x - eye.x,at.y - eye.y,at.z - eye.z);
-	zaxis.set_length(1);
-	var xaxis = new kha_math_FastVector3(zaxis.y * up.z - zaxis.z * up.y,zaxis.z * up.x - zaxis.x * up.z,zaxis.x * up.y - zaxis.y * up.x);
-	xaxis.set_length(1);
-	var _x = xaxis.y * zaxis.z - xaxis.z * zaxis.y;
-	var _y = xaxis.z * zaxis.x - xaxis.x * zaxis.z;
-	var _z = xaxis.x * zaxis.y - xaxis.y * zaxis.x;
-	return new kha_math_FastMatrix4(xaxis.x,xaxis.y,xaxis.z,-(xaxis.x * eye.x + xaxis.y * eye.y + xaxis.z * eye.z),_x,_y,_z,-(_x * eye.x + _y * eye.y + _z * eye.z),-zaxis.x,-zaxis.y,-zaxis.z,zaxis.x * eye.x + zaxis.y * eye.y + zaxis.z * eye.z,0,0,0,1);
 };
 kha_math_FastMatrix4.prototype = {
 	__class__: kha_math_FastMatrix4
 };
-var kha_math_FastVector2 = function(x,y) {
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-};
-$hxClasses["kha.math.FastVector2"] = kha_math_FastVector2;
-kha_math_FastVector2.__name__ = true;
-kha_math_FastVector2.fromVector2 = function(v) {
-	return new kha_math_FastVector2(v.x,v.y);
-};
-kha_math_FastVector2.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		return length;
-	}
-	,toString: function() {
-		return "FastVector2(" + this.x + ", " + this.y + ")";
-	}
-	,__class__: kha_math_FastVector2
-};
-var kha_math_FastVector3 = function(x,y,z) {
-	if(z == null) {
-		z = 0;
-	}
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-	this.z = z;
-};
-$hxClasses["kha.math.FastVector3"] = kha_math_FastVector3;
-kha_math_FastVector3.__name__ = true;
-kha_math_FastVector3.fromVector3 = function(v) {
-	return new kha_math_FastVector3(v.x,v.y,v.z);
-};
-kha_math_FastVector3.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		this.z *= mul;
-		return length;
-	}
-	,toString: function() {
-		return "FastVector3(" + this.x + ", " + this.y + ", " + this.z + ")";
-	}
-	,__class__: kha_math_FastVector3
-};
-var kha_math_FastVector4 = function(x,y,z,w) {
-	if(w == null) {
-		w = 1;
-	}
-	if(z == null) {
-		z = 0;
-	}
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-	this.z = z;
-	this.w = w;
-};
-$hxClasses["kha.math.FastVector4"] = kha_math_FastVector4;
-kha_math_FastVector4.__name__ = true;
-kha_math_FastVector4.fromVector4 = function(v) {
-	return new kha_math_FastVector4(v.x,v.y,v.z,v.w);
-};
-kha_math_FastVector4.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		this.z *= mul;
-		this.w *= mul;
-		return length;
-	}
-	,toString: function() {
-		return "FastVector4(" + this.x + ", " + this.y + ", " + this.z + ", " + this.w + ")";
-	}
-	,__class__: kha_math_FastVector4
-};
-var kha_math_Matrix3 = function(_00,_10,_20,_01,_11,_21,_02,_12,_22) {
-	this._00 = _00;
-	this._10 = _10;
-	this._20 = _20;
-	this._01 = _01;
-	this._11 = _11;
-	this._21 = _21;
-	this._02 = _02;
-	this._12 = _12;
-	this._22 = _22;
-};
-$hxClasses["kha.math.Matrix3"] = kha_math_Matrix3;
-kha_math_Matrix3.__name__ = true;
-kha_math_Matrix3.prototype = {
-	__class__: kha_math_Matrix3
-};
-var kha_math_Matrix4 = function(_00,_10,_20,_30,_01,_11,_21,_31,_02,_12,_22,_32,_03,_13,_23,_33) {
-	this._00 = _00;
-	this._10 = _10;
-	this._20 = _20;
-	this._30 = _30;
-	this._01 = _01;
-	this._11 = _11;
-	this._21 = _21;
-	this._31 = _31;
-	this._02 = _02;
-	this._12 = _12;
-	this._22 = _22;
-	this._32 = _32;
-	this._03 = _03;
-	this._13 = _13;
-	this._23 = _23;
-	this._33 = _33;
-};
-$hxClasses["kha.math.Matrix4"] = kha_math_Matrix4;
-kha_math_Matrix4.__name__ = true;
-kha_math_Matrix4.orthogonalProjection = function(left,right,bottom,top,zn,zf) {
-	return new kha_math_Matrix4(2 / (right - left),0,0,-(right + left) / (right - left),0,2 / (top - bottom),0,-(top + bottom) / (top - bottom),0,0,-2 / (zf - zn),-(zf + zn) / (zf - zn),0,0,0,1);
-};
-kha_math_Matrix4.perspectiveProjection = function(fovY,aspect,zn,zf) {
-	var uh = 1.0 / Math.tan(fovY / 2);
-	return new kha_math_Matrix4(uh / aspect,0,0,0,0,uh,0,0,0,0,(zf + zn) / (zn - zf),2 * zf * zn / (zn - zf),0,0,-1,0);
-};
-kha_math_Matrix4.lookAt = function(eye,at,up) {
-	var zaxis = new kha_math_Vector3(at.x - eye.x,at.y - eye.y,at.z - eye.z);
-	zaxis.set_length(1);
-	var xaxis = new kha_math_Vector3(zaxis.y * up.z - zaxis.z * up.y,zaxis.z * up.x - zaxis.x * up.z,zaxis.x * up.y - zaxis.y * up.x);
-	xaxis.set_length(1);
-	var _x = xaxis.y * zaxis.z - xaxis.z * zaxis.y;
-	var _y = xaxis.z * zaxis.x - xaxis.x * zaxis.z;
-	var _z = xaxis.x * zaxis.y - xaxis.y * zaxis.x;
-	return new kha_math_Matrix4(xaxis.x,xaxis.y,xaxis.z,-(xaxis.x * eye.x + xaxis.y * eye.y + xaxis.z * eye.z),_x,_y,_z,-(_x * eye.x + _y * eye.y + _z * eye.z),-zaxis.x,-zaxis.y,-zaxis.z,zaxis.x * eye.x + zaxis.y * eye.y + zaxis.z * eye.z,0,0,0,1);
-};
-kha_math_Matrix4.prototype = {
-	__class__: kha_math_Matrix4
-};
-var kha_math_Vector2 = function(x,y) {
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-};
-$hxClasses["kha.math.Vector2"] = kha_math_Vector2;
-kha_math_Vector2.__name__ = true;
-kha_math_Vector2.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		return length;
-	}
-	,__class__: kha_math_Vector2
-};
-var kha_math_Vector3 = function(x,y,z) {
-	if(z == null) {
-		z = 0;
-	}
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-	this.z = z;
-};
-$hxClasses["kha.math.Vector3"] = kha_math_Vector3;
-kha_math_Vector3.__name__ = true;
-kha_math_Vector3.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		this.z *= mul;
-		return length;
-	}
-	,__class__: kha_math_Vector3
-};
-var kha_math_Vector4 = function(x,y,z,w) {
-	if(w == null) {
-		w = 1;
-	}
-	if(z == null) {
-		z = 0;
-	}
-	if(y == null) {
-		y = 0;
-	}
-	if(x == null) {
-		x = 0;
-	}
-	this.x = x;
-	this.y = y;
-	this.z = z;
-	this.w = w;
-};
-$hxClasses["kha.math.Vector4"] = kha_math_Vector4;
-kha_math_Vector4.__name__ = true;
-kha_math_Vector4.prototype = {
-	get_length: function() {
-		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w);
-	}
-	,set_length: function(length) {
-		var currentLength = this.get_length();
-		if(currentLength == 0) {
-			return 0;
-		}
-		var mul = length / currentLength;
-		this.x *= mul;
-		this.y *= mul;
-		this.z *= mul;
-		this.w *= mul;
-		return length;
-	}
-	,__class__: kha_math_Vector4
-};
-var kha_network_Client = function() { };
-$hxClasses["kha.network.Client"] = kha_network_Client;
-kha_network_Client.__name__ = true;
-kha_network_Client.prototype = {
-	__class__: kha_network_Client
-};
 var kha_network_ControllerBuilder = function() { };
 $hxClasses["kha.network.ControllerBuilder"] = kha_network_ControllerBuilder;
 kha_network_ControllerBuilder.__name__ = true;
-var kha_network_Entity = function() { };
-$hxClasses["kha.network.Entity"] = kha_network_Entity;
-kha_network_Entity.__name__ = true;
-kha_network_Entity.prototype = {
-	__class__: kha_network_Entity
-};
-var kha_network_LocalClient = function(id) {
-	this.myId = id;
-};
-$hxClasses["kha.network.LocalClient"] = kha_network_LocalClient;
-kha_network_LocalClient.__name__ = true;
-kha_network_LocalClient.__interfaces__ = [kha_network_Client];
-kha_network_LocalClient.prototype = {
-	send: function(bytes,mandatory) {
-	}
-	,receive: function(receiver) {
-	}
-	,onClose: function(close) {
-	}
-	,get_controllers: function() {
-		return null;
-	}
-	,get_id: function() {
-		return this.myId;
-	}
-	,__class__: kha_network_LocalClient
-};
-var kha_network_Network = function(url,port,errorCallback,closeCallback) {
-	this.open = false;
-	var _gthis = this;
-	this.socket = new WebSocket("ws://" + url + ":" + port);
-	this.socket.onerror = function(error) {
-		haxe_Log.trace("Network error: " + error,{ fileName : "Network.hx", lineNumber : 14, className : "kha.network.Network", methodName : "new"});
-		errorCallback();
-	};
-	this.socket.binaryType = "arraybuffer";
-	this.socket.onopen = function() {
-		_gthis.open = true;
-	};
-	this.socket.onclose = function(event) {
-		haxe_Log.trace("Network connection closed",{ fileName : "Network.hx", lineNumber : 22, className : "kha.network.Network", methodName : "new"});
-		closeCallback();
-	};
-};
-$hxClasses["kha.network.Network"] = kha_network_Network;
-kha_network_Network.__name__ = true;
-kha_network_Network.prototype = {
-	send: function(bytes,mandatory) {
-		if(this.open) {
-			this.socket.send(bytes.b.bufferValue);
-		}
-	}
-	,listen: function(listener) {
-		this.socket.onmessage = function(message) {
-			listener(haxe_io_Bytes.ofData(message.data));
-		};
-	}
-	,__class__: kha_network_Network
-};
-var kha_network_State = function(time,data) {
-	this.time = time;
-	this.data = data;
-};
-$hxClasses["kha.network.State"] = kha_network_State;
-kha_network_State.__name__ = true;
-kha_network_State.prototype = {
-	__class__: kha_network_State
-};
-var kha_network_Session = function(maxPlayers,address,port) {
-	this.ping = 1;
-	this.currentPlayers = 0;
+var kha_network_Session = function() {
 	this.controllers = new haxe_ds_IntMap();
-	this.entities = new haxe_ds_IntMap();
-	kha_network_Session.instance = this;
-	this.maxPlayers = maxPlayers;
-	this.address = address;
-	this.port = port;
 };
 $hxClasses["kha.network.Session"] = kha_network_Session;
 kha_network_Session.__name__ = true;
@@ -19243,20 +11940,7 @@ kha_network_Session.the = function() {
 	return kha_network_Session.instance;
 };
 kha_network_Session.prototype = {
-	get_me: function() {
-		return this.localClient;
-	}
-	,addEntity: function(entity) {
-		var key = entity._id();
-		this.entities.h[key] = entity;
-	}
-	,addController: function(controller) {
-		haxe_Log.trace("Adding controller id " + controller._id(),{ fileName : "Session.hx", lineNumber : 88, className : "kha.network.Session", methodName : "addController"});
-		controller._inputBufferIndex = 0;
-		var key = controller._id();
-		this.controllers.h[key] = controller;
-	}
-	,sendControllerUpdate: function(id,bytes) {
+	sendControllerUpdate: function(id,bytes) {
 		if(this.controllers.h.hasOwnProperty(id)) {
 			if(this.controllers.h[id]._inputBuffer.length < this.controllers.h[id]._inputBufferIndex + 4 + bytes.length) {
 				var newBuffer = new haxe_io_Bytes(new ArrayBuffer(this.controllers.h[id]._inputBufferIndex + 4 + bytes.length));
@@ -19268,253 +11952,8 @@ kha_network_Session.prototype = {
 			this.controllers.h[id]._inputBufferIndex += 4 + bytes.length;
 		}
 	}
-	,sendPing: function() {
-		var bytes = new haxe_io_Bytes(new ArrayBuffer(5));
-		bytes.b[0] = 4;
-		bytes.setFloat(1,kha_Scheduler.realTime());
-		this.sendToServer(bytes);
-	}
-	,sendPlayerUpdate: function() {
-	}
-	,receive: function(bytes,client) {
-		switch(bytes.b[0]) {
-		case 0:
-			this.localClient = new kha_network_LocalClient(bytes.b[1]);
-			kha_Scheduler.resetTime();
-			this.startCallback();
-			break;
-		case 1:
-			var time = bytes.getDouble(1);
-			var offset = 9;
-			var tmp = this.entities.iterator();
-			while(tmp.hasNext()) {
-				var entity = tmp.next();
-				entity._receive(offset,bytes);
-				offset += entity._size();
-			}
-			kha_Scheduler.back(time);
-			break;
-		case 3:
-			switch(bytes.b[1]) {
-			case 0:
-				break;
-			case 1:
-				this.executeRPC(bytes);
-				break;
-			}
-			break;
-		case 4:
-			var sendTime = bytes.getFloat(1);
-			this.ping = kha_Scheduler.realTime() - sendTime;
-			break;
-		case 5:
-			this.refusedCallback();
-			break;
-		case 6:
-			this.currentPlayers = bytes.getInt32(1);
-			break;
-		}
-	}
-	,executeRPC: function(bytes) {
-		var args = [];
-		var syncId = bytes.getInt32(2);
-		var index = 6;
-		var classnamelength = bytes.getUInt16(6);
-		index = 8;
-		var classname = "";
-		var _g1 = 0;
-		while(_g1 < classnamelength) {
-			++_g1;
-			classname += String.fromCharCode(bytes.b[index]);
-			++index;
-		}
-		var methodnamelength = bytes.getUInt16(index);
-		index += 2;
-		var methodname = "";
-		var _g11 = 0;
-		while(_g11 < methodnamelength) {
-			++_g11;
-			methodname += String.fromCharCode(bytes.b[index]);
-			++index;
-		}
-		while(index < bytes.length) {
-			var type = bytes.b[index];
-			++index;
-			switch(type) {
-			case 66:
-				var value = bytes.b[index] == 1;
-				++index;
-				haxe_Log.trace("Bool: " + (value == null?"null":"" + value),{ fileName : "Session.hx", lineNumber : 288, className : "kha.network.Session", methodName : "executeRPC"});
-				args.push(value);
-				break;
-			case 70:
-				var value1 = bytes.getDouble(index);
-				index += 8;
-				haxe_Log.trace("Float: " + value1,{ fileName : "Session.hx", lineNumber : 293, className : "kha.network.Session", methodName : "executeRPC"});
-				args.push(value1);
-				break;
-			case 73:
-				var value2 = bytes.getInt32(index);
-				index += 4;
-				haxe_Log.trace("Int: " + value2,{ fileName : "Session.hx", lineNumber : 298, className : "kha.network.Session", methodName : "executeRPC"});
-				args.push(value2);
-				break;
-			case 83:
-				var length = bytes.getUInt16(index);
-				index += 2;
-				var str = "";
-				var _g12 = 0;
-				while(_g12 < length) {
-					++_g12;
-					str += String.fromCharCode(bytes.b[index]);
-					++index;
-				}
-				haxe_Log.trace("String: " + str,{ fileName : "Session.hx", lineNumber : 308, className : "kha.network.Session", methodName : "executeRPC"});
-				args.push(str);
-				break;
-			default:
-				haxe_Log.trace("Unknown argument type.",{ fileName : "Session.hx", lineNumber : 311, className : "kha.network.Session", methodName : "executeRPC"});
-			}
-		}
-		if(syncId == -1) {
-			Reflect.field(Type.resolveClass(classname),methodname + "_remotely").apply(null,args);
-		} else {
-			Reflect.field(kha_network_SyncBuilder.objects[syncId],methodname + "_remotely").apply(kha_network_SyncBuilder.objects[syncId],args);
-		}
-	}
-	,waitForStart: function(callback,refuseCallback,errorCallback,closeCallback,resCallback) {
-		var _gthis = this;
-		this.startCallback = callback;
-		this.refusedCallback = refuseCallback;
-		this.resetCallback = resCallback;
-		this.network = new kha_network_Network(this.address,this.port,errorCallback,function() {
-			closeCallback();
-			_gthis.reset();
-		});
-		this.network.listen(function(bytes) {
-			_gthis.receive(bytes);
-		});
-		this.updateTaskId = kha_Scheduler.addFrameTask($bind(this,this.update),0);
-		this.ping = 1;
-		this.pingTaskId = kha_Scheduler.addTimeTask($bind(this,this.sendPing),0,1);
-	}
-	,reset: function() {
-		kha_Scheduler.removeFrameTask(this.updateTaskId);
-		kha_Scheduler.removeTimeTask(this.pingTaskId);
-		this.currentPlayers = 0;
-		this.ping = 1;
-		this.controllers = new haxe_ds_IntMap();
-		this.entities = new haxe_ds_IntMap();
-		this.resetCallback();
-	}
-	,update: function() {
-		var tmp = this.controllers.iterator();
-		while(tmp.hasNext()) {
-			var controller = tmp.next();
-			if(controller._inputBufferIndex > 0) {
-				var bytes = new haxe_io_Bytes(new ArrayBuffer(22 + controller._inputBufferIndex));
-				bytes.b[0] = 2;
-				bytes.setInt32(1,controller._id());
-				bytes.setDouble(5,kha_Scheduler.realTime());
-				bytes.setInt32(13,kha_System.windowWidth(0));
-				bytes.setInt32(17,kha_System.windowHeight(0));
-				bytes.b[21] = kha_System.get_screenRotation()[1] & 255;
-				bytes.blit(22,controller._inputBuffer,0,controller._inputBufferIndex);
-				this.sendToServer(bytes);
-				controller._inputBufferIndex = 0;
-			}
-		}
-	}
-	,sendToServer: function(bytes) {
-		this.network.send(bytes,false);
-	}
 	,__class__: kha_network_Session
 };
-var kha_network_SyncBuilder = function() { };
-$hxClasses["kha.network.SyncBuilder"] = kha_network_SyncBuilder;
-kha_network_SyncBuilder.__name__ = true;
-var kha_simd_Float32x4 = function(_0,_1,_2,_3) {
-	this._0 = _0;
-	this._1 = _1;
-	this._2 = _2;
-	this._3 = _3;
-};
-$hxClasses["kha.simd.Float32x4"] = kha_simd_Float32x4;
-kha_simd_Float32x4.__name__ = true;
-kha_simd_Float32x4.create = function() {
-	return new kha_simd_Float32x4(0,0,0,0);
-};
-kha_simd_Float32x4.loadAllFast = function(t) {
-	return new kha_simd_Float32x4(t,t,t,t);
-};
-kha_simd_Float32x4.load = function(a,b,c,d) {
-	return new kha_simd_Float32x4(a,b,c,d);
-};
-kha_simd_Float32x4.loadFast = function(a,b,c,d) {
-	return new kha_simd_Float32x4(a,b,c,d);
-};
-kha_simd_Float32x4.get = function(t,index) {
-	var value = 0;
-	switch(index) {
-	case 0:
-		value = t._0;
-		break;
-	case 1:
-		value = t._1;
-		break;
-	case 2:
-		value = t._2;
-		break;
-	case 3:
-		value = t._3;
-		break;
-	}
-	return value;
-};
-kha_simd_Float32x4.getFast = function(t,index) {
-	switch(index) {
-	case 0:
-		return t._0;
-	case 1:
-		return t._1;
-	case 2:
-		return t._2;
-	case 3:
-		return t._3;
-	}
-	return 0;
-};
-kha_simd_Float32x4.abs = function(t) {
-	return new kha_simd_Float32x4(Math.abs(t._0),Math.abs(t._1),Math.abs(t._2),Math.abs(t._3));
-};
-kha_simd_Float32x4.add = function(a,b) {
-	return new kha_simd_Float32x4(a._0 + b._0,a._1 + b._1,a._2 + b._2,a._3 + b._3);
-};
-kha_simd_Float32x4.div = function(a,b) {
-	return new kha_simd_Float32x4(a._0 / b._0,a._1 / b._1,a._2 / b._2,a._3 / b._3);
-};
-kha_simd_Float32x4.mul = function(a,b) {
-	return new kha_simd_Float32x4(a._0 * b._0,a._1 * b._1,a._2 * b._2,a._3 * b._3);
-};
-kha_simd_Float32x4.neg = function(t) {
-	return new kha_simd_Float32x4(-t._0,-t._1,-t._2,-t._3);
-};
-kha_simd_Float32x4.reciprocalApproximation = function(t) {
-	return new kha_simd_Float32x4(0,0,0,0);
-};
-kha_simd_Float32x4.reciprocalSqrtApproximation = function(t) {
-	return new kha_simd_Float32x4(0,0,0,0);
-};
-kha_simd_Float32x4.sub = function(a,b) {
-	return new kha_simd_Float32x4(a._0 - b._0,a._1 - b._1,a._2 - b._2,a._3 - b._3);
-};
-kha_simd_Float32x4.sqrt = function(t) {
-	return new kha_simd_Float32x4(Math.sqrt(t._0),Math.sqrt(t._1),Math.sqrt(t._2),Math.sqrt(t._3));
-};
-kha_simd_Float32x4.prototype = {
-	__class__: kha_simd_Float32x4
-};
-function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 $hxClasses.Math = Math;
@@ -19549,18 +11988,6 @@ js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 kha__$Color_Color_$Impl_$.Black = kha__$Color_Color_$Impl_$._new(-16777216);
 kha__$Color_Color_$Impl_$.White = kha__$Color_Color_$Impl_$._new(-1);
-kha__$Color_Color_$Impl_$.Red = kha__$Color_Color_$Impl_$._new(-65536);
-kha__$Color_Color_$Impl_$.Blue = kha__$Color_Color_$Impl_$._new(-16776961);
-kha__$Color_Color_$Impl_$.Green = kha__$Color_Color_$Impl_$._new(-16711936);
-kha__$Color_Color_$Impl_$.Magenta = kha__$Color_Color_$Impl_$._new(-65281);
-kha__$Color_Color_$Impl_$.Yellow = kha__$Color_Color_$Impl_$._new(-256);
-kha__$Color_Color_$Impl_$.Cyan = kha__$Color_Color_$Impl_$._new(-16711681);
-kha__$Color_Color_$Impl_$.Purple = kha__$Color_Color_$Impl_$._new(-8388480);
-kha__$Color_Color_$Impl_$.Pink = kha__$Color_Color_$Impl_$._new(-16181);
-kha__$Color_Color_$Impl_$.Orange = kha__$Color_Color_$Impl_$._new(-23296);
-kha__$Color_Color_$Impl_$.invMaxChannelValue = 0.00392156862745098;
-kha_FontStyle.Default = new kha_FontStyle(false,false,false);
-kha_Scheduler.timeWarpSaveTime = 1.0;
 kha_Scheduler.DIF_COUNT = 3;
 kha_Scheduler.maxframetime = 0.5;
 kha_Scheduler.startTime = 0;
@@ -19574,10 +12001,7 @@ kha_Shaders.painter_video_fragData = "s842:I3ZlcnNpb24gMTAwCi8vIFVua25vd24gZXhlY
 kha_Shaders.painter_video_vertData = "s628:I3ZlcnNpb24gMTAwCi8vIFVua25vd24gb3BlcmF0aW9uIDgKLy8gVW5rbm93biBvcGVyYXRpb24gOAovLyBVbmtub3duIG9wZXJhdGlvbiA4Ci8vIFVua25vd24gb3BlcmF0aW9uIDgKcHJlY2lzaW9uIG1lZGl1bXAgZmxvYXQ7CnVuaWZvcm0gbWF0NCBwcm9qZWN0aW9uTWF0cml4OwphdHRyaWJ1dGUgdmVjMyB2ZXJ0ZXhQb3NpdGlvbjsKdmFyeWluZyB2ZWMyIHRleENvb3JkOwphdHRyaWJ1dGUgdmVjMiB0ZXhQb3NpdGlvbjsKdmFyeWluZyB2ZWM0IGNvbG9yOwphdHRyaWJ1dGUgdmVjNCB2ZXJ0ZXhDb2xvcjsKCgoKdm9pZCBtYWluKCkKewoJZ2xfUG9zaXRpb24gPSAocHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb25bMF0sIHZlcnRleFBvc2l0aW9uWzFdLCB2ZXJ0ZXhQb3NpdGlvblsyXSwgMS4wKSk7Cgl0ZXhDb29yZCA9IHRleFBvc2l0aW9uOwoJY29sb3IgPSB2ZXJ0ZXhDb2xvcjsKCXJldHVybjsKfQoK";
 kha_System.renderListeners = [];
 kha_System.foregroundListeners = [];
-kha_System.resumeListeners = [];
-kha_System.pauseListeners = [];
 kha_System.backgroundListeners = [];
-kha_System.shutdownListeners = [];
 kha_SystemImpl.mobile = false;
 kha_SystemImpl.mobileAudioPlaying = false;
 kha_SystemImpl.insideInputEvent = false;
@@ -19586,84 +12010,8 @@ kha_SystemImpl.leftMouseCtrlDown = false;
 kha_SystemImpl.minimumScroll = 999;
 kha_SystemImpl.lastFirstTouchX = 0;
 kha_SystemImpl.lastFirstTouchY = 0;
-kha_audio2_Audio1.channelCount = 16;
-kha_audio2_ogg_tools_Crc32.POLY = 79764919;
 kha_audio2_ogg_vorbis_VorbisDecodeState.INVALID_BITS = -1;
-kha_audio2_ogg_vorbis_VorbisTools.EOP = -1;
-kha_audio2_ogg_vorbis_VorbisTools.M__PI = 3.14159265358979323846264;
-kha_audio2_ogg_vorbis_VorbisTools.DIVTAB_NUMER = 32;
-kha_audio2_ogg_vorbis_VorbisTools.DIVTAB_DENOM = 64;
 kha_audio2_ogg_vorbis_VorbisTools.INVERSE_DB_TABLE = [1.0649863e-07,1.1341951e-07,1.2079015e-07,1.2863978e-07,1.3699951e-07,1.4590251e-07,1.5538408e-07,1.6548181e-07,1.7623575e-07,1.8768855e-07,1.9988561e-07,2.1287530e-07,2.2670913e-07,2.4144197e-07,2.5713223e-07,2.7384213e-07,2.9163793e-07,3.1059021e-07,3.3077411e-07,3.5226968e-07,3.7516214e-07,3.9954229e-07,4.2550680e-07,4.5315863e-07,4.8260743e-07,5.1396998e-07,5.4737065e-07,5.8294187e-07,6.2082472e-07,6.6116941e-07,7.0413592e-07,7.4989464e-07,7.9862701e-07,8.5052630e-07,9.0579828e-07,9.6466216e-07,1.0273513e-06,1.0941144e-06,1.1652161e-06,1.2409384e-06,1.3215816e-06,1.4074654e-06,1.4989305e-06,1.5963394e-06,1.7000785e-06,1.8105592e-06,1.9282195e-06,2.0535261e-06,2.1869758e-06,2.3290978e-06,2.4804557e-06,2.6416497e-06,2.8133190e-06,2.9961443e-06,3.1908506e-06,3.3982101e-06,3.6190449e-06,3.8542308e-06,4.1047004e-06,4.3714470e-06,4.6555282e-06,4.9580707e-06,5.2802740e-06,5.6234160e-06,5.9888572e-06,6.3780469e-06,6.7925283e-06,7.2339451e-06,7.7040476e-06,8.2047000e-06,8.7378876e-06,9.3057248e-06,9.9104632e-06,1.0554501e-05,1.1240392e-05,1.1970856e-05,1.2748789e-05,1.3577278e-05,1.4459606e-05,1.5399272e-05,1.6400004e-05,1.7465768e-05,1.8600792e-05,1.9809576e-05,2.1096914e-05,2.2467911e-05,2.3928002e-05,2.5482978e-05,2.7139006e-05,2.8902651e-05,3.0780908e-05,3.2781225e-05,3.4911534e-05,3.7180282e-05,3.9596466e-05,4.2169667e-05,4.4910090e-05,4.7828601e-05,5.0936773e-05,5.4246931e-05,5.7772202e-05,6.1526565e-05,6.5524908e-05,6.9783085e-05,7.4317983e-05,7.9147585e-05,8.4291040e-05,8.9768747e-05,9.5602426e-05,0.00010181521,0.00010843174,0.00011547824,0.00012298267,0.00013097477,0.00013948625,0.00014855085,0.00015820453,0.00016848555,0.00017943469,0.00019109536,0.00020351382,0.00021673929,0.00023082423,0.00024582449,0.00026179955,0.00027881276,0.00029693158,0.00031622787,0.00033677814,0.00035866388,0.00038197188,0.00040679456,0.00043323036,0.00046138411,0.00049136745,0.00052329927,0.00055730621,0.00059352311,0.00063209358,0.00067317058,0.00071691700,0.00076350630,0.00081312324,0.00086596457,0.00092223983,0.00098217216,0.0010459992,0.0011139742,0.0011863665,0.0012634633,0.0013455702,0.0014330129,0.0015261382,0.0016253153,0.0017309374,0.0018434235,0.0019632195,0.0020908006,0.0022266726,0.0023713743,0.0025254795,0.0026895994,0.0028643847,0.0030505286,0.0032487691,0.0034598925,0.0036847358,0.0039241906,0.0041792066,0.0044507950,0.0047400328,0.0050480668,0.0053761186,0.0057254891,0.0060975636,0.0064938176,0.0069158225,0.0073652516,0.0078438871,0.0083536271,0.0088964928,0.009474637,0.010090352,0.010746080,0.011444421,0.012188144,0.012980198,0.013823725,0.014722068,0.015678791,0.016697687,0.017782797,0.018938423,0.020169149,0.021479854,0.022875735,0.024362330,0.025945531,0.027631618,0.029427276,0.031339626,0.033376252,0.035545228,0.037855157,0.040315199,0.042935108,0.045725273,0.048696758,0.051861348,0.055231591,0.058820850,0.062643361,0.066714279,0.071049749,0.075666962,0.080584227,0.085821044,0.091398179,0.097337747,0.10366330,0.11039993,0.11757434,0.12521498,0.13335215,0.14201813,0.15124727,0.16107617,0.17154380,0.18269168,0.19456402,0.20720788,0.22067342,0.23501402,0.25028656,0.26655159,0.28387361,0.30232132,0.32196786,0.34289114,0.36517414,0.38890521,0.41417847,0.44109412,0.46975890,0.50028648,0.53279791,0.56742212,0.60429640,0.64356699,0.68538959,0.72993007,0.77736504,0.82788260,0.88168307,0.9389798,1.0];
-kha_audio2_ogg_vorbis_data_Codebook.NO_CODE = 255;
-kha_audio2_ogg_vorbis_data_Codebook.delay = 0;
-kha_audio2_ogg_vorbis_data_Header.PACKET_ID = 1;
-kha_audio2_ogg_vorbis_data_Header.PACKET_COMMENT = 3;
-kha_audio2_ogg_vorbis_data_Header.PACKET_SETUP = 5;
-kha_audio2_ogg_vorbis_data_PageFlag.CONTINUED_PACKET = 1;
-kha_audio2_ogg_vorbis_data_PageFlag.FIRST_PAGE = 2;
-kha_audio2_ogg_vorbis_data_PageFlag.LAST_PAGE = 4;
-kha_audio2_ogg_vorbis_data_Setting.MAX_CHANNELS = 16;
-kha_audio2_ogg_vorbis_data_Setting.PUSHDATA_CRC_COUNT = 4;
-kha_audio2_ogg_vorbis_data_Setting.FAST_HUFFMAN_LENGTH = 10;
-kha_audio2_ogg_vorbis_data_Setting.FAST_HUFFMAN_TABLE_SIZE = 1024;
-kha_audio2_ogg_vorbis_data_Setting.FAST_HUFFMAN_TABLE_MASK = 1023;
-kha_graphics2_truetype_StbTruetype.STBTT_vmove = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_vline = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_vcurve = 3;
-kha_graphics2_truetype_StbTruetype.STBTT_MACSTYLE_DONTCARE = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_MACSTYLE_BOLD = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_MACSTYLE_ITALIC = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_MACSTYLE_UNDERSCORE = 4;
-kha_graphics2_truetype_StbTruetype.STBTT_MACSTYLE_NONE = 8;
-kha_graphics2_truetype_StbTruetype.STBTT_PLATFORM_ID_UNICODE = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_PLATFORM_ID_MAC = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_PLATFORM_ID_ISO = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_PLATFORM_ID_MICROSOFT = 3;
-kha_graphics2_truetype_StbTruetype.STBTT_UNICODE_EID_UNICODE_1_0 = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_UNICODE_EID_UNICODE_1_1 = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_UNICODE_EID_ISO_10646 = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_UNICODE_EID_UNICODE_2_0_BMP = 3;
-kha_graphics2_truetype_StbTruetype.STBTT_UNICODE_EID_UNICODE_2_0_FULL = 4;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_EID_SYMBOL = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_EID_UNICODE_BMP = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_EID_SHIFTJIS = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_EID_UNICODE_FULL = 10;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_ROMAN = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_ARABIC = 4;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_JAPANESE = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_HEBREW = 5;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_CHINESE_TRAD = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_GREEK = 6;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_KOREAN = 3;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_EID_RUSSIAN = 7;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_ENGLISH = 1033;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_ITALIAN = 1040;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_CHINESE = 2052;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_JAPANESE = 1041;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_DUTCH = 1043;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_KOREAN = 1042;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_FRENCH = 1036;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_RUSSIAN = 1049;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_GERMAN = 1031;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_SPANISH = 1033;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_HEBREW = 1037;
-kha_graphics2_truetype_StbTruetype.STBTT_MS_LANG_SWEDISH = 1053;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_ENGLISH = 0;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_JAPANESE = 11;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_ARABIC = 12;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_KOREAN = 23;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_DUTCH = 4;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_RUSSIAN = 32;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_FRENCH = 1;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_SPANISH = 6;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_GERMAN = 2;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_SWEDISH = 5;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_HEBREW = 10;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_CHINESE_SIMPLIFIED = 33;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_ITALIAN = 3;
-kha_graphics2_truetype_StbTruetype.STBTT_MAC_LANG_CHINESE_TRAD = 19;
-kha_graphics2_truetype_StbTruetype.STBTT_MAX_OVERSAMPLE = 8;
-kha_graphics2_truetype_StbTruetype.STBTT_RASTERIZER_VERSION = 2;
 kha_graphics4_ImageShaderPainter.bufferSize = 1500;
 kha_graphics4_ImageShaderPainter.vertexSize = 9;
 kha_graphics4_ColoredShaderPainter.bufferSize = 100;
@@ -19674,27 +12022,6 @@ kha_input_Gamepad.instances = [];
 kha_input_Keyboard.__meta__ = { fields : { sendDownEvent : { input : null}, sendUpEvent : { input : null}}};
 kha_input_Mouse.__meta__ = { fields : { sendDownEvent : { input : null}, sendUpEvent : { input : null}, sendMoveEvent : { input : null}, sendWheelEvent : { input : null}}};
 kha_js_AEAudioChannel.todo = [];
-kha_js_Sound.loading = [];
-kha_js_Video.loading = new List();
-kha_math_FastMatrix3.width = 3;
-kha_math_FastMatrix3.height = 3;
-kha_math_FastMatrix4.width = 4;
-kha_math_FastMatrix4.height = 4;
-kha_math_Matrix3.width = 3;
-kha_math_Matrix3.height = 3;
-kha_math_Matrix4.width = 4;
-kha_math_Matrix4.height = 4;
 kha_network_ControllerBuilder.nextId = 0;
-kha_network_Session.START = 0;
-kha_network_Session.ENTITY_UPDATES = 1;
-kha_network_Session.CONTROLLER_UPDATES = 2;
-kha_network_Session.REMOTE_CALL = 3;
-kha_network_Session.PING = 4;
-kha_network_Session.ERROR = 5;
-kha_network_Session.PLAYER_UPDATES = 6;
-kha_network_Session.RPC_SERVER = 0;
-kha_network_Session.RPC_ALL = 1;
-kha_network_SyncBuilder.nextId = 0;
-kha_network_SyncBuilder.objects = [];
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
