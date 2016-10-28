@@ -1,0 +1,33 @@
+
+html {
+    font-family : sans;
+}
+
+.generic_select {
+    height : 150px;
+    width  : 250px;
+}
+select {
+    overflow-y: auto;
+}
+
+table {
+    border-collapse: collapse;
+}
+.parm {
+    width: 80px;
+    text-align: left;
+}
+.num {
+    width : 140px;
+    text-align: right;
+}
+th {
+    padding-left: 8px;
+    text-align: center;
+}
+td {
+
+    border:1px solid #afafaf;
+    padding:1px 4px 1px 8px;
+}
