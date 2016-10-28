@@ -894,11 +894,11 @@ bench_report_Result.prototype = {
 	__class__: bench_report_Result
 };
 var bench_report_Report = function(name,desc,results,conf) {
-	this.bench_result_file = process.env["bench_result_file"];
-	this.bench_runtime = process.env["bench_runtime"];
-	this.bench_build_id = process.env["bench_build_id"];
-	this.bench_build_name = process.env["bench_build_name"];
-	this.bench_package = process.env["bench_package"];
+	this.bench_result_file = "";
+	this.bench_runtime = "";
+	this.bench_build_id = "";
+	this.bench_build_name = "";
+	this.bench_package = "";
 	this.common = new bench_parameters_Common();
 	this.paramerterConfig = conf;
 	this.name = name;
@@ -907,15 +907,13 @@ var bench_report_Report = function(name,desc,results,conf) {
 };
 bench_report_Report.__name__ = ["bench","report","Report"];
 bench_report_Report.writeToFile = function(path,content) {
-	js_node_Fs.writeFileSync(path,content);
+};
+bench_report_Report.get_env = function(s) {
+	return "";
 };
 bench_report_Report.prototype = {
 	toFile: function() {
-		var result_file = process.env["bench_result_file"];
-		if(result_file == "" || result_file == null) {
-			throw new js__$Boot_HaxeError("bench_result_file environment variable is not set: `" + result_file + "` ");
-		}
-		bench_report_Report.writeToFile(result_file,JSON.stringify(this));
+		throw new js__$Boot_HaxeError("bench_result_file environment variable is not set: `" + "` ");
 	}
 	,__class__: bench_report_Report
 };
@@ -2547,8 +2545,6 @@ js_html_compat_Uint8Array._subarray = function(start,end) {
 	a.byteOffset = start;
 	return a;
 };
-var js_node_Fs = require("fs");
-var js_node_buffer_Buffer = require("buffer").Buffer;
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = ["thx","Arrays"];
 thx_Arrays.each = function(arr,effect) {
