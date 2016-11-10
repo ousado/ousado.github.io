@@ -822,7 +822,13 @@ var bench_enums_Config = function() {
 			this.K.push(bench_enums_EKind.Arg(bench_enums_ArgKind.ATP(ak),pc1));
 		}
 		this.AKs.push(ak);
-		this.AKs.push(bench_enums_ArgKind.ATP(ak));
+	}
+	var _g3 = 0;
+	var _g12 = this.AKs;
+	while(_g3 < _g12.length) {
+		var ak1 = _g12[_g3];
+		++_g3;
+		this.AKs.push(bench_enums_ArgKind.ATP(ak1));
 	}
 };
 bench_enums_Config.__name__ = ["bench","enums","Config"];
