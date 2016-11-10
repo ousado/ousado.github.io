@@ -824,9 +824,8 @@ var bench_enums_Config = function() {
 		this.AKs.push(ak);
 	}
 	var _g3 = 0;
-	var _g12 = this.AKs;
-	while(_g3 < _g12.length) {
-		var ak1 = _g12[_g3];
+	while(_g3 < AK.length) {
+		var ak1 = AK[_g3];
 		++_g3;
 		this.AKs.push(bench_enums_ArgKind.ATP(ak1));
 	}
@@ -1494,7 +1493,7 @@ ddbmviz_web_Enums.prototype = {
 			_g.push({ params : tmp, values : Array.prototype.concat.apply([],_g2)});
 		}
 		var rows = _g;
-		haxe_Log.trace("rows " + Std.string(rows) + " " + rows.length,{ fileName : "Enums.hx", lineNumber : 157, className : "ddbmviz.web.Enums", methodName : "get_rows"});
+		haxe_Log.trace("rows " + Std.string(rows) + " " + rows.length,{ fileName : "Enums.hx", lineNumber : 158, className : "ddbmviz.web.Enums", methodName : "get_rows"});
 		return rows;
 	}
 	,filter: function(target_sel,sel,show_merr) {
@@ -1538,7 +1537,7 @@ ddbmviz_web_Enums.prototype = {
 		var _gthis = this;
 		var params_sel = new thx_stream_Value([1,1,1,1,1,1]);
 		var target_sel = [{ idx : 0, val : new thx_stream_Value([1]), labels : this.target_names}];
-		haxe_Log.trace(this.target_names.toString(),{ fileName : "Enums.hx", lineNumber : 203, className : "ddbmviz.web.Enums", methodName : "ui"});
+		haxe_Log.trace(this.target_names.toString(),{ fileName : "Enums.hx", lineNumber : 204, className : "ddbmviz.web.Enums", methodName : "ui"});
 		var selects = [this.config.K.slice(0,3).map($bind(this,this.ekString)),this.config.AKs.map($bind(this,this.akString)),this.config.PC.map(Std.string),this.config.MIX.map($bind(this,this.mixString)),this.config.C.map(Std.string),this.config.SZ.map(Std.string)].map(function(labels,idx) {
 			return { idx : idx, val : params_sel, labels : labels};
 		});
@@ -1546,7 +1545,7 @@ ddbmviz_web_Enums.prototype = {
 		var vizdata = new ddbmviz_web_view_VizData(target_sel,params_sel,selects,table);
 		var viz = new ddbmviz_web_view_VizC(vizdata);
 		var update = function(v) {
-			haxe_Log.trace("update .. ",{ fileName : "Enums.hx", lineNumber : 221, className : "ddbmviz.web.Enums", methodName : "ui"});
+			haxe_Log.trace("update .. ",{ fileName : "Enums.hx", lineNumber : 222, className : "ddbmviz.web.Enums", methodName : "ui"});
 			var td = _gthis.filter(target_sel[0].val.get()[0],params_sel.get(),vizdata.show_merr.get());
 			table.update(td);
 			viz.update(vizdata);
