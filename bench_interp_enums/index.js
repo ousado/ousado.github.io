@@ -1830,7 +1830,7 @@ var ddbmviz_web_FieldAccess = function() {
 	this.config = new bench_fieldaccess_Config();
 	var _gthis = this;
 	this.tests = this.config.tests();
-	var data = JSON.parse(haxe_Resource.getString("fieldaccess2"));
+	var data = JSON.parse(haxe_Resource.getString("fieldaccess"));
 	this.results = data.results;
 	ddbmviz_web_AKUtils.akmap = this.akmap = new ddbmviz_web_EnumMap(ddbmviz_web_AKUtils.compare);
 	ddbmviz_web_FKUtils.fkmap = this.fkmap = new ddbmviz_web_EnumMap(ddbmviz_web_FKUtils.compare);
