@@ -2411,9 +2411,9 @@ ddbmviz_web_Index.onload = function() {
 	var fa = new ddbmviz_web_FieldAccess();
 	var maps = new ddbmviz_web_Maps();
 	var enums = new ddbmviz_web_Enums();
-	Doom.browser.mount(doom_core_VNodeImpl.Comp(fa.render()),dd_web_Core.doc.body);
-	Doom.browser.mount(maps.ui(),dd_web_Core.doc.body);
-	Doom.browser.mount(enums.ui(),dd_web_Core.doc.body);
+	Doom.browser.mount(doom_core_VNodeImpl.Comp(fa.render()),dd_web_Core.doc.body.firstElementChild);
+	Doom.browser.mount(maps.ui(),dd_web_Core.doc.body.firstElementChild.nextElementSibling);
+	Doom.browser.mount(enums.ui(),dd_web_Core.doc.body.firstElementChild.nextElementSibling.nextElementSibling);
 	return;
 };
 ddbmviz_web_Index.main = function() {
