@@ -2176,7 +2176,7 @@ ddbmviz_web_Index.onload = function() {
 	var fa = new ddbmviz_web_FieldAccess();
 	var maps = new ddbmviz_web_Maps();
 	var enums = new ddbmviz_web_Enums();
-	Doom.browser.mount(enums.ui(),dd_web_Core.doc.body.firstElementChild.nextElementSibling.nextElementSibling);
+	Doom.browser.mount(enums.ui(),dd_web_Core.doc.body.firstElementChild);
 	return;
 };
 ddbmviz_web_Index.main = function() {
