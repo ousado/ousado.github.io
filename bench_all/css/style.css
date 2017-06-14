@@ -11,6 +11,7 @@ select {
     overflow-y: auto;
 }
 
+
 table {
     border-collapse: collapse;
 }
@@ -30,4 +31,7 @@ td {
 
     border:1px solid #afafaf;
     padding:1px 4px 1px 8px;
+}
+.bench_selects {
+    display:flex;
 }
