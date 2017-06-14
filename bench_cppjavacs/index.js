@@ -83,7 +83,7 @@ doom_html_Render.prototype = {
 			parent.appendChild(el);
 			return el;
 		}
-		switch(node._hx_index) {
+		switch(node[1]) {
 		case 0:
 			var children = node[4];
 			var attributes = node[3];
@@ -412,7 +412,7 @@ doom_html_Render.prototype = {
 			if(_g21 == null) {
 				doom_html_Attributes.removeAttribute(dom,key5);
 			} else {
-				switch(_g21._hx_index) {
+				switch(_g21[1]) {
 				case 0:
 					var b = _g21[2];
 					doom_html_Attributes.toggleBoolAttribute(dom,key5,b);
@@ -440,7 +440,7 @@ doom_html_Render.prototype = {
 		}
 	}
 	,generateDom: function(node,post) {
-		switch(node._hx_index) {
+		switch(node[1]) {
 		case 0:
 			var children = node[4];
 			var attributes = node[3];
@@ -1134,8 +1134,8 @@ bench_maps_Config.prototype = {
 				var mk = _g4[_g3];
 				++_g3;
 				var tmp;
-				if(mk._hx_index == 1) {
-					if(kt._hx_index == 2) {
+				if(mk[1] == 1) {
+					if(kt[1] == 2) {
 						continue;
 					} else {
 						tmp = { mk : mk, kt : kt};
@@ -1432,7 +1432,7 @@ dd_web_Core.openclose = function(xxx,nodes) {
 		var node = structure[sidx++];
 		if(node == 255) {
 			var value = values[ctx_vidx++];
-			switch(value._hx_index) {
+			switch(value[1]) {
 			case 0:
 				break;
 			case 1:
@@ -1478,7 +1478,7 @@ dd_web_Core.openclose = function(xxx,nodes) {
 			var domnode;
 			if(node == 256) {
 				var custom = values[ctx_vidx++];
-				if(custom._hx_index == 1) {
+				if(custom[1] == 1) {
 					var v8 = custom[2];
 					domnode = dd_web_Core.doc.createElement(v8);
 				} else {
@@ -1507,7 +1507,7 @@ dd_web_Core.openclose = function(xxx,nodes) {
 				var anm;
 				if(a == 256) {
 					var v9 = values[ctx_vidx++];
-					if(v9._hx_index == 1) {
+					if(v9[1] == 1) {
 						var v10 = v9[2];
 						anm = v10;
 					} else {
@@ -1547,7 +1547,7 @@ dd_web_Core.openclose = function(xxx,nodes) {
 	return parent;
 };
 dd_web_Core.stdval = function(v) {
-	switch(v._hx_index) {
+	switch(v[1]) {
 	case 0:
 		return "dt:none";
 	case 1:
@@ -1600,7 +1600,7 @@ var ddbmviz_web_Enums = function() {
 ddbmviz_web_Enums.__name__ = ["ddbmviz","web","Enums"];
 ddbmviz_web_Enums.prototype = {
 	mixString: function(v) {
-		switch(v._hx_index) {
+		switch(v[1]) {
 		case 0:
 			return "first";
 		case 1:
@@ -1610,7 +1610,7 @@ ddbmviz_web_Enums.prototype = {
 		}
 	}
 	,akString: function(v) {
-		switch(v._hx_index) {
+		switch(v[1]) {
 		case 0:
 			return "Int";
 		case 1:
@@ -1623,7 +1623,7 @@ ddbmviz_web_Enums.prototype = {
 		}
 	}
 	,akStringByEk: function(v) {
-		if(v._hx_index == 2) {
+		if(v[1] == 2) {
 			var ak = v[2];
 			return this.akString(ak);
 		} else {
@@ -1631,7 +1631,7 @@ ddbmviz_web_Enums.prototype = {
 		}
 	}
 	,pcByEk: function(v) {
-		if(v._hx_index == 2) {
+		if(v[1] == 2) {
 			var pc = v[3];
 			return "" + pc;
 		} else {
@@ -1639,7 +1639,7 @@ ddbmviz_web_Enums.prototype = {
 		}
 	}
 	,ekString: function(v) {
-		switch(v._hx_index) {
+		switch(v[1]) {
 		case 0:
 			return "@:enum abstract";
 		case 1:
@@ -1650,7 +1650,7 @@ ddbmviz_web_Enums.prototype = {
 		}
 	}
 	,aKey: function(v) {
-		if(v._hx_index == 3) {
+		if(v[1] == 3) {
 			var ak = v[2];
 			return this.aKey(ak) + 3;
 		} else {
@@ -1699,7 +1699,7 @@ ddbmviz_web_Enums.prototype = {
 			var ak = 0;
 			var pc = 0;
 			var _g7 = t.enumKind;
-			switch(_g7._hx_index) {
+			switch(_g7[1]) {
 			case 0:
 				break;
 			case 1:
@@ -1973,7 +1973,7 @@ ddbmviz_web_EnumMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
 var ddbmviz_web_AKUtils = function() { };
 ddbmviz_web_AKUtils.__name__ = ["ddbmviz","web","AKUtils"];
 ddbmviz_web_AKUtils.toString = function(v) {
-	switch(v._hx_index) {
+	switch(v[1]) {
 	case 0:
 		return "Anon";
 	case 1:
@@ -1990,7 +1990,7 @@ ddbmviz_web_AKUtils.compare = function(a,b) {
 var ddbmviz_web_FKUtils = function() { };
 ddbmviz_web_FKUtils.__name__ = ["ddbmviz","web","FKUtils"];
 ddbmviz_web_FKUtils.toString = function(v) {
-	switch(v._hx_index) {
+	switch(v[1]) {
 	case 0:
 		return "Int";
 	case 1:
@@ -2009,8 +2009,8 @@ ddbmviz_web_FKUtils.toString = function(v) {
 ddbmviz_web_FKUtils.compare = function(a,b) {
 	var cmp = ddbmviz_web_AKUtils.compare(a,b);
 	if(cmp == 0) {
-		if(a._hx_index == 5) {
-			if(b._hx_index == 5) {
+		if(a[1] == 5) {
+			if(b[1] == 5) {
 				var a1 = a[2];
 				var b1 = b[2];
 				return ddbmviz_web_AKUtils.compare(a1,b1);
@@ -2852,7 +2852,6 @@ ddbmviz_web_GenericView.prototype = {
 	}
 	,ui: function() {
 		this.tableView = new ddbmviz_web_view_TableC({ header : [], rows : []});
-		haxe_Log.trace(this.xaxis_sel,{ fileName : "GenericView.hx", lineNumber : 169, className : "ddbmviz.web.GenericView", methodName : "ui", customParams : [this.params_sel]});
 		this.vizdata = new ddbmviz_web_view_VizDataS(this.xaxis_sel,this.params_sel,this.tableView);
 		this.component = new ddbmviz_web_view_VizCS(this.vizdata);
 	}
@@ -3062,16 +3061,27 @@ ddbmviz_web_Benchmarks.__name__ = ["ddbmviz","web","Benchmarks"];
 ddbmviz_web_Benchmarks.__super__ = doom_html_Component;
 ddbmviz_web_Benchmarks.prototype = $extend(doom_html_Component.prototype,{
 	render: function() {
-		return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Unicode:")])),this.unicode.ui(),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Enums:")])),this.enums.ui(),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Fieldaccess:")])),doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Comp(this.fa.render())])),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Maps:")])),this.maps.ui()]));
+		var u = this.unicode.ui();
+		var e = this.enums.ui();
+		var fa = this.fa.render();
+		var m = this.maps.ui();
+		haxe_Log.trace(u,{ fileName : "Index.hx", lineNumber : 104, className : "ddbmviz.web.Benchmarks", methodName : "render", customParams : [e,fa,m]});
+		var tree;
+		try {
+			tree = doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Unicode:")])),this.unicode.ui(),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Enums:")])),this.enums.ui(),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Fieldaccess:")])),doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([fa.render()])),doom_core__$VNode_VNode_$Impl_$.el("h2",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("Maps:")])),this.maps.ui()]));
+		} catch( e1 ) {
+			haxe_CallStack.lastException = e1;
+			if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+			haxe_Log.trace(e1,{ fileName : "Index.hx", lineNumber : 115, className : "ddbmviz.web.Benchmarks", methodName : "render"});
+			throw new js__$Boot_HaxeError("damn");
+		}
+		return tree;
 	}
 	,__class__: ddbmviz_web_Benchmarks
 });
 var ddbmviz_web_Index = function() { };
 ddbmviz_web_Index.__name__ = ["ddbmviz","web","Index"];
 ddbmviz_web_Index.onload = function() {
-	var fa = new ddbmviz_web_FieldAccess();
-	var maps = new ddbmviz_web_Maps();
-	var enums = new ddbmviz_web_Enums();
 	var benchmarks = new ddbmviz_web_Benchmarks(null);
 	Doom.browser.mount(doom_core_VNodeImpl.Comp(benchmarks),dd_web_Core.doc.body);
 	return;
@@ -3094,7 +3104,7 @@ ddbmviz_web_Maps.prototype = {
 		return HxOverrides.substr(v[0],1,null);
 	}
 	,mkString: function(v,k) {
-		switch(v._hx_index) {
+		switch(v[1]) {
 		case 0:
 			return "Map";
 		case 1:
@@ -3140,7 +3150,6 @@ ddbmviz_web_Maps.prototype = {
 		while(_g32 < _g41.length) {
 			var t1 = _g41[_g32];
 			++_g32;
-			haxe_Log.trace("" + Std.string(t1),{ fileName : "Maps.hx", lineNumber : 95, className : "ddbmviz.web.Maps", methodName : "prepareFilter"});
 		}
 		var _g33 = [];
 		var _g42 = 0;
@@ -3326,7 +3335,9 @@ var ddbmviz_web_Unicode = function() {
 ddbmviz_web_Unicode.__name__ = ["ddbmviz","web","Unicode"];
 ddbmviz_web_Unicode.prototype = {
 	ui: function() {
-		return this.gview.component.render();
+		var n = this.gview.component.render();
+		haxe_Log.trace(n,{ fileName : "Unicode.hx", lineNumber : 42, className : "ddbmviz.web.Unicode", methodName : "ui"});
+		return n;
 	}
 	,testToMap: function(target,v) {
 		var _g = new haxe_ds_StringMap();
@@ -3796,7 +3807,7 @@ doom_html_Attributes.getAttribute = function(el,name) {
 	if(prop == null) {
 		return el.getAttribute(name);
 	} else {
-		switch(prop._hx_index) {
+		switch(prop[1]) {
 		case 1:case 2:case 6:
 			return Reflect.field(el,name);
 		case 0:case 3:case 4:case 5:
@@ -3810,7 +3821,7 @@ doom_html_Attributes.setDynamicAttribute = function(el,name,value) {
 	if(prop == null) {
 		el.setAttribute(name,value);
 	} else {
-		switch(prop._hx_index) {
+		switch(prop[1]) {
 		case 1:case 2:case 6:
 			el[name] = value;
 			break;
@@ -3827,7 +3838,7 @@ doom_html_Attributes.setStringAttribute = function(el,name,value) {
 	if(prop == null) {
 		el.setAttribute(name,value);
 	} else {
-		switch(prop._hx_index) {
+		switch(prop[1]) {
 		case 1:case 2:case 6:
 			el[name] = value;
 			break;
@@ -3848,7 +3859,7 @@ doom_html_Attributes.toggleBoolAttribute = function(el,name,value) {
 			el.removeAttribute(name);
 		}
 	} else {
-		switch(prop._hx_index) {
+		switch(prop[1]) {
 		case 1:case 2:case 6:
 			el[name] = value;
 			break;
@@ -3968,7 +3979,7 @@ haxe_CallStack.toString = function(stack) {
 	return b.b;
 };
 haxe_CallStack.itemToString = function(b,s) {
-	switch(s._hx_index) {
+	switch(s[1]) {
 	case 0:
 		b.b += "a C function";
 		break;
@@ -4894,7 +4905,7 @@ thx_Types.sameType = function(a,b) {
 	return thx_Types.toString(Type["typeof"](a)) == thx_Types.toString(Type["typeof"](b));
 };
 thx_Types.toString = function(type) {
-	switch(type._hx_index) {
+	switch(type[1]) {
 	case 0:
 		return "Null";
 	case 1:
@@ -5788,7 +5799,7 @@ thx_format_NumberFormat.customFormatInteger = function(v,pattern,nf,isCurrency,i
 	}
 	buf.reverse();
 	var r = buf.map(function(_) {
-		switch(_._hx_index) {
+		switch(_[1]) {
 		case 0:
 			var s = _[2];
 			return s;
@@ -6067,7 +6078,7 @@ var thx_stream_Process = function(handler,init) {
 thx_stream_Process.__name__ = ["thx","stream","Process"];
 thx_stream_Process.nextAsMessageHandler = function(handler) {
 	return function(m) {
-		if(m._hx_index == 0) {
+		if(m[1] == 0) {
 			var v = m[2];
 			handler(v);
 		}
@@ -6129,7 +6140,7 @@ var thx_stream_Stream = function(init) {
 		var cancel = null;
 		cancel = init(function(msg) {
 			handler(msg);
-			switch(msg._hx_index) {
+			switch(msg[1]) {
 			case 1:case 2:
 				if(null != cancel) {
 					cancel();
@@ -6201,7 +6212,7 @@ thx_stream_Subjects.wrapHandler = function(handler) {
 			return;
 		}
 		handler(msg);
-		switch(msg._hx_index) {
+		switch(msg[1]) {
 		case 1:case 2:
 			terminated = true;
 			break;
