@@ -2710,27 +2710,37 @@ var ddbmviz_web_GenericView = function(pName,keys,vals,gi) {
 			return;
 		}).run();
 	}
-	this.sel.modify(function(v) {
-		return _gthis.parseHashSelection(v);
-	});
-	var _sel = this.sel.get();
-	var _g23 = 0;
-	while(_g23 < sds.length) {
-		var sd3 = sds[_g23];
-		++_g23;
-		var key3 = sd3.name;
-		sd3.value.set(__map_reserved[key3] != null ? _sel.getReserved(key3) : _sel.h[key3]);
-	}
+	var isChanging = false;
+	var onHashChange = function() {
+		if(isChanging) {
+			return;
+		}
+		isChanging = true;
+		_gthis.sel.modify(function(v) {
+			return _gthis.parseHashSelection(v);
+		});
+		var _sel = _gthis.sel.get();
+		var _g23 = 0;
+		while(_g23 < sds.length) {
+			var sd3 = sds[_g23];
+			++_g23;
+			var key3 = sd3.name;
+			sd3.value.set(__map_reserved[key3] != null ? _sel.getReserved(key3) : _sel.h[key3]);
+		}
+		isChanging = false;
+	};
+	onHashChange();
+	window.onhashchange = onHashChange;
 	this.ui();
 	haxe_Timer.delay(function() {
 		_gthis.sel.stream().next(function(v1) {
-			haxe_Log.trace("selection update 2",{ fileName : "GenericView.hx", lineNumber : 95, className : "ddbmviz.web.GenericView", methodName : "new"});
+			haxe_Log.trace("selection update 2",{ fileName : "GenericView.hx", lineNumber : 105, className : "ddbmviz.web.GenericView", methodName : "new"});
 			_gthis.hashSelection(v1);
 			_gthis.update_table(v1);
 			return;
 		}).run();
 		_gthis.xaxis_sel.value.stream().next(function(v2) {
-			haxe_Log.trace("xaxis_sel",{ fileName : "GenericView.hx", lineNumber : 100, className : "ddbmviz.web.GenericView", methodName : "new", customParams : [v2.toString()]});
+			haxe_Log.trace("xaxis_sel",{ fileName : "GenericView.hx", lineNumber : 110, className : "ddbmviz.web.GenericView", methodName : "new", customParams : [v2.toString()]});
 			var s = _gthis.sel.get();
 			_gthis.hashSelection(s);
 			_gthis.update_table(s);
@@ -2743,7 +2753,7 @@ var ddbmviz_web_GenericView = function(pName,keys,vals,gi) {
 		}).run();
 		return;
 	},20);
-	haxe_Log.trace("genericview.new done",{ fileName : "GenericView.hx", lineNumber : 109, className : "ddbmviz.web.GenericView", methodName : "new", customParams : [this.xaxis_sel,this.params_sel]});
+	haxe_Log.trace("genericview.new done",{ fileName : "GenericView.hx", lineNumber : 119, className : "ddbmviz.web.GenericView", methodName : "new", customParams : [this.xaxis_sel,this.params_sel]});
 };
 ddbmviz_web_GenericView.__name__ = ["ddbmviz","web","GenericView"];
 ddbmviz_web_GenericView.prototype = {
@@ -2752,11 +2762,12 @@ ddbmviz_web_GenericView.prototype = {
 		if(StringTools.startsWith(h,"#")) {
 			h = HxOverrides.substr(h,1,null);
 		}
-		haxe_Log.trace("HASH: ",{ fileName : "GenericView.hx", lineNumber : 115, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [h]});
+		haxe_Log.trace("HASH: ",{ fileName : "GenericView.hx", lineNumber : 125, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [h]});
 		if(h != "") {
 			try {
-				if(StringTools.startsWith(h,this.packName)) {
-					var x_sel = h.split("!~!");
+				var h1 = decodeURIComponent(h.split("+").join(" "));
+				if(StringTools.startsWith(h1,this.packName)) {
+					var x_sel = h1.split("!~!");
 					var xaxis = x_sel[1];
 					var sel0 = x_sel[2];
 					var params = sel0.split("!_!");
@@ -2792,7 +2803,7 @@ ddbmviz_web_GenericView.prototype = {
 						var k3 = k2.next();
 						valid = valid && (__map_reserved[k3] != null ? map.existsReserved(k3) : map.h.hasOwnProperty(k3));
 					}
-					haxe_Log.trace("HASH: ",{ fileName : "GenericView.hx", lineNumber : 133, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [map.toString(),valid]});
+					haxe_Log.trace("HASH: ",{ fileName : "GenericView.hx", lineNumber : 144, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [map.toString(),valid]});
 					var tmp = this.xaxis_sel.value;
 					var _g3 = new haxe_ds_StringMap();
 					if(__map_reserved[xaxis] != null) {
@@ -2812,7 +2823,7 @@ ddbmviz_web_GenericView.prototype = {
 			} catch( e ) {
 				haxe_CallStack.lastException = e;
 				if (e instanceof js__$Boot_HaxeError) e = e.val;
-				haxe_Log.trace("HASH exception: ",{ fileName : "GenericView.hx", lineNumber : 140, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [e]});
+				haxe_Log.trace("HASH exception: ",{ fileName : "GenericView.hx", lineNumber : 151, className : "ddbmviz.web.GenericView", methodName : "parseHashSelection", customParams : [e]});
 				return sel;
 			}
 		} else {
@@ -2841,7 +2852,7 @@ ddbmviz_web_GenericView.prototype = {
 	}
 	,ui: function() {
 		this.tableView = new ddbmviz_web_view_TableC({ header : [], rows : []});
-		haxe_Log.trace(this.xaxis_sel,{ fileName : "GenericView.hx", lineNumber : 158, className : "ddbmviz.web.GenericView", methodName : "ui", customParams : [this.params_sel]});
+		haxe_Log.trace(this.xaxis_sel,{ fileName : "GenericView.hx", lineNumber : 169, className : "ddbmviz.web.GenericView", methodName : "ui", customParams : [this.params_sel]});
 		this.vizdata = new ddbmviz_web_view_VizDataS(this.xaxis_sel,this.params_sel,this.tableView);
 		this.component = new ddbmviz_web_view_VizCS(this.vizdata);
 	}
